@@ -1,10 +1,9 @@
 import Image from "next/image";
-import NavBar from "./NavBar";
 
-export default function Home() {
+export default function Map() {
   return (
-    <div className="p-1">
-        <NavBar/>
+    <div>
+      <h1>map</h1>
     </div>
   )
 }
