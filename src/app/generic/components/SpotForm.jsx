@@ -1,6 +1,7 @@
+'use client'
 import { useEffect, useState } from "react";
 import Select from 'react-select';
-import usePinRegistration from "@/app/store/PinRegistration";
+import usePinRegistration from "@/app/generic/store/PinRegistration";
 import { registerSpot } from "../utils/GenericFetch";
 
 export default function SpotForm(){

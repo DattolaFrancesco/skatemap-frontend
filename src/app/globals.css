@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+/* custom grid for the spot section */
+.navbar{
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    grid-template-rows: 245px;
+    grid-template-areas: "left . . . right";
+}
+.left{grid-area: left;}
+.right{grid-area: right;}
+.nav-link{
+    background-color: rgb(158, 158, 158);
+}
+button{
+    text-align: center;
+    background-color: rgb(158, 158, 158);
+    white-space: nowrap;
+    padding-inline: 10px;
+}

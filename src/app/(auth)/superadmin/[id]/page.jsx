@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
-import { getUser, getAllUserandAdmin, deleteUser, changeRole } from "@/app/utils/user";
+import { getUser, getAllUserandAdmin, deleteUser, changeRole } from "@/app/generic/utils/user";
 export default function SuperAdminHomePage(){
 const [user, setUser] = useState({
     username: "", email: "",  name: "", surname: "",id:"",authorities:[]
