@@ -1,20 +1,37 @@
 @import "tailwindcss";
-
+/* custom var  */
+:root {
+  --button-color: #cacece;
+  --button-color-active: #5d5d5d;
+}
 /* custom grid for the spot section */
 .navbar{
     display: grid;
     grid-template-columns: repeat(5,1fr);
     grid-template-rows: 245px;
     grid-template-areas: "left . . . right";
+    gap: 5px;
 }
 .left{grid-area: left;}
 .right{grid-area: right;}
 .nav-link{
-    background-color: rgb(158, 158, 158);
-}
-button{
-    text-align: center;
-    background-color: rgb(158, 158, 158);
-    white-space: nowrap;
+    background-color: var(--button-color);
     padding-inline: 10px;
 }
+@layer base{
+    button{
+        text-align: center;
+        background-color: var(--button-color);
+        white-space: nowrap;
+        padding-inline: 10px;
+    }
+}
+
+/* custom grid for the spot grid section */
+
+.grid_custom{
+    display: grid;
+    grid-template-columns: repeat(5,1fr);
+    gap: 5px;
+}
+
