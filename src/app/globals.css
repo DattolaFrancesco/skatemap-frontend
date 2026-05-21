@@ -1,1 +1,116 @@
 @import "tailwindcss";
+/* custom var  */
+:root {
+  --button-color: #cacece;
+  --button-color-active: #5d5d5d;
+}
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: -3%;
+}
+/* NAV BAR custom grid for the spot section ------------------------------------------------------------------------------*/
+.navbar{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: 245px;
+    grid-template-areas: "left right";
+    gap: 5px;
+}
+.left{grid-area: left;}
+.right{grid-area: right;}
+.nav-link{
+    background-color: var(--button-color);
+    padding-inline: 5px;
+}
+/* LAYER BASE ------------------------------------------------------------------------------------------------------------*/
+@layer base{
+    button{
+        text-align: center;
+        background-color: var(--button-color);
+        white-space: nowrap;
+        padding-inline: 5px;
+    }
+    p{
+        background-color: var(--button-color);
+    }
+    input{
+        background-color: var(--button-color);
+         padding-inline: 5px;
+    }
+    input::placeholder {
+        color: black;
+    }
+    input:focus {
+        outline: none;
+        border: 1px solid black;
+    }
+}
+ /* SPOT DETAILS INSET ------------------------------------------------------------------------------------------------*/
+    .bg_custom_spot_details{
+        background-color: var(--button-color);
+    }
+/* GRID custom grid for the spot grid section -------------------------------------------------------------------------*/
+
+.grid_custom{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 5px;
+}
+.height_custom_spot_card{
+    height: 180px;
+}
+
+/* QUERY for the grid section ----------------------------------------------------------------------------------*/
+
+@media (min-width: 500px) {
+.grid_custom{
+    grid-template-columns: repeat(2,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(2,1fr);
+    grid-template-areas: "left right";
+}
+.height_custom_spot_card{
+    height: 250px;
+}
+}
+@media (min-width: 768px) {
+.grid_custom{
+    grid-template-columns: repeat(3,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(3,1fr);
+    grid-template-areas: "left . right";
+}
+}
+@media (min-width: 1024px) {
+.grid_custom{
+    grid-template-columns: repeat(4,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(4,1fr);
+    grid-template-areas: "left . . right";
+}
+}
+@media (min-width: 1280px) {
+.grid_custom{
+    grid-template-columns: repeat(5,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(5,1fr);
+    grid-template-areas: "left . . .right";
+}
+}
+@media (min-width: 1480px) {
+.height_custom_spot_card{
+    height: 320px;
+}
+}
+
+
+
+
