@@ -12,7 +12,7 @@ body{
 .navbar{
     display: grid;
     grid-template-columns: repeat(2,1fr);
-    grid-template-rows: 245px;
+    grid-template-rows: 236px;
     grid-template-areas: "left right";
     gap: 5px;
 }
@@ -44,10 +44,26 @@ body{
         outline: none;
         border: 1px solid black;
     }
+    h1{
+        letter-spacing: -10%;
+    }
 }
  /* SPOT DETAILS INSET ------------------------------------------------------------------------------------------------*/
     .bg_custom_spot_details{
         background-color: var(--button-color);
+        width: 90%;
+        height: 90%;
+        font-size: 10px;
+    }
+    .font_details_h1{
+        font-size: 20px;
+    }
+    .font_details_h2{
+        font-size: 15px;
+    }
+    .custom_box_size{
+        width: 10px;
+        height: 10px;
     }
 /* GRID custom grid for the spot grid section -------------------------------------------------------------------------*/
 
@@ -74,6 +90,22 @@ body{
 .height_custom_spot_card{
     height: 250px;
 }
+/* details card section */
+.bg_custom_spot_details{
+    width: 90%;
+    height: 70%;
+    font-size: 15px;
+}
+.font_details_h1{
+    font-size: 22px;
+}
+.font_details_h2{
+    font-size: 17px;
+}
+.custom_box_size{
+    width: 12px;
+    height: 12px;
+}
 }
 @media (min-width: 768px) {
 .grid_custom{
@@ -84,6 +116,22 @@ body{
     grid-template-columns: repeat(3,1fr);
     grid-template-areas: "left . right";
 }
+/* details card section */
+.bg_custom_spot_details{
+    width: 70%;
+    height: 90%;
+    font-size: 18px;
+}
+.font_details_h1{
+    font-size: 26px;
+}
+.font_details_h2{
+    font-size: 23px;
+}
+.custom_box_size{
+    width: 14px;
+    height: 14px;
+}
 }
 @media (min-width: 1024px) {
 .grid_custom{
@@ -93,6 +141,11 @@ body{
 .navbar{
     grid-template-columns: repeat(4,1fr);
     grid-template-areas: "left . . right";
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 55%;
+    height: 90%;
 }
 }
 @media (min-width: 1280px) {
@@ -108,6 +161,22 @@ body{
 @media (min-width: 1480px) {
 .height_custom_spot_card{
     height: 320px;
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 50%;
+    height: 90%;
+    font-size: 18px;
+}
+.font_details_h1{
+    font-size: 35px;
+}
+.font_details_h2{
+    font-size: 25px;
+}
+.custom_box_size{
+    width: 15px;
+    height: 15px;
 }
 }
 

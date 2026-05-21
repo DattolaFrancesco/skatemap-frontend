@@ -46,7 +46,7 @@ export default function NavBar(){
                                     onClick={()=>{setOpenFilter(openFilter === "Location"?null :"Location")}}>Location
                                 </button>
                                 <div 
-                                className={`absolute flex flex-col gap-0.5 top-0 left-21 ${openFilter === "Location" ? "" : "invisible"}`}>
+                                className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Location" ? "" : "invisible"}`}>
                                    {filters.location.map((f,index)=>(
                                     <button key={index} onClick={()=>multipleSelection("location",f)} 
                                     className={selected.location.includes(f)?"bg-black/40":""}
@@ -61,7 +61,7 @@ export default function NavBar(){
                                 onClick={()=>{setOpenFilter(openFilter === "Type"?null :"Type")}}>Type
                                 </button>
                                 <div
-                                    className={`absolute flex flex-col gap-0.5 top-0 left-21 ${openFilter === "Type" ? "" : "invisible"}`}>
+                                    className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Type" ? "" : "invisible"}`}>
                                     {filters.type.map((f,index)=>(
                                         <button key={index} onClick={()=>multipleSelection("type",f)}
                                         className={selected.type.includes(f)?"bg-black/40":""}
@@ -76,7 +76,7 @@ export default function NavBar(){
                                 onClick={()=>{setOpenFilter(openFilter === "Risk"?null :"Risk")}}>Risk
                                 </button>
                                 <div 
-                                className={`absolute flex flex-col gap-0.5 top-0 left-21 ${openFilter === "Risk" ? "" : "invisible"}`}>
+                                className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Risk" ? "" : "invisible"}`}>
                                     {filters.risk.map((f,index)=>(
                                         <button key={index} onClick={()=>multipleSelection("risk",f)}
                                         className={selected.risk.includes(f)?"bg-black/40":""}
