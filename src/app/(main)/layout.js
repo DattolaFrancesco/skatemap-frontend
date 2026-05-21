@@ -3,8 +3,10 @@ import NavBar from "./components/NavBar";
 export default function NavLayout({ children }) {
   return (
   <>
-  <NavBar/>
-  {children}
+   <div className="flex flex-col h-screen">
+      <NavBar/>
+      <main className="flex-1 relative">{children}</main>
+   </div>
   </>
   );
 }

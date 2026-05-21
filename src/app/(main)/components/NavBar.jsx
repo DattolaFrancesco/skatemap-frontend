@@ -24,11 +24,11 @@ export default function NavBar(){
     }
     return(
        <div>
-        <nav className="navbar">
+        <nav className="navbar p-2">
         <section className="left flex flex-col h-full">
             {/* input search div */}
-            <div><input type="text" placeholder="Search" className="border w-full"/></div>
-            <aside className="flex gap-0.5 pt-2">
+            <div><input type="text" placeholder="Search" className="w-full"/></div>
+            <aside className="flex gap-0.5 pt-1">
                     {/* filter main div  */}
                    <div><button  
                     className={`${!filterOpen?null :"bg-black/40"}`}
@@ -87,7 +87,7 @@ export default function NavBar(){
                        </div>
                     </div>
             </aside>
-            <div className="mt-auto flex flex-col gap-1.5">
+            <div className="mt-auto flex flex-col gap-1">
                 <button className="w-fit active:bg-black/40"onClick={()=>setSelected({ location: [], type: [], risk: [] })}>Reset filters</button>
                 <button className="w-full text-start">say something</button>
             </div>

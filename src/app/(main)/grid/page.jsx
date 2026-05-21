@@ -1,3 +1,6 @@
+import SpotCard from "../components/SpotCard";
+import SpotDetails from "../components/SpotDetails";
+
 export default async function Grid(){
     const url = "http://localhost:3003/spots/all";
     const res = await fetch(url,{
@@ -10,12 +13,11 @@ export default async function Grid(){
     if (!res.ok) throw new Error(data.message);
     console.log(data)
     return (
-        <div className="grid_custom">
-            {data.content.map((s)=>(
-                <div className="bg-amber-300">
-                    {s.name}
-                </div>
-            ))}
-        </div>
+       <div>
+            <SpotDetails/>
+            <div className="grid_custom gap-1 px-2 py-0.5">
+                {data.content.map((s)=><SpotCard key={s.id} spot={s}/>)}
+            </div>
+       </div>
     )
 }
