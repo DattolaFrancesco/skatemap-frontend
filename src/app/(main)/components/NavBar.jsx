@@ -1,7 +1,8 @@
 'use client'
 
-import {useState } from "react"
+import {useEffect, useState } from "react"
 import NavLinks from "./NavLinks"
+import {useRouter} from "next/navigation"
 
 export default function NavBar(){
     const filters = {
@@ -16,12 +17,27 @@ export default function NavBar(){
     })
     const [filterOpen,setFilterOpen] = useState(false)
     const [openFilter, setOpenFilter] = useState(null)
+    const router = useRouter()
     const multipleSelection = (category,f)=>{
          setSelected(prev=>({
             ...prev,
             [category]: prev[category].includes(f)?prev[category].filter(x=>x!=f):[...(prev[category] || []),f]
          }))
     }
+    useEffect(()=>{
+    console.log(selected)
+    const params = new URLSearchParams()
+    selected.location.forEach(f => {
+        params.append("continent", f.toUpperCase().replace(/\s/g, ""))
+    })
+    selected.type.forEach(f => {
+        params.append("type", f.toUpperCase())
+    })
+    selected.risk.forEach(f => {
+        params.append("risk", f.toUpperCase())
+    })
+    router.push(`?${params.toString()}`)
+    },[selected])
     return(
        <div>
         <nav className="navbar p-2">
@@ -88,7 +104,7 @@ export default function NavBar(){
                     </div>
             </aside>
             <div className="mt-auto flex flex-col gap-1">
-                <button className="w-fit active:bg-black/40"onClick={()=>setSelected({ location: [], type: [], risk: [] })}>Reset filters</button>
+                <button className="w-fit active:bg-black/40"onClick={()=>{setSelected({ location: [], type: [], risk: [] }); router.push(``)}}>Reset filters</button>
                 <button className="w-full text-start">say something</button>
             </div>
         </section>

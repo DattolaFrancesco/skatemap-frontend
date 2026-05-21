@@ -1,9 +1,12 @@
+
 import SpotCard from "../components/SpotCard";
 import SpotDetails from "../components/SpotDetails";
 
-export default async function Grid(){
+export default async function Grid({ searchParams }){
+    const params = await searchParams
+    const query = new URLSearchParams(params)  
     let data;
-    const url = "http://localhost:3003/spots/all";
+    const url = `http://localhost:3003/spots/all?${query.toString()}`;
     try
     { const res = await fetch(url,{
         method:"GET",
