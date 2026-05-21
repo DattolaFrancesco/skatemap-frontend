@@ -24,7 +24,7 @@ export default function NavBar(){
             [category]: prev[category].includes(f)?prev[category].filter(x=>x!=f):[...(prev[category] || []),f]
          }))
     }
-    useEffect(()=>{
+
     console.log(selected)
     const params = new URLSearchParams()
     selected.location.forEach(f => {
@@ -36,8 +36,8 @@ export default function NavBar(){
     selected.risk.forEach(f => {
         params.append("risk", f.toUpperCase())
     })
-    router.push(`?${params.toString()}`)
-    },[selected])
+    router.push(`?${params.toString()}&_t=${Date.now()}`)
+
     return(
        <div>
         <nav className="navbar p-2">
