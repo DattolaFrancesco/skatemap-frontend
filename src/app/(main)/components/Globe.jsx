@@ -1,19 +1,32 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-const CITIES = [
-  { name: 'Tokyo',         lat: 35.6895,  lng: 139.6917 },
-  { name: 'New York',      lat: 40.7128,  lng: -74.006  },
-  { name: 'London',        lat: 51.5074,  lng: -0.1276  },
-  { name: 'Dubai',         lat: 25.2048,  lng: 55.2708  },
-  { name: 'Sydney',        lat: -33.868,  lng: 151.209  },
-]
-
 export default function Globe() {
+  const [spot,setSpot] = useState(null)
   const mapRef = useRef(null)
-
+   async function getSpot(){
+    const url = `http://localhost:3003/spots/all?`;
+    try
+    { const res = await fetch(url,{
+        method:"GET",
+         headers: {
+            "Content-Type": "application/json",
+    }
+    })
+    const data = await res.json();
+    console.log(data)
+    setSpot(data.content)
+    if (!res.ok) throw new Error(data.message);
+    }
+    catch(error){
+        console.log(error.message)
+    }
+   }
+   useEffect(()=>{
+    getSpot()
+   },[])
   useEffect(() => {
     if (!mapRef.current) return
 
@@ -41,7 +54,7 @@ export default function Globe() {
     })
 
     map.on('load', () => {
-      const markers = CITIES.map(city => {
+      const markers = spot.map(city => {
         const el = document.createElement('div')
         el.style.cssText = `
           width: 6px;
@@ -49,32 +62,33 @@ export default function Globe() {
           background: #ffffff;
         `
         const tooltip = document.createElement('div')
-tooltip.style.cssText = `
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #fff;
-  font-size: 11px;
-  opacity: 0;
-`
-tooltip.textContent = city.name
-el.appendChild(tooltip)
-el.addEventListener('mouseenter', () => {
-  tooltip.style.opacity = '1'
-})
-el.addEventListener('mouseleave', () => {
+        tooltip.style.cssText = `
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #fff;
+        font-size: 11px;
+        opacity: 0;
+        `
+      tooltip.textContent = city.name
+      el.appendChild(tooltip)
+      el.addEventListener('mouseenter', () => {
+      tooltip.style.opacity = '1'
+      })
+    el.addEventListener('mouseleave', () => {
   tooltip.style.opacity = '0'
-})
+      })
         const marker = new maplibregl.Marker({ element: el, anchor: 'center',opacityWhenCovered: '0' })
-          .setLngLat([city.lng, city.lat])
+          .setLngLat([city.longitude, city.latitude
+])
           .addTo(map)
         return marker
       })
     })
 
     return () => map.remove()
-  }, [])
+  }, [spot])
 
   return (
     <div className="aspect-square w-[45%] rounded-full overflow-hidden">

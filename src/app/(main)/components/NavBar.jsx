@@ -24,19 +24,24 @@ export default function NavBar(){
             [category]: prev[category].includes(f)?prev[category].filter(x=>x!=f):[...(prev[category] || []),f]
          }))
     }
-
-    console.log(selected)
+   useEffect(() => {
     const params = new URLSearchParams()
+
     selected.location.forEach(f => {
         params.append("continent", f.toUpperCase().replace(/\s/g, ""))
     })
+
     selected.type.forEach(f => {
         params.append("type", f.toUpperCase())
     })
+
     selected.risk.forEach(f => {
         params.append("risk", f.toUpperCase())
     })
-    router.push(`?${params.toString()}&_t=${Date.now()}`)
+
+    router.push(`?${params.toString()}&_t=${Date.now()}`, { scroll: false })
+
+}, [selected, router])
 
     return(
        <div>
