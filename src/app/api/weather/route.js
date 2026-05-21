@@ -6,5 +6,5 @@ export  async function GET(request) {
     const res = await fetch(url)
     const data = await res.json()
     if (!res.ok) return Response.json({ error: data.message }, { status: res.status })
-        return Response.json(data)
+    return Response.json(data)
 }
