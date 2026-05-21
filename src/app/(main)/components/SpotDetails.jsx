@@ -3,6 +3,7 @@ import useInsetStore from "@/app/(main)/store/InsetStore"
 import { RxCross2 } from "react-icons/rx"
 import CarouselMedia from "./CarouselMedia"
 import OpenMedia from "./OpenMedia";
+import Weather from "./Weather";
 
 export default function SpotDetails(){
      const spotOpen = useInsetStore((state) => state.spotOpen);
@@ -40,7 +41,7 @@ export default function SpotDetails(){
                             <div className="flex justify-between"><p>CONTINENT</p><p>{spotOpen.continents}</p></div>
                             <div className="flex justify-between border-t"><p>CITY</p><p>{spotOpen.city}</p></div>
                             <div className="flex justify-between border-t"><p>STREET</p><p>{spotOpen.street}</p></div>
-                            <div className="flex justify-between border-t"><p>WEATHER</p><p>sunny</p></div>
+                            <div className="flex justify-between border-t"><p>WEATHER</p><Weather city={spotOpen.city}/></div>
                             <div className="flex justify-between border-t"><p>TYPE</p><p>{spotOpen.spotTypes.map((t)=>t.toUpperCase()).join(", ")}</p></div>
                             <div className="flex justify-between border-t"><p>RISK</p><p>{spotOpen.risk}</p></div>
                         </section>
