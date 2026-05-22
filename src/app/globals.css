@@ -51,7 +51,19 @@ body{
  /* GLOBE ------------------------------------------------------------------------------------------------*/
     .w_custom_globe{
         width: 90%;
-    }  
+    } 
+    .popup-image{
+        width: 100px;
+        object-fit: cover;
+    }
+    .maplibregl-popup-content {
+        background-color: #c2c2c2 !important;
+        padding: 5px !important;
+        border-radius: 0;
+    }
+    .maplibregl-popup-tip {
+    display: none !important;
+    }       
  /* SPOT DETAILS INSET ------------------------------------------------------------------------------------------------*/
     .bg_custom_spot_details{
         background-color: var(--button-color);
@@ -171,7 +183,7 @@ body{
 /* nav bar grid section */
 .navbar{
     grid-template-columns: repeat(5,1fr);
-    grid-template-areas: "left . . .right";
+    grid-template-areas: "left . . . right";
 }
 /* globe */
  .w_custom_globe{

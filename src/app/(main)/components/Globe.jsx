@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import useInsetStore from "@/app/(main)/store/InsetStore"
+import SpotDetails from './SpotDetails'
 
 
 export default function Globe({ searchParams }) {
@@ -11,6 +13,8 @@ export default function Globe({ searchParams }) {
   const mapInstance = useRef(null)
   const mapRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
+  // store spot
+  const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
 
   //fetch get spot come funziona usecallback?
    const getSpot = useCallback(async()=>{
@@ -89,7 +93,7 @@ export default function Globe({ searchParams }) {
             type: 'Point',
             coordinates: [s.longitude, s.latitude]
         },
-        properties: { name: s.name }
+        properties: { spot: s }
     }))
     })
     }else{
@@ -103,7 +107,7 @@ export default function Globe({ searchParams }) {
                 type: 'Point',
                 coordinates: [s.longitude, s.latitude]
             },
-            properties: { name: s.name }
+            properties: { spot: s }
             }))
     }
     })
@@ -116,12 +120,34 @@ export default function Globe({ searchParams }) {
         'circle-color': '#ffffff'
     }
     })
+    //on click del marker
+    mapInstance.current.on('click', 'spots-layer', (e) => {
+    const feature = e.features[0]
+    setSpotOpen(JSON.parse(feature.properties.spot))
+    })
+    // cursor pointer
+    let popUp;
+    mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
+    mapInstance.current.getCanvas().style.cursor = 'pointer'
+    const params = JSON.parse(e.features[0].properties.spot);
+       popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
+        .setLngLat([params.longitude,params.latitude])
+        .setHTML(`<img src="${params?.image[0]?.link}" class="popup-image"/>`)
+        .addTo(mapInstance.current)
+    })
+    mapInstance.current.on('mouseleave', 'spots-layer', () => {
+    mapInstance.current.getCanvas().style.cursor = ''
+    popUp?.remove()
+    })
     }
 
    },[mapReady,spot])
   return (
-    <div className="aspect-square w_custom_globe rounded-full overflow-hidden">
-      <div ref={mapRef} className="w-full h-full" />
+    <div className=' w-full flex justify-center items-center'>
+      <SpotDetails/>
+      <div className="aspect-square w_custom_globe rounded-full overflow-hidden">
+        <div ref={mapRef} className="w-full h-full" />
+      </div>
     </div>
   )
 }
