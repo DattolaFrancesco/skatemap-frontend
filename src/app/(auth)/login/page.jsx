@@ -1,6 +1,8 @@
 'use client'
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
+import { RxCross2 } from "react-icons/rx"
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
@@ -16,8 +18,8 @@ export default function Login() {
     e.preventDefault();
     sendLogin()
   };
-async function sendLogin() {
-  const url = "http://localhost:3003/auth/login";
+  async function sendLogin() {
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -33,8 +35,8 @@ async function sendLogin() {
   } catch (err) {
     console.log(err.message);
   }
-}
-async function getUserId(){
+  }
+  async function getUserId(){
   const url = "http://localhost:3003/account";
   try{
     const res = await fetch(url,{
@@ -46,19 +48,36 @@ async function getUserId(){
     })
     const data = await res.json();
     if(!res.ok) throw new Error(data.message);
-    router.push(`/auth/superadmin/${data.id}`)
+    //router.push(`/auth/superadmin/${data.id}`)
     console.log(data)
   }
   catch(err){
     console.log(err.message);
   }
-}
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col border-2">
-      <input  required name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
-      <input  required name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
+    <div className="w-screen h-screen flex justify-center items-center ">
+     <div className="w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col">
+        <section className="flex justify-between">
+          <h1 className="text-4xl font-bold">LOGIN</h1>
+          <RxCross2 size={38} onClick={()=>router.push(`/`)} className="cursor-pointer"/>
+        </section>
+        <form onSubmit={handleSubmit} className=" flex flex-col flex-grow-1 justify-around">
+          <h1 className="text-2xl font-semibold ">EMAIL</h1>
+          <input
+          className="bg-white py-2"
+          required name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
+          <h1 className="text-2xl font-semibold">PASSWORD</h1>
+          <input
+          className="bg-white py-2"
+          required name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" />
+          <aside className="flex justify-between items-end py-1">
+            <p className="text-xs">IF YOU DON'T HAVE AN ACCOUNT YET <span className="underline"><Link href="/register">REGISTER</Link></span></p>
+            <button type="submit" className="bg-black/30 hover:bg-black/40 text-2xl font-semibold w-1/3">SUBMIT</button>
+          </aside>
+        </form>
+     </div>
+    </div>
   );
 }
