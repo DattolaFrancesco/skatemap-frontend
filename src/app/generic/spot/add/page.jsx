@@ -1,8 +1,8 @@
+
 'use client'
-
-
-import MapSpotRegistration from "../../components/MapSpotRegistration"
+import dynamic from 'next/dynamic'
 import SpotForm from "../../components/SpotForm"
+const MapSpotRegistration = dynamic(() => import('../../components/MapSpotRegistration'), { ssr: false })
 
 
 export default function addSpot(){

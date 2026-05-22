@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from 'react';
 import usePinRegistration from '../store/PinRegistration';
 
@@ -9,15 +10,16 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-delete L.Icon.Default.prototype._getIconUrl;
+
+// finish leaflet imports
+
+export default function MapSpotRegistration(){
+    delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
-// finish leaflet imports
-
-export default function MapSpotRegistration(){
     const [urlMap, setUrlMap] = useState("https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png")
     const [position, setPosition] = useState(null);
    const setPin = usePinRegistration((state) => state.setPin);
