@@ -15,6 +15,7 @@ export default function NavBar(){
         type: [],
         risk: []
     })
+    const [search,setSearch] = useState(null)
     const [filterOpen,setFilterOpen] = useState(false)
     const [openFilter, setOpenFilter] = useState(null)
     const router = useRouter()
@@ -26,29 +27,26 @@ export default function NavBar(){
     }
    useEffect(() => {
     const params = new URLSearchParams()
-
     selected.location.forEach(f => {
         params.append("continent", f.toUpperCase().replace(/\s/g, ""))
     })
-
     selected.type.forEach(f => {
         params.append("type", f.toUpperCase())
     })
-
     selected.risk.forEach(f => {
         params.append("risk", f.toUpperCase())
     })
-
+    if(search !== null)params.append("search",search)
     router.push(`?${params.toString()}&_t=${Date.now()}`, { scroll: false })
-
-}, [selected, router])
+    console.log(search)
+}, [selected, router,search])
 
     return(
        <div>
         <nav className="navbar p-2">
         <section className="left flex flex-col h-full">
             {/* input search div */}
-            <div><input type="text" placeholder="Search" className="w-full"/></div>
+            <div><input type="text" placeholder="Search" onChange={(e)=>setSearch(e.currentTarget.value)} className="w-full"/></div>
             <aside className="flex gap-0.5 pt-1">
                     {/* filter main div  */}
                    <div><button  

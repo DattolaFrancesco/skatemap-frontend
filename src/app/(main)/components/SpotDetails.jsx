@@ -39,6 +39,7 @@ export default function SpotDetails(){
                    <div className="h-full flex flex-col justify-around">
                         <section>
                             <div className="flex justify-between"><p>CONTINENT</p><p>{spotOpen.continents.replace("NORTH","NORTH\n").replace("SOUTH", "SOUTH\n")}</p></div>
+                            <div className="flex justify-between border-t"><p>COUNTRY</p><p>{spotOpen.country}</p></div>
                             <div className="flex justify-between border-t"><p>CITY</p><p>{spotOpen.city}</p></div>
                             <div className="flex justify-between border-t"><p>STREET</p><p>{spotOpen.street}</p></div>
                             <div className="flex justify-between border-t"><p>WEATHER</p><Weather city={spotOpen.city}/></div>
