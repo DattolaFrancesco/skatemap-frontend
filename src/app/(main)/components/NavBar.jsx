@@ -1,6 +1,6 @@
 'use client'
 
-import {useEffect, useState } from "react"
+import {useEffect, useRef, useState } from "react"
 import NavLinks from "./NavLinks"
 import {useRouter} from "next/navigation"
 
@@ -15,9 +15,11 @@ export default function NavBar(){
         type: [],
         risk: []
     })
+    const [params, setParams] = useState(null)
     const [search,setSearch] = useState(null)
     const [filterOpen,setFilterOpen] = useState(false)
     const [openFilter, setOpenFilter] = useState(null)
+    const inputRef = useRef(null)
     const router = useRouter()
     const multipleSelection = (category,f)=>{
          setSelected(prev=>({
@@ -38,7 +40,7 @@ export default function NavBar(){
     })
     if(search !== null)params.append("search",search)
     router.push(`?${params.toString()}&_t=${Date.now()}`, { scroll: false })
-    console.log(search)
+    setParams(params)
 }, [selected, router,search])
 
     return(
@@ -46,7 +48,7 @@ export default function NavBar(){
         <nav className="navbar p-2">
         <section className="left flex flex-col h-full">
             {/* input search div */}
-            <div><input type="text" placeholder="Search" onChange={(e)=>setSearch(e.currentTarget.value)} className="w-full"/></div>
+            <div><input ref={inputRef} type="text" placeholder="Search" onChange={(e)=>setSearch(e.currentTarget.value)} className="w-full"/></div>
             <aside className="flex gap-0.5 pt-1">
                     {/* filter main div  */}
                    <div><button  
@@ -107,11 +109,15 @@ export default function NavBar(){
                     </div>
             </aside>
             <div className="mt-auto flex flex-col gap-1">
-                <button className="w-fit active:bg-black/40"onClick={()=>{setSelected({ location: [], type: [], risk: [] }); router.push(``)}}>Reset filters</button>
+                <button className="w-fit active:bg-black/40"onClick={()=>{
+                    setSelected({ location: [], type: [], risk: [] }); 
+                    setSearch(null)
+                    inputRef.current.value=""
+                    router.push(``)}}>Reset filters</button>
                 <button className="w-full text-start">say something</button>
             </div>
         </section>
-        <NavLinks/>
+        <NavLinks params={params}/>
         </nav>
        </div>
     )

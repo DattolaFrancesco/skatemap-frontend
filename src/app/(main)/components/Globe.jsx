@@ -14,9 +14,7 @@ export default function Globe({ searchParams }) {
 
   //fetch get spot come funziona usecallback?
    const getSpot = useCallback(async()=>{
-    console.log(searchParams)
     const params = await searchParams
-    console.log(params)
     const query = new URLSearchParams(params)  
     const url = `http://localhost:3003/spots/all?${query.toString()}`;
     try
@@ -29,7 +27,6 @@ export default function Globe({ searchParams }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
      setSpot(data.content)
-     console.log(data.content)
     }
     catch(error){
         console.log(error.message)
@@ -37,11 +34,18 @@ export default function Globe({ searchParams }) {
    },[searchParams])
   // function usecallback thanks to that is not going to re rendere every time
   const getZoom = useCallback(() => {
+    if(!windowWidthCustom){
+    if (window.innerWidth < 480) return 0.8   
+    if (window.innerWidth < 1024) return 1   
+    if (window.innerWidth < 1280) return 1.2   
+    if (window.innerWidth < 1480) return 1.5   
+    return 2
+    }
     if (windowWidthCustom < 480) return 0.8   
     if (windowWidthCustom < 1024) return 1   
     if (windowWidthCustom < 1280) return 1.2   
     if (windowWidthCustom < 1480) return 1.5   
-    return 1.8
+    return 2
   },[windowWidthCustom])
    useEffect(() => {
       getSpot()
@@ -66,11 +70,10 @@ export default function Globe({ searchParams }) {
         attributionControl: false,
       })
 
-    mapInstance.current.on('style.load', () => {
+    mapInstance.current.on('load', () => {
       mapInstance.current.setProjection({ type: 'globe' })
-      mapInstance.current.setPaintProperty('background', 'background-color', '#0c0c0c')
-      mapInstance.current.setPaintProperty('countries-fill', 'fill-color', '#1c1c1c')
-      mapInstance.current.setPaintProperty('countries-boundary', 'line-color', '#2a2a2a')
+      mapInstance.current.setPaintProperty('Background', 'background-color', '#1a1a1a')
+      mapInstance.current.setPaintProperty('Country border', 'line-color', '#2a2a2a')
       setMapReady(true)
     })
     return () => mapInstance.current.remove()
@@ -104,8 +107,7 @@ export default function Globe({ searchParams }) {
             }))
     }
     })
-    }
-    mapInstance.current.addLayer({  
+        mapInstance.current.addLayer({  
     id: 'spots-layer',
     type: 'circle',
     source: 'spots',
@@ -113,7 +115,9 @@ export default function Globe({ searchParams }) {
         'circle-radius': 4,
         'circle-color': '#ffffff'
     }
-  })
+    })
+    }
+
    },[mapReady,spot])
   return (
     <div className="aspect-square w_custom_globe rounded-full overflow-hidden">
