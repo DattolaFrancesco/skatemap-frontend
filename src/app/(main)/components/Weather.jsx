@@ -8,7 +8,7 @@ export default function Weather({ city }) {
     useEffect(() => {
         fetch(`/api/weather?city=${city}`)
             .then(res => res.json())
-            .then(data => {setWeather(data); console.log(data)})
+            .then(data => {setWeather(data)})
     }, [city])
     
     if (!weather) return <p>NOT AVAILABLE</p>

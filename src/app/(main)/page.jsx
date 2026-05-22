@@ -1,9 +1,10 @@
 import Image from "next/image";
+import Globe from "./components/Globe";
 
-export default function Map() {
+export default function Map({searchParams}) {
   return (
-    <div>
-      <h1>map</h1>
+    <div className="flex justify-center items-center h-full">
+      <Globe searchParams={searchParams}/>
     </div>
   )
 }
