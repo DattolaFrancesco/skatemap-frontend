@@ -48,6 +48,10 @@ body{
         letter-spacing: -10%;
     }
 }
+ /* GLOBE ------------------------------------------------------------------------------------------------*/
+    .w_custom_globe{
+        width: 90%;
+    }  
  /* SPOT DETAILS INSET ------------------------------------------------------------------------------------------------*/
     .bg_custom_spot_details{
         background-color: var(--button-color);
@@ -106,6 +110,10 @@ body{
     width: 12px;
     height: 12px;
 }
+/* globe */
+ .w_custom_globe{
+    width: 65%;
+    }  
 }
 @media (min-width: 768px) {
 .grid_custom{
@@ -132,6 +140,10 @@ body{
     width: 14px;
     height: 14px;
 }
+/* globe */
+ .w_custom_globe{
+    width: 60%;
+} 
 }
 @media (min-width: 1024px) {
 .grid_custom{
@@ -147,6 +159,10 @@ body{
     width: 55%;
     height: 90%;
 }
+/* globe */
+ .w_custom_globe{
+    width: 40%;
+} 
 }
 @media (min-width: 1280px) {
 .grid_custom{
@@ -157,6 +173,10 @@ body{
     grid-template-columns: repeat(5,1fr);
     grid-template-areas: "left . . .right";
 }
+/* globe */
+ .w_custom_globe{
+    width: 35%;
+} 
 }
 @media (min-width: 1480px) {
 .height_custom_spot_card{
@@ -178,6 +198,10 @@ body{
     width: 15px;
     height: 15px;
 }
+/* globe */
+ .w_custom_globe{
+    width: 45rem;
+} 
 }
 
 
