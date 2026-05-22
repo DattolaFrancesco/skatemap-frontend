@@ -1,1 +1,221 @@
 @import "tailwindcss";
+/* custom var  */
+:root {
+  --button-color: #cacece;
+  --button-color-active: #5d5d5d;
+}
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    letter-spacing: -3%;
+}
+/* NAV BAR custom grid for the spot section ------------------------------------------------------------------------------*/
+.navbar{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-template-rows: 236px;
+    grid-template-areas: "left right";
+    gap: 5px;
+}
+.left{grid-area: left;}
+.right{grid-area: right;}
+.nav-link{
+    background-color: var(--button-color);
+    padding-inline: 5px;
+}
+/* LAYER BASE ------------------------------------------------------------------------------------------------------------*/
+@layer base{
+    button{
+        text-align: center;
+        background-color: var(--button-color);
+        white-space: nowrap;
+        padding-inline: 5px;
+    }
+    p{
+        background-color: var(--button-color);
+    }
+    input{
+        background-color: var(--button-color);
+         padding-inline: 5px;
+    }
+    input::placeholder {
+        color: black;
+    }
+    input:focus {
+        outline: none;
+        border: 1px solid black;
+    }
+    h1{
+        letter-spacing: -10%;
+    }
+}
+ /* GLOBE ------------------------------------------------------------------------------------------------*/
+    .w_custom_globe{
+        width: 90%;
+    } 
+    .popup-image{
+        width: 100px;
+        object-fit: cover;
+    }
+    .maplibregl-popup-content {
+        background-color: #c2c2c2 !important;
+        padding: 5px !important;
+        border-radius: 0;
+    }
+    .maplibregl-popup-tip {
+    display: none !important;
+    }       
+ /* SPOT DETAILS INSET ------------------------------------------------------------------------------------------------*/
+    .bg_custom_spot_details{
+        background-color: var(--button-color);
+        width: 90%;
+        height: 90%;
+        font-size: 10px;
+    }
+    .font_details_h1{
+        font-size: 20px;
+    }
+    .font_details_h2{
+        font-size: 15px;
+    }
+    .custom_box_size{
+        width: 10px;
+        height: 10px;
+    }
+/* GRID custom grid for the spot grid section -------------------------------------------------------------------------*/
+
+.grid_custom{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 5px;
+}
+.height_custom_spot_card{
+    height: 180px;
+}
+
+/* QUERY for the grid section ----------------------------------------------------------------------------------*/
+
+@media (min-width: 500px) {
+.grid_custom{
+    grid-template-columns: repeat(2,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(2,1fr);
+    grid-template-areas: "left right";
+}
+.height_custom_spot_card{
+    height: 250px;
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 90%;
+    height: 70%;
+    font-size: 15px;
+}
+.font_details_h1{
+    font-size: 22px;
+}
+.font_details_h2{
+    font-size: 17px;
+}
+.custom_box_size{
+    width: 12px;
+    height: 12px;
+}
+/* globe */
+ .w_custom_globe{
+    width: 65%;
+    }  
+}
+@media (min-width: 768px) {
+.grid_custom{
+    grid-template-columns: repeat(3,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(3,1fr);
+    grid-template-areas: "left . right";
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 70%;
+    height: 90%;
+    font-size: 18px;
+}
+.font_details_h1{
+    font-size: 26px;
+}
+.font_details_h2{
+    font-size: 23px;
+}
+.custom_box_size{
+    width: 14px;
+    height: 14px;
+}
+/* globe */
+ .w_custom_globe{
+    width: 60%;
+} 
+}
+@media (min-width: 1024px) {
+.grid_custom{
+    grid-template-columns: repeat(4,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(4,1fr);
+    grid-template-areas: "left . . right";
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 55%;
+    height: 90%;
+}
+/* globe */
+ .w_custom_globe{
+    width: 40%;
+} 
+}
+@media (min-width: 1280px) {
+.grid_custom{
+    grid-template-columns: repeat(5,1fr);
+}
+/* nav bar grid section */
+.navbar{
+    grid-template-columns: repeat(5,1fr);
+    grid-template-areas: "left . . . right";
+}
+/* globe */
+ .w_custom_globe{
+    width: 35%;
+} 
+}
+@media (min-width: 1480px) {
+.height_custom_spot_card{
+    height: 320px;
+}
+/* details card section */
+.bg_custom_spot_details{
+    width: 50%;
+    height: 90%;
+    font-size: 18px;
+}
+.font_details_h1{
+    font-size: 35px;
+}
+.font_details_h2{
+    font-size: 25px;
+}
+.custom_box_size{
+    width: 15px;
+    height: 15px;
+}
+/* globe */
+ .w_custom_globe{
+    width: 45rem;
+} 
+}
+
+
+
+
