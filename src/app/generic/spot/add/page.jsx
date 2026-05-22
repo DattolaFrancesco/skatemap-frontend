@@ -1,6 +1,7 @@
 'use client'
 
-import MapSpotRegistration from "@/app/components/MapSpotRegistration"
+
+import MapSpotRegistration from "../../components/MapSpotRegistration"
 import SpotForm from "../../components/SpotForm"
 
 
