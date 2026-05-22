@@ -20,7 +20,7 @@ export default function Globe({ searchParams }) {
    const getSpot = useCallback(async()=>{
     const params = await searchParams
     const query = new URLSearchParams(params)  
-    const url = `http://localhost:3003/spots/all?${query.toString()}`;
+    const url = `http://localhost:3003/spots/globe/all?${query.toString()}`;
     try
     { const res = await fetch(url,{
         method:"GET",
