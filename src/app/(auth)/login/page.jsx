@@ -9,6 +9,7 @@ export default function Login() {
   const [form, setForm] = useState({
     email: "", password: "",
   });
+  const [error, setError] = useState(null)
    const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -33,7 +34,7 @@ export default function Login() {
     localStorage.setItem('token', data.message);
     getUserId()
   } catch (err) {
-    console.log(err.message);
+    setError(err.message)
   }
   }
   async function getUserId(){
@@ -52,7 +53,7 @@ export default function Login() {
     console.log(data)
   }
   catch(err){
-    console.log(err.message);
+    console.log(err.message)
   }
   }
 
@@ -72,6 +73,7 @@ export default function Login() {
           <input
           className="bg-white py-2"
           required name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" />
+          {error && <p className="text-red-800 py-1">{error}</p>}
           <aside className="flex justify-between items-end py-1">
             <p className="text-xs">IF YOU DON'T HAVE AN ACCOUNT YET <span className="underline"><Link href="/register">REGISTER</Link></span></p>
             <button type="submit" className="bg-black/30 hover:bg-black/40 text-2xl font-semibold w-1/3">SUBMIT</button>
