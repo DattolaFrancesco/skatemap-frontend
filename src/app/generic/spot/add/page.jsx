@@ -1,7 +1,8 @@
 'use client'
 
 import MapSpotRegistration from "@/app/components/MapSpotRegistration"
-import SpotForm from "@/app/components/SpotForm";
+import SpotForm from "../../components/SpotForm"
+
 
 export default function addSpot(){
     return (
