@@ -31,6 +31,7 @@ export default function Globe({ searchParams }) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.message);
      setSpot(data.content)
+     console.log(data)
     }
     catch(error){
         console.log(error.message)

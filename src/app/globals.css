@@ -23,12 +23,15 @@ body{
     background-color: var(--button-color);
     padding-inline: 5px;
 }
-/* LOGIN/REGISTER ------------------------------------------------------------------------------------------------------------*/
+/* LOGIN/REGISTER/FORM ------------------------------------------------------------------------------------------------------------*/
 .bg_login{
 background-color: var(--button-color);
 }
 .bg_custom_btn{
     background-color: var(--button-color-form);
+}
+.bg_preview {
+    background-color: var(--button-color);
 }
 /* LAYER BASE ------------------------------------------------------------------------------------------------------------*/
 @layer base{
