@@ -17,7 +17,6 @@ const options = [
 ]
 
 export default function SpotForm() {
-  const token = localStorage.getItem('token')
   const pin = usePinRegistration((state) => state.pin);
   const setSpot = useSpotForm((data) => data.setSpot);
   const [images,setImages] = useState(null)
@@ -69,6 +68,7 @@ export default function SpotForm() {
         return
     }
     setLoading(true)
+     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots`, {
         method: "POST",
@@ -115,6 +115,7 @@ export default function SpotForm() {
     Array.from(videos).forEach(e => {
       formData.append("file",e)
     });
+     const token = localStorage.getItem('token')
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/video/${spotId}`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}` },
@@ -128,6 +129,7 @@ export default function SpotForm() {
     Array.from(images).forEach(e => {
       formData.append("file",e)
     });
+     const token = localStorage.getItem('token')
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/image/${spotId}`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}` },
@@ -137,6 +139,7 @@ export default function SpotForm() {
   }
   async function deleteSpotById(spotId){;
     try{
+       const token = localStorage.getItem('token')
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotId}`, {
       method: "DELETE",
       headers: { "Authorization": `Bearer ${token}` }
