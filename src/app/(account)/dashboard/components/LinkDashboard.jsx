@@ -8,13 +8,15 @@ export default function LinkDashboard(){
     const isAdmin = user?.authorities[0].authority === "admin" || user?.authorities[0].authority === "super_admin";
     const isSuperAdmin =  user?.authorities[0].authority === "super_admin";
     return(
-        <div className="w-full flex gap-2  py-2 border-t border-b mt-3">
-                <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?" bg-black/50!":""}`}>SPOTS</Link>
-                <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-black/50!":""}`}>FAVOURITES</Link>
-                {isAdmin && 
-                <Link href={"/dashboard/requests"} className={`nav-link ${pathname === "/dashboard/requests"?" bg-black/50!":""}`}>REQUESTS</Link>}
-                {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-black/50!":""}`}>USERS</Link>}
-                <Link href={"/dashboard/settings"} className={`nav-link ms-auto ${pathname === "/dashboard/settings"?" bg-black/50!":""}`}>SETTINGS</Link>
+        <div className="w-full flex flex-wrap justify-between gap-2  py-2 border-t border-b mt-3">
+               <div className="flex gap-2">
+                    <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?" bg-black/50!":""}`}>SPOTS</Link>
+                    <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-black/50!":""}`}>FAVOURITES</Link>
+                    {isAdmin && 
+                    <Link href={"/dashboard/requests"} className={`nav-link ${pathname === "/dashboard/requests"?" bg-black/50!":""}`}>REQUESTS</Link>}
+                    {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-black/50!":""}`}>USERS</Link>}
+               </div>
+               <div className="flex"><Link href={"/dashboard/settings"} className={`nav-link  ${pathname === "/dashboard/settings"?" bg-black/50!":""}`}>SETTINGS</Link></div>
         </div>
     )
 }

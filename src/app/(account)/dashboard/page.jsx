@@ -4,6 +4,8 @@ import useUserStore from "./components/UserStore";
 import { useEffect, useState } from "react";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import { RxCross2 } from "react-icons/rx";
+import { FaPencilAlt } from "react-icons/fa";
+import Link from "next/link";
 
 export default  function MySpots(){
     const user = useUserStore((data)=> data.user)
@@ -44,20 +46,24 @@ export default  function MySpots(){
     if(!data) return <p className="mx-2 px-1">Server is not working right now</p> 
         return  ( 
             <div>
-                <div className="border-b py-2 flex gap-2">
-                    <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
-                        className={`${status === "approved"?"bg-black/40":""}`}>APPROVED</button>
-                    <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
-                        className={`${status === "pending"?"bg-black/40":""}`}>PENDING</button>
-                    <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
-                        className={`${status === "unapproved"?"bg-black/40":""}`}>UNAPPROVED</button>
+                <div className="border-b py-2 flex flex-wrap justify-between gap-2">
+                    <div className=" flex gap-2">
+                        <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
+                            className={`${status === "approved"?"bg-black/40":""}`}>APPROVED</button>
+                        <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
+                            className={`${status === "pending"?"bg-black/40":""}`}>PENDING</button>
+                        <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
+                            className={`${status === "unapproved"?"bg-black/40":""}`}>UNAPPROVED</button>
+                    </div>
+                    <div className="flex"><Link href={"/spot/registration"} className="nav-link">ADD SPOT</Link></div>
                 </div>
                 <SpotDetails/>
-                <div className="grid_custom gap-1  py-0.5">
+                <div className="grid_custom gap-1  py-3">
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> deleteSpotById(s.id))} className="absolute top-1 right-1 cursor-pointer"><RxCross2 size={20}/></button>
+                        <button onClick={(()=> deleteSpotById(s.id))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
+                        <Link className="absolute top-7 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
                             ${s.status === "APPROVED"?"bg-green-500":""}
                              ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}

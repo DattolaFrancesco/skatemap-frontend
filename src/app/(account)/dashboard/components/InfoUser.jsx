@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import useUserStore from "./UserStore";
+import Link from "next/link";
 
 export default function InfoUser(){
     const setUser = useUserStore((data)=> data.setUser)
@@ -36,15 +37,18 @@ export default function InfoUser(){
                 <p className="text-2xl bg-transparent mt-3">{user.name +" "+ user.surname}</p>
                 <p className="text-2xl bg-transparent">{user.email}</p>
             </div>
-            <div className="w-full flex justify-end items-end gap-3">
-                <div className="flex flex-col justify-center items-center">
-                    <p className="text-6xl bg-transparent font-sans">24</p>
-                    <p className="text-xl bg-transparent">SPOTS</p>
-                </div>
-                <div className="flex flex-col justify-center items-center">
-                    <p className="text-6xl bg-transparent font-sans">12</p>
-                    <p className="text-xl bg-transparent">FAVOURITES</p>
-                </div>
+            <div className="w-full flex flex-col justify-around">
+               <div className="flex ms-auto"> <Link href={"/"} className="nav-link">HOME</Link></div>
+              <div className="flex justify-end gap-3 py-4">
+                    <div className="flex flex-col justify-center items-center">
+                        <p className="text-6xl bg-transparent font-sans">24</p>
+                        <p className="text-xl bg-transparent">SPOTS</p>
+                    </div>
+                    <div className="flex flex-col justify-center items-center">
+                        <p className="text-6xl bg-transparent font-sans">12</p>
+                        <p className="text-xl bg-transparent">FAVOURITES</p>
+                    </div>
+              </div>
             </div>
         </> 
         }

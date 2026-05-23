@@ -11,6 +11,7 @@ export default function NavLinks({params}){
       <div className="flex gap-1">
         <Link className="nav-link" href="/donate">Donate</Link>
         <Link className="nav-link" href="/login">Login/Signup</Link>
+        <Link className="nav-link" href="/dashboard">Profile</Link>
       </div>
 
     </div>

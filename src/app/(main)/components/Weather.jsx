@@ -4,11 +4,15 @@ import { useEffect, useState } from 'react'
 
 export default function Weather({ city }) {
     const [weather, setWeather] = useState(null)
-    
+    async function getWeather(){
+        try{const res = await fetch(`/api/weather?city=${city}`);
+        const data = await res.json()
+        if(!res.ok) throw new Error("weather not available")
+        setWeather(data)}
+        catch(err){console.log(err.message)}
+    }
     useEffect(() => {
-        fetch(`/api/weather?city=${city}`)
-            .then(res => res.json())
-            .then(data => {setWeather(data)})
+       getWeather()
     }, [city])
     
     if (!weather) return <p>NOT AVAILABLE</p>
