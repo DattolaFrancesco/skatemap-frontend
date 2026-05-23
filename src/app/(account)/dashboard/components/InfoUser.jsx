@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import useUserStore from "./UserStore";
 
 export default function InfoUser(){
-
-    const [user,setUser] = useState(null)
+    const setUser = useUserStore((data)=> data.setUser)
+    const user = useUserStore((data)=> data.user)
 
     async function  getUser(){
     const url = "http://localhost:3003/account";
