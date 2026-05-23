@@ -4,8 +4,6 @@ import useSpotForm from "./SpotFormStore"
 
 export default function SpotDetailPreview(){
     const spot = useSpotForm((data) => data.spot);
-    const spotImage = useSpotForm((data) => data.spotImage);
-    const spotVideo = useSpotForm((data) => data.spotVideo);
     const types = spot.spotTypes || spot.types || []
     return(
         <div className="h-full w-full flex justify-center items-center">
