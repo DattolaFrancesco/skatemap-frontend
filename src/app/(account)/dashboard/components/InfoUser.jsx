@@ -28,6 +28,8 @@ export default function InfoUser(){
 
     return(
         <div className=" w-full flex flex-col md:flex-row">
+        {user  &&
+        <>
             <div className="w-full">
                 <h1 className="text-6xl">{user.username}</h1>
                 <p className="text-2xl bg-transparent mt-3">{user.name +" "+ user.surname}</p>
@@ -43,7 +45,8 @@ export default function InfoUser(){
                     <p className="text-xl bg-transparent">FAVOURITES</p>
                 </div>
             </div>
-
+        </> 
+        }
         </div>
     )
 }
