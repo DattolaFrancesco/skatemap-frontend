@@ -8,7 +8,7 @@ export default function LinkDashboard(){
     const isAdmin = user?.authorities[0].authority === "admin" || user?.authorities[0].authority === "super_admin";
     const isSuperAdmin =  user?.authorities[0].authority === "super_admin";
     return(
-        <div className="w-full flex gap-2  py-2 border-t border-b my-3">
+        <div className="w-full flex gap-2  py-2 border-t border-b mt-3">
                 <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?" bg-black/50!":""}`}>SPOTS</Link>
                 <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-black/50!":""}`}>FAVOURITES</Link>
                 {isAdmin && 

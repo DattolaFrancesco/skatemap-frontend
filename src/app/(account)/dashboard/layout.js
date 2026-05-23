@@ -6,7 +6,7 @@ export default function DashBoardLayout({ children, searchParams }) {
       <div className="w-screen min-h-screen flex flex-col p-3">
         <InfoUser/>
         <LinkDashboard searchParams={searchParams}/>
-        <div className="bg-red-400 w-full">{children}</div>
+        <div className="w-full">{children}</div>
       </div>
   );
 }
