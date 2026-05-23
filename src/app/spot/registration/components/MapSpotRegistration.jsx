@@ -56,8 +56,8 @@ function MapSpotRegistration() {
       <TileLayer attribution='&copy; OpenStreetMap contributors' url={urlMap} />
       <ClickHandler onPin={handlePin} />
       <div className='absolute z-[999] right-0 flex flex-col gap-0.5'>
-        <button className='bg-black/20 cursor-pointer' onClick={handleDark}>DARK</button>
-        <button className='bg-black/20 cursor-pointer' onClick={handleNormal}>LIGHT</button>
+        <button className={`bg-black/20 cursor-pointer ${urlMap === MAP_URLS.dark? "bg-white text-black":""}`} onClick={handleDark}>DARK</button>
+        <button className={`bg-black/20 cursor-pointer ${urlMap === MAP_URLS.dark? "bg-white text-black":""}`} onClick={handleNormal}>LIGHT</button>
       </div>
       {position && <Marker position={position} />}
     </MapContainer>
