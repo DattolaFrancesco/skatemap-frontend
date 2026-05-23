@@ -48,14 +48,14 @@ function MapSpotRegistration() {
   return (
     <MapContainer
       center={[45.4642, 9.1900]}
-      zoom={2}
+      zoom={3}
       minZoom={1}
       style={{ height: '100%', width: '100%' }}
       className='relative'
     >
       <TileLayer attribution='&copy; OpenStreetMap contributors' url={urlMap} />
       <ClickHandler onPin={handlePin} />
-      <div className='absolute z-[999] right-0 flex flex-col gap-0.5'>
+      <div className='absolute z-[999] right-[1.5%] top-[4.5%] flex flex-col gap-0.5'>
         <button className={`bg-black/20 cursor-pointer ${urlMap === MAP_URLS.dark? "bg-white text-black":""}`} onClick={handleDark}>DARK</button>
         <button className={`bg-black/20 cursor-pointer ${urlMap === MAP_URLS.dark? "bg-white text-black":""}`} onClick={handleNormal}>LIGHT</button>
       </div>
