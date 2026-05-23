@@ -1,7 +1,6 @@
 'use client'
 import { RxCross2 } from "react-icons/rx"
 import useSpotForm from "./SpotFormStore"
-import CarouselMedia from "@/app/(main)/components/CarouselMedia";
 
 export default function SpotDetailPreview(){
     const spot = useSpotForm((data) => data.spot);
@@ -9,7 +8,7 @@ export default function SpotDetailPreview(){
     const spotVideo = useSpotForm((data) => data.spotVideo);
     const types = spot.spotTypes || spot.types || []
     return(
-        <div className="h-[90%] w-full flex justify-center items-center p-4">
+        <div className="h-full w-full flex justify-center items-center">
             <div className="w-full h-full bg_preview break-words overflow-hidden">
                 <main className="p-3 flex flex-col justify-between h-full overflow-scroll">
                     <div className="flex flex-col justify-between h-full relative">

@@ -53,7 +53,7 @@ function MapSpotRegistration() {
   return (
     <MapContainer
       center={[45.4642, 9.1900]}
-      zoom={3}
+      zoom={2}
       minZoom={1}
       style={{ height: '100%', width: '100%' }}
       className='relative'

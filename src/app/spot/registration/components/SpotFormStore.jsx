@@ -14,10 +14,6 @@ const useSpotForm = create((set) => ({
         street: "STAZIONE CENTRALE",
     },
     setSpot: (data) => set(() => ({ spot: data })),
-    spotImage: {},
-    setSpotImage: (data) => set(() => ({ spotImage: data })),
-    spotVideo: {},
-    setSpotVideo: (data) => set(() => ({ spotVideo: data })),
 }))
 
 export default useSpotForm;

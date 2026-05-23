@@ -47,14 +47,14 @@ export default function Register() {
     <form onSubmit={handleSubmit} className="flex flex-col flex-grow-1 justify-around">
       <h1 className="text-2xl font-semibold">USERNAME</h1>
       <input className="bg-white py-2" required name="username" value={form.username} onChange={handleChange} placeholder="Username" />
+      <h1 className="text-2xl font-semibold">NAME</h1>
+      <input className="bg-white py-2" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
+      <h1 className="text-2xl font-semibold">SURNAME</h1>
+      <input className="bg-white py-2" required name="surname" value={form.surname} onChange={handleChange} placeholder="Surname" />
       <h1 className="text-2xl font-semibold">EMAIL</h1>
       <input className="bg-white py-2" required name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
       <h1 className="text-2xl font-semibold">PASSWORD</h1>
       <input className="bg-white py-2" required name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" />
-      <h1 className="text-2xl font-semibold">NOME</h1>
-      <input className="bg-white py-2" required name="name" value={form.name} onChange={handleChange} placeholder="Nome" />
-      <h1 className="text-2xl font-semibold">COGNOME</h1>
-      <input className="bg-white py-2" required name="surname" value={form.surname} onChange={handleChange} placeholder="Cognome" />
       {error && <p className="text-red-800 py-1">{error}</p>}
       <aside className="flex justify-between items-end py-1">
         <p className="text-xs">ALREADY HAVE AN ACCOUNT? <span className="underline"><Link href="/login">LOGIN</Link></span></p>
