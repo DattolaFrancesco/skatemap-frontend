@@ -36,7 +36,6 @@ export default  function MySpots(){
          setAskPermission(true)
          setEliminationSpot(spot)
     }
-    useEffect(()=>{console.log(eliminationSpot)},[eliminationSpot])
 
     async function deleteSpotById(spotId){
         setLoading(true)
