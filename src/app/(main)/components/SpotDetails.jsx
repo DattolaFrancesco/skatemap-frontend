@@ -7,11 +7,14 @@ import CarouselMedia from "./CarouselMedia"
 import OpenMedia from "./OpenMedia";
 import Weather from "./Weather";
 import { useEffect, useState } from "react";
+import useUserStore from "@/app/(account)/dashboard/components/UserStore";
 
 export default function SpotDetails(){
      const spotOpen = useInsetStore((state) => state.spotOpen);
      const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
      const setMediaOpen = useInsetStore((state)=>state.setMediaOpen)
+     const setRefreshy = useUserStore((state)=>state.setRefresh)
+     const refreshy = useUserStore((state)=>state.refresh)
      const [refresh,setRefresh] =useState(null)
      const [liked, setLiked] =useState(null)
     async function getFav(){
@@ -38,9 +41,11 @@ export default function SpotDetails(){
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
             setRefresh(!refresh)
+            setRefreshy(!refreshy)
         }catch(err){
             console.log(err.message)
             setRefresh(!refresh)
+            setRefreshy(!refreshy)
         }
     }
     async function deleteFav(){
@@ -53,9 +58,11 @@ export default function SpotDetails(){
             if(!res.ok) throw new Error("Can't connect to the server")
             setRefresh(!refresh)
             setLiked(null)
+            setRefreshy(!refreshy)
         }catch(err){
             setRefresh(!refresh)
             setLiked(null)
+            setRefreshy(!refreshy)
         }
     }
     useEffect(()=>{getFav(); console.log(spotOpen)},[spotOpen,refresh])
