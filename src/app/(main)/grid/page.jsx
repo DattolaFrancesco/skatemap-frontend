@@ -5,7 +5,7 @@ export default async function Grid({ searchParams }){
     const params = await searchParams
     const query = new URLSearchParams(params)  
     let data;
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all?${query.toString()}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all?${query.toString()}`;
     try
     { const res = await fetch(url,{
         method:"GET",
@@ -19,7 +19,8 @@ export default async function Grid({ searchParams }){
     catch(error){
         console.log(error.message)
     }
-    if(!data) return <p className="mx-2 px-1">Server is not available</p> 
+    if(!data) return <h1 className="text-2xl px-2">Server is not available</h1> 
+    if(data?.content?.length === 0) return <h1 className="text-2xl px-2">There aren't spot</h1> 
     return (
         <div>
             <SpotDetails/>

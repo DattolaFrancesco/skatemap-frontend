@@ -17,7 +17,7 @@ export default function Globe({ searchParams }) {
   const getSpot = useCallback(async()=>{
     const params = await searchParams
     const query = new URLSearchParams(params)  
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/all?${query.toString()}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/approved/all?${query.toString()}`;
     try {
       const res = await fetch(url,{
         method:"GET",
@@ -127,9 +127,9 @@ export default function Globe({ searchParams }) {
       })
     }
   },[mapReady,spot])
-
   return (
-    <div className='w-full flex justify-center items-center'>
+    <div className='w-full flex flex-col justify-center items-center'>
+      {spot?.length === 0 && <h1 className="text-2xl px-2">There aren't spot</h1> }
       <SpotDetails/>
       <div className="aspect-square w_custom_globe rounded-full overflow-hidden relative">
         {!mapReady && (
