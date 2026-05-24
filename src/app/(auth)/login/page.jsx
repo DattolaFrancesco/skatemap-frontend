@@ -49,7 +49,7 @@ export default function Login() {
     })
     const data = await res.json();
     if(!res.ok) throw new Error(data.message);
-    router.push(`/user/${data.id}`)
+    router.push(`/dashboard`)
     console.log(data)
   }
   catch(err){
