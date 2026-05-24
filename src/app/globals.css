@@ -23,6 +23,7 @@ body{
 .nav-link{
     background-color: var(--button-color);
     padding-inline: 5px;
+    cursor: pointer;
 }
 /* LOGIN/REGISTER/FORM ------------------------------------------------------------------------------------------------------------*/
 .bg_login{

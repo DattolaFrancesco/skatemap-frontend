@@ -41,7 +41,7 @@ export default function Register() {
   };
 
   return (
-    <div className="w-screen h-screen flex justify-center items-center">
+    <div className="w-full h-full flex justify-end items-start">
       <div className={`w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <section className="flex justify-between">
           <h1 className="text-4xl font-bold">REGISTER</h1>
