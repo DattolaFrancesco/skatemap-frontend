@@ -3,10 +3,13 @@
 import SpotCard from "@/app/(main)/components/SpotCard"
 import { useEffect, useState } from "react"
 import { HeartOff } from 'lucide-react';
+import useUserStore from "../components/UserStore";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 
 export default function Favourites(){
     const [spots, setSpots] = useState(null)
+    const refresh = useUserStore((data)=> data.refresh)
+    const setRefresh = useUserStore((data)=> data.setRefresh)
     async function getFav(){
         const token = localStorage.getItem('token')
         try{
@@ -31,8 +34,10 @@ export default function Favourites(){
             })
             if(!res.ok) throw new Error("Can't connect to the server")
                 getFav()
+                setRefresh(!refresh)
         }catch(err){
             console.log(err.message)
+            setRefresh(!refresh)
         }
     }
 
