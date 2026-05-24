@@ -58,7 +58,7 @@ export default function Login() {
   }
 
   return (
-    <div className="w-full h-full flex justify-end items-start">
+    <div className="w-full h-full flex justify-center items-center">
       <div className={`w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <section className="flex justify-between">
           <h1 className="text-4xl font-bold">LOGIN</h1>

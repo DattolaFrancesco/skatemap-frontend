@@ -1,19 +1,70 @@
 'use client'
 import useInsetStore from "@/app/(main)/store/InsetStore"
 import { RxCross2 } from "react-icons/rx"
+import { HeartOff } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import CarouselMedia from "./CarouselMedia"
 import OpenMedia from "./OpenMedia";
 import Weather from "./Weather";
+import { useEffect, useState } from "react";
 
 export default function SpotDetails(){
      const spotOpen = useInsetStore((state) => state.spotOpen);
      const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
      const setMediaOpen = useInsetStore((state)=>state.setMediaOpen)
+     const [refresh,setRefresh] =useState(null)
+     const [liked, setLiked] =useState(null)
+    async function getFav(){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotOpen.id}`,{
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if(!res.ok) throw new Error("Can't connect to the server")
+            setLiked(data)
+        }catch(err){
+            console.log(err.message)
+        }
+    }
+    async function setFav(){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotOpen.id}`,{
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if(!res.ok) throw new Error("Can't connect to the server")
+            setRefresh(!refresh)
+        }catch(err){
+            console.log(err.message)
+            setRefresh(!refresh)
+        }
+    }
+    async function deleteFav(){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotOpen.id}`,{
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            if(!res.ok) throw new Error("Can't connect to the server")
+            setRefresh(!refresh)
+            setLiked(null)
+        }catch(err){
+            setRefresh(!refresh)
+            setLiked(null)
+        }
+    }
+    useEffect(()=>{getFav(); console.log(spotOpen)},[spotOpen,refresh])
     return(
         <div 
         onClick={()=>{
             setSpotOpen(null)
             setMediaOpen(null)
+            setLiked(null)
         }}
         className={` ${spotOpen ? "block" : "hidden"} fixed  inset-0 z-50 bg-black/30 h-full flex justify-center items-center`}>
             <div
@@ -25,7 +76,10 @@ export default function SpotDetails(){
                         <div>
                             <div className="flex justify-between ">
                                 <h1 className="font-bold font_details_h1">{spotOpen.name.toUpperCase()}</h1>
-                                <RxCross2 size={38} onClick={()=>setSpotOpen(null)} className="cursor-pointer"/>
+                                <div className="flex justify-center items-center gap-3">
+                                    {liked ? <HeartOff size={30} onClick={()=>deleteFav()} className="cursor-pointer"/>:<Heart size={30} onClick={()=>setFav()} className="cursor-pointer"/>}
+                                    <RxCross2 size={38} onClick={()=>{setSpotOpen(null);setLiked(null)}} className="cursor-pointer"/>
+                                </div>
                             </div>
                             <aside className="flex gap-1">
                             {[...Array(5)].map((_,i)=>(
