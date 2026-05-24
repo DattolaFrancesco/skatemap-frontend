@@ -1,6 +1,5 @@
 'use client'
 import SpotCard from "@/app/(main)/components/SpotCard";
-import useUserStore from "./components/UserStore";
 import { useEffect, useState } from "react";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import { RxCross2 } from "react-icons/rx";
@@ -8,9 +7,12 @@ import { FaPencilAlt } from "react-icons/fa";
 import Link from "next/link";
 
 export default  function MySpots(){
-    const user = useUserStore((data)=> data.user)
     const [data, setData] = useState(null)
     const [status,setStatus] = useState(null)
+    const [askPermission, setAskPermission] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState({message:"",type:""})
+    const [eliminationSpot, setEliminationSpot] = useState(null)
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/own?${status?`status=${status}`:""}`;
         try
@@ -30,7 +32,14 @@ export default  function MySpots(){
         console.log(error.message)
         }
     }
-    async function deleteSpotById(spotId){;
+    function askConfermation(spot){
+         setAskPermission(true)
+         setEliminationSpot(spot)
+    }
+    useEffect(()=>{console.log(eliminationSpot)},[eliminationSpot])
+
+    async function deleteSpotById(spotId){
+        setLoading(true)
     try{
       const token = localStorage.getItem('token')
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotId}`, {
@@ -39,13 +48,40 @@ export default  function MySpots(){
       })
       if(!res.ok) throw new Error(data.message);
         getSpots()
+        setLoading(false)
+        setAskPermission(false)
+        setMessage({message:`${eliminationSpot?.name} deleted successfully`, type:"good"})
+        setTimeout(() => {
+        setMessage({message:"",type:""}) 
+        }, 3000);
       }
-      catch(err){console.log(err.message, "delete")}
+      catch(err){
+        setMessage({message:`${eliminationSpot?.name} deleting session went wrong, try again`, type:"bad"}); 
+        setLoading(false);
+        setAskPermission(false)}
+         setTimeout(() => {
+         setMessage({message:"",type:""}) 
+         }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
     if(!data) return <p className="mx-2 px-1">Server is not working right now</p> 
         return  ( 
             <div>
+               {message.type === "bad" ?
+               <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
+               {message.type === "good" ?
+               <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1></div>:null}
+                <div className={` ${askPermission ? "block" : "hidden"} fixed h-full  inset-0 z-50 bg-black/40 overflow-hidden`}>
+                <div className="w-full h-full flex justify-center items-center" >
+                  <div className={`bg-white ${loading ? "animate-pulse" : ""}`}>
+                        <h1 className="text-red-800 text-4xl p-5">do you realy want to delete {eliminationSpot?.name}?</h1>
+                       <div className="flex justify-center gap-3 p-3">
+                            <button onClick={()=>deleteSpotById(eliminationSpot.id)} className="px-5">Yes</button>
+                            <button onClick={()=>setAskPermission(false)} className="px-5">No</button>
+                       </div>
+                  </div>
+                </div>
+                </div>
                 <div className="border-b py-2 flex flex-wrap justify-between gap-2">
                     <div className=" flex gap-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
@@ -62,7 +98,7 @@ export default  function MySpots(){
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> deleteSpotById(s.id))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
+                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
                         <Link className="absolute top-7 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
                             ${s.status === "APPROVED"?"bg-green-500":""}

@@ -194,7 +194,7 @@ export default function ModifySpotForm() {
   return (
   <div className={`flex flex-col w-full h-full justify-center items-center ${loading ? "animate-pulse" : ""}`}>
     <div className="w-full mb-0.5 md:mb-1">
-      <Link href={"/"} className={`nav-link block text-center py-0.5 text-xs md:text-sm ${loading ? "invisible" : ""}`}>BACK</Link>
+      <Link href={"/dashboard"} className={`nav-link block text-center py-0.5 text-xs md:text-sm ${loading ? "invisible" : ""}`}>BACK</Link>
     </div>
     <div className="w-full h-full bg_login px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
       <form onSubmit={handleSubmit} className="h-full flex flex-col justify-between gap-1.5 md:gap-2 lg:gap-3">
