@@ -1,4 +1,3 @@
-
 import SpotCard from "../components/SpotCard";
 import SpotDetails from "../components/SpotDetails";
 
@@ -20,7 +19,7 @@ export default async function Grid({ searchParams }){
     catch(error){
         console.log(error.message)
     }
-    if(!data) return <p className="mx-2 px-1">Backend non raggiungibile</p> 
+    if(!data) return <p className="mx-2 px-1">Server is not available</p> 
     return (
         <div>
             <SpotDetails/>
