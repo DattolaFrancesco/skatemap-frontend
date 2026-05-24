@@ -3,6 +3,7 @@
 import {useEffect, useRef, useState } from "react"
 import NavLinks from "./NavLinks"
 import {useRouter} from "next/navigation"
+import ChatBot from "./ChatBot"
 
 export default function NavBar(){
     const filters = {
@@ -114,7 +115,7 @@ export default function NavBar(){
                     setSearch(null)
                     inputRef.current.value=""
                     router.push(``)}}>Reset filters</button>
-                <button className="w-full text-start">say something</button>
+                    <ChatBot/>
             </div>
         </section>
         <NavLinks params={params}/>

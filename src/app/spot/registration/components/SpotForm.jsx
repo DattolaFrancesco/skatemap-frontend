@@ -58,7 +58,9 @@ export default function SpotForm() {
   function handleChange(e) {
     const { name, value } = e.target;
     if (name === 'description' && value.length > 500) return
-    setForm((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+    const start = e.target.selectionStart
+    const end = e.target.selectionEnd
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   async function handleSubmit(e) {
