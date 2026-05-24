@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FaPencilAlt } from "react-icons/fa";
 import useUserStore from "../components/UserStore";
+import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 
 export default function Request(){
     const [spot,setSpot] = useState(null)
@@ -30,7 +31,7 @@ export default function Request(){
         })
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
-        setSpot(data.content)
+        setSpot(data)
         }
         catch(error){
         console.log(error.message)
@@ -106,8 +107,9 @@ export default function Request(){
         setApprovedSpot(spot)
     }
     useEffect(()=>{getSpots()},[refresh])
-    if(!spot || spot.length === 0) return <h1 className="text-2xl">You don't have any spot request to review</h1>
+    if(!spot || spot?.content?.length === 0) return <h1 className="text-2xl">You don't have any spot request to review</h1>
     return (
+        <>
         <div className="grid_custom gap-1  py-3">
              {message.type === "bad" ?
                <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
@@ -136,7 +138,7 @@ export default function Request(){
                 </div>
             </div>
                 <SpotDetails/>
-                    {spot.map((s)=>(
+                    {spot.content?.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
                        <div className="absolute top-1 right-1 flex flex-col gap-1">
@@ -147,5 +149,7 @@ export default function Request(){
                         </div>
                     ))}
         </div>
+        {spot?.totalPages>1 &&<ArrowPageSelector totalPages={spot?.totalPages}/>}
+    </>
     )
 }

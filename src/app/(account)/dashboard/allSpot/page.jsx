@@ -8,6 +8,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import SearchFilters from "../components/SearchFilters";
 import useUserStore from "../components/UserStore";
+import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector"
 
 export default function AllSpotGrid() {
   const [data, setData] = useState(null)
@@ -18,6 +19,8 @@ export default function AllSpotGrid() {
   const searchParams = useSearchParams()
   const setPendingSpots = useUserStore((data)=> data.setPendingSpots)
   const pendingSpots = useUserStore((data)=> data.pendingSpots)
+  const refresh = useUserStore((data)=> data.refresh)
+  const setRefresh = useUserStore((data)=> data.setRefresh)
 
   async function getSpots() {
     const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all?${searchParams.toString()}`
@@ -28,6 +31,7 @@ export default function AllSpotGrid() {
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.message)
+        console.log(data)
       setData(json)
     } catch(err) {
       console.log(err.message)
@@ -59,6 +63,7 @@ export default function AllSpotGrid() {
     } finally {
       setLoading(false)
       setPendingSpots(!pendingSpots)
+      setRefresh(!refresh)
     }
   }
 
@@ -111,6 +116,7 @@ export default function AllSpotGrid() {
           </div>
         ))}
       </div>
+       {data?.totalPages>1 &&<ArrowPageSelector totalPages={data?.totalPages}/>}
     </div>
   )
 }

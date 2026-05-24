@@ -6,6 +6,7 @@ import { RxCross2 } from "react-icons/rx";
 import { FaPencilAlt } from "react-icons/fa";
 import useUserStore from "./components/UserStore";
 import Link from "next/link";
+import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 
 
 export default  function MySpots(){
@@ -69,7 +70,6 @@ export default  function MySpots(){
     }
     useEffect(()=>{getSpots()},[status])
     if(!data) return <h1 className=" text-2xl animate-pulse">Loading spots...</h1> 
-    if(data.content.length === 0) return  <h1 className="text-2xl mt-2">You didn't create any spot yet</h1>
         return  ( 
             <div>
                {message.type === "bad" ?
@@ -100,6 +100,7 @@ export default  function MySpots(){
                 </div>
                 <SpotDetails/>
                 <div className="grid_custom gap-1  py-3">
+                   {data.content.length === 0 && <h1 className="text-2xl mt-2">You don't have any spot that satisfy the filters</h1>}
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
@@ -112,6 +113,7 @@ export default  function MySpots(){
                         </div>
                         ))}
                 </div>
+                 {data?.totalPages>1 &&<ArrowPageSelector totalPages={data?.totalPages}/>}
             </div>
         )
 }

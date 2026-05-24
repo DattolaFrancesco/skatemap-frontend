@@ -1,3 +1,4 @@
+import ArrowPageSelector from "../components/ArrowPageSelector";
 import SpotCard from "../components/SpotCard";
 import SpotDetails from "../components/SpotDetails";
 
@@ -15,6 +16,7 @@ export default async function Grid({ searchParams }){
     })
     data = await res.json();
     if (!res.ok) throw new Error(data.message);
+    console.log(data)
     }
     catch(error){
         console.log(error.message)
@@ -27,6 +29,7 @@ export default async function Grid({ searchParams }){
             <div className="grid_custom gap-1 px-2 py-0.5">
                 {data.content.map((s)=><SpotCard key={s.id} spot={s}/>)}
             </div>
+            {data?.totalPages>1 && <ArrowPageSelector totalPages={data?.totalPages}/>}
        </div>
     )
 }

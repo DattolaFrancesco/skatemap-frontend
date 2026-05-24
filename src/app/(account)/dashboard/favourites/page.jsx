@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { HeartOff } from 'lucide-react';
 import useUserStore from "../components/UserStore";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
+import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 
 export default function Favourites(){
     const [spots, setSpots] = useState(null)
@@ -19,7 +20,8 @@ export default function Favourites(){
             })
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
-            setSpots(data.content)
+            setSpots(data)
+            console.log(data)
         }catch(err){
             console.log(err.message)
         }
@@ -42,16 +44,19 @@ export default function Favourites(){
 
     useEffect(()=>{console.log(spots)},[spots])
     useEffect(()=>{getFav()},[])
-    if(!spots || spots.length === 0)return <h1 className="text-2xl">You don't have favourite spots</h1>
+    if(!spots || spots.content.length === 0)return <h1 className="text-2xl">You don't have favourite spots</h1>
     return (
+        <>
             <div className="grid_custom gap-1  py-3">
                 <SpotDetails/>
-                    {spots.map((s)=>(
+                    {spots.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
                         <button onClick={()=>deleteFav(s.id)}><HeartOff size={30} className="absolute top-1 right-1 text-red-500 p-1"/></button>
                         </div>
                     ))}
             </div>
+            {spots?.totalPages>0 &&<ArrowPageSelector totalPages={spots?.totalPages}/>}
+            </>
     )
 }
