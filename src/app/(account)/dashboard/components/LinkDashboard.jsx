@@ -32,10 +32,13 @@ export default function LinkDashboard(){
                     <Link href={"/dashboard/requests"} className={`nav-link ${pathname === "/dashboard/requests"?" bg-black/50!":""}`}>REQUESTS</Link>}
                     {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-black/50!":""}`}>USERS</Link>}
                </div>
-               <div className="flex"><button onClick={()=>{
+               <div className="flex gap-2">
+                 <Link href={"/spot/registration"} className={`nav-link `}>ADD SPOT</Link>
+                <button onClick={()=>{
                 localStorage.removeItem('token')
                 router.push("/login")
-               }} className={`nav-link`}>LOG OUT</button></div>
+               }} className={`nav-link`}>LOG OUT</button>
+               </div>
         </div>
     )
 }       

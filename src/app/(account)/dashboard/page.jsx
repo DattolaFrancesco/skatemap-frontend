@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import { RxCross2 } from "react-icons/rx";
 import { FaPencilAlt } from "react-icons/fa";
+import useUserStore from "./components/UserStore";
 import Link from "next/link";
+
 
 export default  function MySpots(){
     const [data, setData] = useState(null)
     const [status,setStatus] = useState(null)
     const [askPermission, setAskPermission] = useState(false)
+    const setRefresh = useUserStore((data)=> data.setRefresh)
+    const refresh = useUserStore((data)=> data.refresh)
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState({message:"",type:""})
     const [eliminationSpot, setEliminationSpot] = useState(null)
@@ -53,11 +57,13 @@ export default  function MySpots(){
         setTimeout(() => {
         setMessage({message:"",type:""}) 
         }, 3000);
+         setRefresh(!refresh)
       }
       catch(err){
         setMessage({message:`${eliminationSpot?.name} deleting session went wrong, try again`, type:"bad"}); 
         setLoading(false);
         setAskPermission(false)}
+         setRefresh(!refresh)
          setTimeout(() => {
          setMessage({message:"",type:""}) 
          }, 3000);

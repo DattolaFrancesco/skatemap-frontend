@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useUserStore from "./UserStore";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,9 @@ import { useRouter } from 'next/navigation';
 export default function InfoUser(){
     const setUser = useUserStore((data)=> data.setUser)
     const user = useUserStore((data)=> data.user)
+    const refresh = useUserStore((data)=> data.refresh)
+    const [spot,setSpot] = useState(null)
+    const [spotFav,setSpotFav] = useState(null)
     const router = useRouter()
 
     async function  getUser(){
@@ -28,7 +31,41 @@ export default function InfoUser(){
         router.push("/login")
         console.log(err.message)
     }}
-    useEffect(()=>{getUser()},[])
+    async function  getSpot(){
+    const url = "http://localhost:3003/spots/own";
+    try{
+        const res = await fetch(url, {
+        method: "GET",
+        headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem('token')}`
+        }   
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    setSpot(data.content)
+    }
+    catch(err){
+        console.log(err.message)
+    }}
+    async function  getFavs(){
+    const url = "http://localhost:3003/fav/all";
+    try{
+        const res = await fetch(url, {
+        method: "GET",
+        headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${localStorage.getItem('token')}`
+        }   
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    setSpotFav(data.content)
+    }
+    catch(err){
+        console.log(err.message)
+    }}
+    useEffect(()=>{getUser(); getSpot(); getFavs()},[refresh])
     if(!user)
     return(
         <div className="w-full flex flex-col md:flex-row">
@@ -67,11 +104,11 @@ export default function InfoUser(){
                <div className="flex ms-auto"> <Link href={"/"} className="nav-link">HOME</Link></div>
               <div className="flex justify-end gap-3 py-4">
                     <div className="flex flex-col justify-center items-center">
-                        <p className="text-6xl bg-transparent font-sans">24</p>
+                        <p className="text-6xl bg-transparent font-sans">{spot?.length}</p>
                         <p className="text-xl bg-transparent">SPOTS</p>
                     </div>
                     <div className="flex flex-col justify-center items-center">
-                        <p className="text-6xl bg-transparent font-sans">12</p>
+                        <p className="text-6xl bg-transparent font-sans">{spotFav?.length}</p>
                         <p className="text-xl bg-transparent">FAVOURITES</p>
                     </div>
               </div>
