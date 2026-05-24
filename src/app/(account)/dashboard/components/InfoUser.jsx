@@ -3,10 +3,12 @@
 import { useEffect } from "react";
 import useUserStore from "./UserStore";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 export default function InfoUser(){
     const setUser = useUserStore((data)=> data.setUser)
     const user = useUserStore((data)=> data.user)
+    const router = useRouter()
 
     async function  getUser(){
     const url = "http://localhost:3003/account";
@@ -23,10 +25,35 @@ export default function InfoUser(){
     setUser(data)
     }
     catch(err){
+        router.push("/login")
         console.log(err.message)
     }}
     useEffect(()=>{getUser()},[])
-
+    if(!user)
+    return(
+        <div className="w-full flex flex-col md:flex-row">
+            <div className="w-full flex flex-col gap-3">
+                <div className="h-14 w-48 bg-black/20 animate-pulse" />
+                <div className="h-7 w-36 bg-black/20 animate-pulse mt-3" />
+                <div className="h-7 w-52 bg-black/20 animate-pulse" />
+            </div>
+            <div className="w-full flex flex-col justify-around">
+                <div className="flex ms-auto">
+                            <div className="nav-link w-16 h-5 bg-black/20 animate-pulse" />
+                </div>
+                <div className="flex justify-end gap-3 py-4">
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <div className="h-14 w-12 bg-black/20 animate-pulse" />
+                    <div className="h-5 w-14 bg-black/20 animate-pulse" />
+                </div>
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <div className="h-14 w-12 bg-black/20 animate-pulse" />
+                    <div className="h-5 w-20 bg-black/20 animate-pulse" />
+                </div>
+                </div>
+            </div>
+        </div>
+    )
     return(
         <div className=" w-full flex flex-col md:flex-row">
         {user  &&

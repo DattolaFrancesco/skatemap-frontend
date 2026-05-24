@@ -63,7 +63,8 @@ export default  function MySpots(){
          }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
-    if(!data) return <p className="mx-2 px-1">Server is not working right now</p> 
+    if(!data) return <h1 className=" text-2xl animate-pulse">Loading spots...</h1> 
+    if(data.content.length === 0) return  <h1 className="text-2xl mt-2">You didn't create any spot yet</h1>
         return  ( 
             <div>
                {message.type === "bad" ?
