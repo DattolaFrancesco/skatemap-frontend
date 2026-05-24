@@ -20,7 +20,6 @@ export default function Favourites(){
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
             setSpots(data.content)
-            console.log(data)
         }catch(err){
             console.log(err.message)
         }

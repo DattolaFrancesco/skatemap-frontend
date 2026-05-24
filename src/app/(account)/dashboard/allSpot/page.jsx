@@ -65,8 +65,6 @@ export default function AllSpotGrid() {
   useEffect(() => { getSpots() }, [searchParams])
 
   if (!data) return <h1 className="text-2xl animate-pulse">Loading spots...</h1>
-  if (data.content.length === 0) return <h1 className="text-2xl">No spots found</h1>
-
   return (
     <div>
       {message.type === "bad" && (

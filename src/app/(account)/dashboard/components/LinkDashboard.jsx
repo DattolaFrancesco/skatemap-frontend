@@ -25,7 +25,6 @@ export default function LinkDashboard(){
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
         setPending(data.content.length)
-        console.log(data.content.length)
         }
         catch(error){
         console.log(error.message)
@@ -34,7 +33,7 @@ export default function LinkDashboard(){
     useEffect(()=>{getPendingSpots()},[pendingSpots])
     if(!user)
     return(
-        <div className="w-full flex flex-wrap justify-between gap-2 py-2 border-t border-b mt-3">
+        <div className="w-full flex flex-wrap justify-between gap-2 py-2 border-t border-b ">
           <div className="flex gap-2">      
             <div className="nav-link w-16 h-5 animate-pulse bg-black/20" />
             <div className="nav-link w-20 h-5 animate-pulse bg-black/20" />
@@ -47,10 +46,10 @@ export default function LinkDashboard(){
         </div>
     )
     return(
-        <div className="w-full flex flex-wrap justify-between gap-2  py-2 border-t border-b mt-3">
+        <div className="w-full flex flex-wrap justify-between gap-2  py-2 border-t border-b ">
                <div className="flex flex-wrap gap-2">
                     <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?" bg-black/50!":""}`}>MY SPOTS</Link>
-                      {isSuperAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link ${pathname === "/dashboard/allSpot"?" bg-black/50!":""}`}>ALL SPOTS</Link>}
+                      {isAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link ${pathname === "/dashboard/allSpot"?" bg-black/50!":""}`}>ALL SPOTS</Link>}
                     <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-black/50!":""}`}>FAVOURITES</Link>
                     {isAdmin && 
                     <Link href={"/dashboard/requests"} className={`relative nav-link ${pathname === "/dashboard/requests"?" bg-black/50!":""}`}>

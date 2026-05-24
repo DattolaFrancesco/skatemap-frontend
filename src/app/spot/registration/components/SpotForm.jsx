@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
-import usePinRegistration from "@/app/generic/store/PinRegistration";
+import usePinRegistration from "@/app/spot/registration/components/PinRegistration";
 import dynamic from "next/dynamic";
 import useSpotForm from "./SpotFormStore"
 import Link from "next/link";
