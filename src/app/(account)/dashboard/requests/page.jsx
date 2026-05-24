@@ -5,6 +5,7 @@ import SpotDetails from "@/app/(main)/components/SpotDetails";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FaPencilAlt } from "react-icons/fa";
+import useUserStore from "../components/UserStore";
 
 export default function Request(){
     const [spot,setSpot] = useState(null)
@@ -15,6 +16,8 @@ export default function Request(){
     const [unApprovedSpot, setUnApprovedSpot] = useState(null)
     const [approvedSpot, setApprovedSpot] = useState(null)
     const [loading, setLoading] = useState(false)
+     const setPendingSpots = useUserStore((data)=> data.setPendingSpots)
+     const pendingSpots = useUserStore((data)=> data.pendingSpots)
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/pending`;
         try
@@ -53,11 +56,13 @@ export default function Request(){
         setRefresh(!refresh)
         setLoading(false)
         setAskPermissionToApprove(false)
+        setPendingSpots(!pendingSpots)
         }
         catch(error){
         setLoading(false)
         setRefresh(!refresh)
         setAskPermissionToApprove(false)
+        setPendingSpots(!pendingSpots)
         }
 
     }
@@ -81,12 +86,14 @@ export default function Request(){
         setRefresh(!refresh)
         setLoading(false)
         setAskPermissionToUnApprove(false)
+        setPendingSpots(!pendingSpots)
         }
         catch(error){
         console.log(error.message)
         setRefresh(!refresh)
         setLoading(true)
         setAskPermissionToUnApprove(false)
+        setPendingSpots(!pendingSpots)
         }
 
     }

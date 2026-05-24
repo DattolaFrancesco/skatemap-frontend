@@ -15,7 +15,6 @@ export default function User() {
     try {
       const data = await getAllUserandAdmin();
       setUsers(data.content);
-      console.log(data)
        setLoading(false)
 
     } catch (err) { console.log(err.message) }
