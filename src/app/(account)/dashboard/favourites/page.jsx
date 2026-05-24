@@ -1,3 +1,53 @@
+'use client'
+
+import SpotCard from "@/app/(main)/components/SpotCard"
+import { useEffect, useState } from "react"
+import { HeartOff } from 'lucide-react';
+import SpotDetails from "@/app/(main)/components/SpotDetails";
+
 export default function Favourites(){
-    return <h1>fav</h1>
+    const [spots, setSpots] = useState(null)
+    async function getFav(){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/all`,{
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if(!res.ok) throw new Error("Can't connect to the server")
+            setSpots(data.content)
+            console.log(data)
+        }catch(err){
+            console.log(err.message)
+        }
+    }
+    async function deleteFav(spotId){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotId}`,{
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            if(!res.ok) throw new Error("Can't connect to the server")
+                getFav()
+        }catch(err){
+            console.log(err.message)
+        }
+    }
+
+    useEffect(()=>{console.log(spots)},[spots])
+    useEffect(()=>{getFav()},[])
+    if(!spots || spots.length === 0)return <h1 className="text-2xl">You don't have favourite spots</h1>
+    return (
+            <div className="grid_custom gap-1  py-3">
+                <SpotDetails/>
+                    {spots.map((s)=>(
+                       <div  key={s.id} className="relative">
+                        <SpotCard spot={s}/>
+                        <button onClick={()=>deleteFav(s.id)}><HeartOff size={30} className="absolute top-1 right-1 text-red-500 p-1"/></button>
+                        </div>
+                    ))}
+            </div>
+    )
 }
