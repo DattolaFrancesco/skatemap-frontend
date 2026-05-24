@@ -17,7 +17,7 @@ export default function Globe({ searchParams }) {
   const getSpot = useCallback(async()=>{
     const params = await searchParams
     const query = new URLSearchParams(params)  
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/all?${query.toString()}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/approved/all?${query.toString()}`;
     try {
       const res = await fetch(url,{
         method:"GET",

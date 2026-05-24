@@ -5,7 +5,7 @@ export default async function Grid({ searchParams }){
     const params = await searchParams
     const query = new URLSearchParams(params)  
     let data;
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all?${query.toString()}`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all?${query.toString()}`;
     try
     { const res = await fetch(url,{
         method:"GET",
