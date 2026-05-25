@@ -1,15 +1,13 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
-import usePinRegistration from "@/app/spot/registration/components/PinRegistration";
+import usePinRegistration from "@/app/spot/components/PinRegistration";
 import dynamic from "next/dynamic";
-import useSpotForm from "@/app/spot/registration/components/SpotFormStore";
+import useSpotForm from "./SpotFormStore"
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { RxCross2 } from "react-icons/rx";
-import { useRouter } from "next/navigation"
 
-const MapSpotRegistration = dynamic(() => import('@/app/spot/registration/components/MapSpotRegistration'), { ssr: false })
+
+const MapSpotRegistration = dynamic(() => import('./MapSpotRegistration'), { ssr: false })
 
 const options = [
   { value: 'RAIL', label: 'Rail' },
@@ -19,33 +17,22 @@ const options = [
   { value: 'STAIR', label: 'Stair' },
 ]
 
-export default function ModifySpotForm() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const sections = pathname.split("/")
-  const section = sections[3]
+export default function SpotForm() {
   const pin = usePinRegistration((state) => state.pin);
   const setSpot = useSpotForm((data) => data.setSpot);
-  const [existsImages,setExistsImages] = useState(null)
-  const [existsVideos,setExistsVideos] = useState(null)
-  const [eliminatedExistsImages,setEliminatedExistsImages] = useState({id:[]})
-  const [eliminatedExistsVideos,setEliminatedExistsVideos] = useState({id:[]})
-  let imageRestrictionNumber = 5 -  (existsImages?.length - eliminatedExistsImages?.id?.length);
-  let videoRestrictionNumber = 3 -  (existsVideos?.length - eliminatedExistsVideos?.id?.length);
-  const [images,setImages] = useState(null)
-  const [videos,setVideos] = useState(null)
+  const [images, setImages] = useState([])
+  const [videos, setVideos] = useState([])
   const [error, setError] = useState(null)
+  const [message, setMessage] = useState(null)
   const imageInputRef = useRef(null)
   const videoInputRef = useRef(null)
   const [loading, setLoading] = useState(false)
-  const [firstLoad,setFirstLoad] = useState(true)
   const [form, setForm] = useState({
     name: '', latitude: '', longitude: '',
     description: '', risk: 'LOW', types: [],
     city: '', country: '', continent: '', street: '',
   });
   useEffect(() => {
-    if(firstLoad) return
     if (!pin) return
     setForm((prev) => ({ ...prev, latitude: pin.lat, longitude: pin.lng }));
     handleCoordinates(pin.lat, pin.lng)
@@ -53,31 +40,6 @@ export default function ModifySpotForm() {
   useEffect(() => {
     setSpot(form)
   }, [form])
-  useEffect(() => {
-    console.log(videoRestrictionNumber)
-  }, [videoRestrictionNumber])
-  useEffect(() => {
-    getSpot()
-  }, [])
-  async function getSpot() {
-  const token = localStorage.getItem('token')
-    try{const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${section}`, {
-      method: "GET",
-      headers: { "Authorization": `Bearer ${token}` }
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error("unable to get spot");
-    console.log(data)
-    setFirstLoad(false)
-    setForm({
-    name: data.name, latitude: data.latitude, longitude: data.longitude,
-    description: data.description, risk: data.risk, types: data.spotTypes.map((t)=>t),
-    city: data.city, country: data.country, continent: data.continents, street: data.street,
-    })
-    setExistsImages(data.image)
-    setExistsVideos(data.video)
-  }catch(err){console.log(err.message)}
-  }
   async function handleCoordinates(lat, lng) {
     try {
       const [bigData, nominatim] = await Promise.all([
@@ -97,38 +59,33 @@ export default function ModifySpotForm() {
   function handleChange(e) {
     const { name, value } = e.target;
     if (name === 'description' && value.length > 500) return
-    setForm((prev) => ({ ...prev, [name]: value.toUpperCase() }));
+    const start = e.target.selectionStart
+    const end = e.target.selectionEnd
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
-  async function deleteExistingImage(){
-    const token = localStorage.getItem('token')
-    await Promise.all(
-          eliminatedExistsImages.id.map(async(i)=>{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/${i}`,{
-              method: "DELETE",
-              headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-              },
-            })
-            if (!res.ok) throw new Error("delete existing images failed");
-          })
-      )
-    }
-  async function deleteExistingVideo(){
-    const token = localStorage.getItem('token')
-    await Promise.all(
-          eliminatedExistsVideos.id.map(async(i)=>{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/${i}`,{
-              method: "DELETE",
-              headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`
-              },
-            })
-            if (!res.ok) throw new Error("delete existing videos failed");
-          })
-      )
-    }
+  function handleAddImages(e) {
+  const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
+  const merged = [...images, ...incoming]
+  if (merged.length > 5) { setError("Max 5 images"); return }
+  setImages(merged)
+  e.target.value = '' // reset input così puoi riaprirlo
+  }
+
+  function handleAddVideos(e) {
+  const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
+  const merged = [...videos, ...incoming]
+  if (merged.length > 3) { setError("Max 3 videos"); return }
+  setVideos(merged)
+  e.target.value = ''
+  }
+
+  function removeImage(index) {
+  setImages(prev => prev.filter((_, i) => i !== index))
+  }
+
+  function removeVideo(index) {
+  setVideos(prev => prev.filter((_, i) => i !== index))
+  }
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.latitude || !form.longitude) {
@@ -136,24 +93,10 @@ export default function ModifySpotForm() {
         return
     }
     setLoading(true)
-    try{
-      await deleteExistingImage()
-      await deleteExistingVideo()
-      await handleImagesSubmit(section)
-      await handleVideosSubmit(section)
-      await handleForm(section)
-      setLoading(false)
-      router.push('/dashboard')
-      }catch(err) {
-      setError(err.message, "last error")
-      setLoading(false)
-      return
-      }
-  }
-  async function handleForm(spotId){
      const token = localStorage.getItem('token')
-    const res = await  fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotId}`, {
-        method: "PUT",
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
@@ -162,11 +105,39 @@ export default function ModifySpotForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+      try{
+        await handleImagesSubmit(data.id)
+        await handleVideosSubmit(data.id)
+      }
+      catch(err){
+        await deleteSpotById(data.id)
+        setError(err.message)
+        setMessage("")
+        setLoading(false)
+        return
+      }
+      setError("")
+      setMessage("SPOT CREATED")
+      setForm({
+        name: '', latitude: '', longitude: '',
+        description: '', risk: 'LOW', types: [],
+        city: '', country: '', continent: '', street: '',
+      })
+      imageInputRef.current.value = ''
+      setImages([])
+      videoInputRef.current.value = ''
+      setVideos([])
+      setLoading(false)
+     } catch (err) {
+      setError(err.message)
+      setMessage("")
+      setLoading(false)
+     }
   }
   async function handleVideosSubmit(spotId){
     if (!videos || videos.length === 0) return
     const formData = new FormData()
-    Array.from(videos).forEach(e => {
+      videos.forEach(e => {
       formData.append("file",e)
     });
      const token = localStorage.getItem('token')
@@ -178,23 +149,36 @@ export default function ModifySpotForm() {
     if (!res.ok) throw new Error("Video upload failed");
   }
   async function handleImagesSubmit(spotId){
-    if (!images || images.length === 0) return
-    const formData = new FormData()
-    Array.from(images).forEach(e => {
-      formData.append("file",e)
-    });
+    if (!images || images.length === 0) throw new Error(data.message)
+      const formdata = new FormData()
+      images.forEach((i)=>{
+      formdata.append("file",i)
+    })
      const token = localStorage.getItem('token')
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/image/${spotId}`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}` },
-      body: formData,
+      body: formdata,
     })
     if (!res.ok) throw new Error("Image upload failed");
   }
+  async function deleteSpotById(spotId){;
+    try{
+       const token = localStorage.getItem('token')
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotId}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if(!res.ok) throw new Error(data.message);
+      }
+      catch(err){console.log(err.message, "delete")}
+  }
+
   return (
   <div className={`flex flex-col w-full h-full justify-center items-center ${loading ? "animate-pulse" : ""}`}>
     <div className="w-full mb-0.5 md:mb-1">
-      <Link href={"/dashboard"} className={`nav-link block text-center py-0.5 text-xs md:text-sm ${loading ? "invisible" : ""}`}>BACK</Link>
+      <Link href={"/"} className={`nav-link block text-center py-0.5 text-xs md:text-sm ${loading ? "invisible" : ""}`}>BACK</Link>
     </div>
     <div className="w-full h-full bg_login px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
       <form onSubmit={handleSubmit} className="h-full flex flex-col justify-between gap-1.5 md:gap-2 lg:gap-3">
@@ -272,54 +256,38 @@ export default function ModifySpotForm() {
             />
           </div>
           <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">IMAGES</label>
-            <input ref={imageInputRef} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs" type="file" accept="image/*" multiple 
-              onChange={(e) => {
-                const files = Array.from(e.target.files)
-                const onlyImages = files.filter(f => f.type.startsWith('image/'))
-                if (onlyImages.length !== files.length) { setError("Only images accepted"); e.target.value = ''; return }
-                if (onlyImages.length > imageRestrictionNumber) { setError("Max 5 Images"); e.target.value = ''; return }
-                setImages(e.target.files)
-              }}
-            />
-          <div className="flex gap-1 flex-wrap">
-              {existsImages &&  existsImages.map((img) => (
-              <div key={img.id} className={`relative ${eliminatedExistsImages.id.includes(img.id)?"hidden":""}`}>
-              <img src={img.link} className="w-16 h-16 object-cover" />
-              <button onClick={(e) => {
-                e.preventDefault()
-                setEliminatedExistsImages((prev)=>({id:[...prev.id,img.id]}))}
-                } className={"absolute top-1 right-1"}>
-              <RxCross2 size={14}/>
-              </button>
-          </div>
-            ))}
-          </div>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex justify-between items-center">
+                <label className="text-xs md:text-sm font-semibold">IMAGES</label>
+                <button type="button" onClick={() => imageInputRef.current.click()} className="text-xs border px-2 py-0.5">+ Add</button>
+              </div>
+              <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
+              <div className="flex flex-wrap gap-1 mt-1">
+                {images.map((file, i) => (
+                  <div key={i} className="relative w-16 h-16">
+                    <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
+                    <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">VIDEOS</label>
-            <input ref={videoInputRef} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs" type="file" accept="video/*" multiple
-              onChange={(e) => {
-                const files = Array.from(e.target.files)
-                const onlyVideos = files.filter(f => f.type.startsWith('video/'))
-                if (onlyVideos.length !== files.length) { setError("Only videos accepted"); e.target.value = ''; return }
-                if (onlyVideos.length > videoRestrictionNumber) { setError("Max 3 videos"); e.target.value = ''; return }
-                setVideos(e.target.files)
-              }}
-            />
-          <div className="flex gap-1 flex-wrap">
-              {existsVideos &&  existsVideos.map((img) => (
-              <div key={img.id} className={`relative ${eliminatedExistsVideos.id.includes(img.id)?"hidden":""}`}>
-              <video src={img.link} className="w-16 h-16 object-cover"></video>
-              <button onClick={(e) => {
-                e.preventDefault()
-                setEliminatedExistsVideos((prev)=>({id:[...prev.id,img.id]}))}
-                } className={"absolute top-1 right-1"}>
-              <RxCross2 size={14}/>
-              </button>
-          </div>
-            ))}
-          </div>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs md:text-sm font-semibold">VIDEOS</label>
+                  <button type="button" onClick={() => videoInputRef.current.click()} className="text-xs border px-2 py-0.5">+ Add</button>
+                </div>
+                <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {videos.map((file, i) => (
+                    <div key={i} className="relative w-16 h-16">
+                      <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded"></video>
+                      <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
           </div>
         </div>
 
@@ -333,6 +301,7 @@ export default function ModifySpotForm() {
         </div>
 
         {error && <p className="text-red-800 text-xs py-0.5">{error}</p>}
+        {message && <p className="text-green-800 text-xs py-0.5">{message}</p>}
 
         <aside className="flex justify-end">
           <button disabled={loading} type="submit" className="bg-black/30 hover:bg-black/40 text-xs md:text-sm lg:text-2xl xl:text-2xl font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">

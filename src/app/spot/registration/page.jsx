@@ -1,6 +1,6 @@
 
-import SpotDetailPreview from "./components/SpotDetailPreview";
-import SpotForm from "./components/SpotForm";
+import SpotDetailPreview from "../components/SpotDetailPreview";
+import SpotForm from "../components/SpotForm";
 
 export default function SpotRegistration(){
    return(
