@@ -17,7 +17,7 @@ export default function ChatBot(){
     const [loadingMessage, setLoadingMessage] = useState(false)
     const chatEndRef = useRef(null)
     async function getChat(){
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/bot/test`;
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/bot/ask`;
     try{
         const res = await fetch(url,{
               method: 'POST',

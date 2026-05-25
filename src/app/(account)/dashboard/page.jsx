@@ -96,7 +96,6 @@ export default  function MySpots(){
                         <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
                             className={`${status === "unapproved"?"bg-black/40":""}`}>UNAPPROVED</button>
                     </div>
-                    <div className="flex"><Link href={"/spot/registration"} className="nav-link">ADD SPOT</Link></div>
                 </div>
                 <SpotDetails/>
                 <div className="grid_custom gap-1  py-3">
