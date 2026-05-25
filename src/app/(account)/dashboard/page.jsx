@@ -104,7 +104,7 @@ export default  function MySpots(){
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
+                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20} className="text-red-800"/></button>
                         <Link className="absolute top-7 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
                             ${s.status === "APPROVED"?"bg-green-500":""}

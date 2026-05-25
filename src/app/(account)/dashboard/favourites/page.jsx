@@ -56,7 +56,7 @@ export default function Favourites(){
                         </div>
                     ))}
             </div>
-            {spots?.totalPages>0 &&<ArrowPageSelector totalPages={spots?.totalPages}/>}
+            {spots?.totalPages>1 &&<ArrowPageSelector totalPages={spots?.totalPages}/>}
             </>
     )
 }
