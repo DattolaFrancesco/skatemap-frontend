@@ -57,6 +57,7 @@ export default function LinkDashboard(){
                    {pending > 0 && <div className="absolute rounded-full w-2 h-2 top-[-3] right-[-3] bg-red-500 text-[10px] animate-pulse"></div>}
                     </Link>}
                     {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-black/50!":""}`}>USERS</Link>}
+                    {isSuperAdmin && <Link href={"/dashboard/chatBot"} className={`nav-link ${pathname === "/dashboard/chatBot"?" bg-black/50!":""}`}>CHATBOT AI</Link>}
                </div>
                <div className="flex gap-2">
                  <Link href={"/spot/registration"} className={`nav-link `}>ADD SPOT</Link>
