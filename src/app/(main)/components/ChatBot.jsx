@@ -3,13 +3,14 @@ import { ChevronDown } from 'lucide-react';
 import { ChevronUp } from 'lucide-react';
 import {  useState , useRef, useEffect} from "react";
 import TextareaAutosize from "react-textarea-autosize";
-import useChatStore from './ChatStore';
+import useChatStore from '../store/ChatStore';
 import { Send } from 'lucide-react';
 
 
 export default function ChatBot(){
     const chat = useChatStore((data)=>data.chat)
     const setChat = useChatStore((data)=>data.setChat)
+    const allowBot = useChatStore((data)=>data.allowBot)
     const [lastResponse, setLastResponse] = useState([])
     const [lastPrompt, setLastPrompt] = useState("")
     const [openChat, setOpenChat] = useState(false)
@@ -62,7 +63,7 @@ export default function ChatBot(){
         <div className="relative z-[9999]">
                 <button onClick={()=>setOpenChat(!openChat)} className="w-full text-start flex">
                     Say something <span className='ms-auto'>{!openChat ? <ChevronDown/>: <ChevronUp/>}</span></button>
-            <div className={`${openChat?"h-[300px] md:h-[500px] border bg-white opacity-100":"h-0 opacity-0"} absolute min-w-[250px] sm:w-full flex flex-col justify-between 
+         {allowBot ? <div className={`${openChat?"h-[300px] md:h-[500px] border bg-white opacity-100":"h-0 opacity-0"} absolute min-w-[250px] sm:w-full flex flex-col justify-between 
             overflow-hidden transition-all duration-300  p-1 mt-1`}>
                 <div ref={chatEndRef} className="w-full overflow-y-scroll py-3">
                     {chat && chat?.map((m,index)=>(<p key={index} className={` wrap-break-word p-2 text-sm w-4/5 m-1 
@@ -78,6 +79,18 @@ export default function ChatBot(){
                 <div className='flex items-end'><button type='submit' disabled={loading} className={`rounded-sm h-fit p-1`}><Send size={20}/></button></div>
               </form>
             </div>
+            : 
+            <div className={`${openChat?"h-[300px] md:h-[500px] border bg-white opacity-100":"h-0 opacity-0"} absolute min-w-[250px] sm:w-full flex flex-col justify-between 
+            overflow-hidden transition-all duration-300  p-1 mt-1`}>
+                 <p className="bg-black/20 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">
+                 I'm skating right now. Gonna try a 12-stair set. I'll be back... hopefully! Meanwhile, have a look around.</p>
+              <form className={`flex gap-1 ${loading?"animate-pulse":""}`} onSubmit={(e)=>e.preventDefault()}>
+                <TextareaAutosize minRows={1} value={lastPrompt} disabled={true} placeholder="He'll be back soon..."
+                className="w-full rounded-sm placeholder:py-0.5  placeholder:text-sm  focus:outline-none focus:ring-0 resize-none border bg-black/10 px-1"/>
+                <div className='flex items-end'><button type='submit' disabled={true} className={`rounded-sm h-fit p-1`}><Send size={20}/></button></div>
+              </form>
+            </div>
+            }
         </div>
     )
 }
