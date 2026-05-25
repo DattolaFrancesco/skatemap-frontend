@@ -37,8 +37,8 @@ export default function SearchFilters() {
     <div className="flex flex-col gap-0.5 mt-2 border-b pb-2">
       <input ref={inputRef} type="text" placeholder="Search" onChange={(e) => setSearch(e.currentTarget.value)} className="w-full md:w-1/2" />
       <aside className="flex gap-0.5">
-        <button className={`${!filterOpen ? null : "bg-black/40"}`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
-        <div className={`${filterOpen ? "" : "invisible"}`}>
+        <button className={`${!filterOpen ? null : "bg-black/40"} h-fit`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
+        <div className={`${filterOpen ? "" : "hidden"}`}>
           <div className="flex flex-col gap-0.5 w-fit generic_filters">
             {["Location", "Type", "Risk"].map((label) => {
               const key = label.toLowerCase()

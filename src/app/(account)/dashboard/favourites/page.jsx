@@ -52,7 +52,7 @@ export default function Favourites(){
                     {spots.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={()=>deleteFav(s.id)}><HeartOff size={30} className="absolute top-1 right-1 text-red-500 p-1"/></button>
+                        <button onClick={()=>deleteFav(s.id)}className=" text-red-700 absolute top-1 right-1 p-1"><HeartOff size={20}/></button>
                         </div>
                     ))}
             </div>

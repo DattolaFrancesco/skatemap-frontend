@@ -5,6 +5,8 @@ import SpotDetails from "@/app/(main)/components/SpotDetails";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FaPencilAlt } from "react-icons/fa";
+import { X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import useUserStore from "../components/UserStore";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 
@@ -53,8 +55,8 @@ export default function Request(){
         setMessage({message:`${spotId?.name} approved successfully`, type:"good"})
         setTimeout(() => {
         setMessage({message:"",type:""}) 
-        }, 3000);
         setRefresh(!refresh)
+        }, 3000);
         setLoading(false)
         setAskPermissionToApprove(false)
         setPendingSpots(!pendingSpots)
@@ -83,8 +85,8 @@ export default function Request(){
         setMessage({message:`${spotId?.name} unapproved successfully`, type:"bad"})
         setTimeout(() => {
         setMessage({message:"",type:""}) 
-        }, 3000);
         setRefresh(!refresh)
+        }, 3000);
         setLoading(false)
         setAskPermissionToUnApprove(false)
         setPendingSpots(!pendingSpots)
@@ -142,10 +144,10 @@ export default function Request(){
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
                        <div className="absolute top-1 right-1 flex flex-col gap-1">
-                            <button onClick={(()=> askConfermationApproved(s))} className="bg-green-500 text-white">APPROVE</button>
-                            <button onClick={(()=> askConfermationUnApproved(s))} className="bg-red-500 text-white">UNAPPROVE</button>
+                            <button onClick={(()=> askConfermationApproved(s))} className=" text-green-700"><Check size={20}/></button>
+                            <button onClick={(()=> askConfermationUnApproved(s))} className=" text-red-700"><X size={20}/></button>
+                            <Link className="nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                        </div>
-                        <Link className="absolute top-1 left-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         </div>
                     ))}
         </div>
