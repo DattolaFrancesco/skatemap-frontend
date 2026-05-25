@@ -1,6 +1,6 @@
+import ModifySpotForm from "../../components/ModifySpotForm";
+import SpotDetailPreview from "../../components/SpotDetailPreview";
 
-import ModifySpotForm from "../../registration/components/ModifySpotForm";
-import SpotDetailPreview from "../../registration/components/SpotDetailPreview";
 
 export default function ModifySpot(){
    return(

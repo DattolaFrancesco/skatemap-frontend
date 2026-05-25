@@ -1,6 +1,6 @@
 'use client'
 import { useState, useCallback, memo } from 'react';
-import usePinRegistration from '@/app/spot/registration/components/PinRegistration';
+import usePinRegistration from './PinRegistration';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet';

@@ -106,14 +106,9 @@ export default function AllSpotGrid() {
   if (!data) return <h1 className="text-2xl animate-pulse">Loading spots...</h1>
   return (
     <div>
-      {message.type === "bad" && (
+      {message.type === "bad" || message.type === "good" && (
         <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
           <h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1>
-        </div>
-      )}
-      {message.type === "good" && (
-        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-          <h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1>
         </div>
       )}
       {message.type === "pending" && (
