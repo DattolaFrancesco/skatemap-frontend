@@ -4,6 +4,7 @@ import SpotCard from "@/app/(main)/components/SpotCard"
 import SpotDetails from "@/app/(main)/components/SpotDetails"
 import { RxCross2 } from "react-icons/rx"
 import { FaPencilAlt } from "react-icons/fa"
+import { ClipboardClock } from 'lucide-react';
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import SearchFilters from "../components/SearchFilters";
@@ -13,6 +14,7 @@ import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector"
 export default function AllSpotGrid() {
   const [data, setData] = useState(null)
   const [askPermission, setAskPermission] = useState(false)
+  const [askPermissionPending, setAskPermissionPending] = useState(false)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ message: "", type: "" })
   const [eliminationSpot, setEliminationSpot] = useState(null)
@@ -42,6 +44,10 @@ export default function AllSpotGrid() {
     setAskPermission(true)
     setEliminationSpot(spot)
   }
+  function askConfirmationPending(spot) {
+    setAskPermissionPending(true)
+    setEliminationSpot(spot)
+  }
 
   async function deleteSpotById(spotId) {
     setLoading(true)
@@ -66,6 +72,34 @@ export default function AllSpotGrid() {
       setRefresh(!refresh)
     }
   }
+  async function pendingSpot(spotId){
+        setLoading(true)
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/status/${spotId}?status=pending`;
+        try
+        { const res = await fetch(url,{
+        method:"PATCH",
+         headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
+        }
+        })
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        await getSpots()
+        setAskPermissionPending(false)
+        setMessage({ message: `${eliminationSpot?.name} returned pending successfully`, type: "pending" })
+        setTimeout(() => setMessage({ message: "", type: "" }), 3000)
+      } catch(err) {
+        setMessage({ message: `${eliminationSpot?.name} pending went wrong, try again`, type: "bad" })
+        setAskPermissionPending(false)
+        setTimeout(() => setMessage({ message: "", type: "" }), 3000)
+      } finally {
+        setLoading(false)
+        setPendingSpots(spotId)
+        setRefresh(!refresh)
+      }
+
+  }
 
   useEffect(() => { getSpots() }, [searchParams])
 
@@ -82,6 +116,11 @@ export default function AllSpotGrid() {
           <h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1>
         </div>
       )}
+      {message.type === "pending" && (
+        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
+          <h1 className="bg-orange-500 text-2xl px-3 py-1 text-white">{message.message}</h1>
+        </div>
+      )}
 
       {/* modal conferma delete */}
       <div className={`${askPermission ? "block" : "hidden"} fixed h-full inset-0 z-50 bg-black/40 overflow-hidden`}>
@@ -95,6 +134,18 @@ export default function AllSpotGrid() {
           </div>
         </div>
       </div>
+      {/* modal conferma pending */}
+      <div className={`${askPermissionPending ? "block" : "hidden"} fixed h-full inset-0 z-50 bg-black/40 overflow-hidden`}>
+        <div className="w-full h-full flex justify-center items-center">
+          <div className={`bg-white ${loading ? "animate-pulse" : ""}`}>
+            <h1 className="text-orange-500 text-4xl p-5">do you really want to set as pending {eliminationSpot?.name}?</h1>
+            <div className="flex justify-center gap-3 p-3">
+              <button onClick={() => pendingSpot(eliminationSpot.id)} className="px-5">Yes</button>
+              <button onClick={() => setAskPermissionPending(false)} className="px-5">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <SearchFilters />
       <SpotDetails />
@@ -102,12 +153,18 @@ export default function AllSpotGrid() {
         {data.content.map((s) => (
           <div key={s.id} className="relative">
             <SpotCard spot={s} />
-            <button onClick={() => askConfirmation(s)} className="absolute top-1 right-1">
-              <RxCross2 size={20} />
-            </button>
-            <Link className="absolute top-7 right-1 nav-link" href={`/spot/modify/${s.id}`}>
-              <FaPencilAlt size={20} className="py-1" />
-            </Link>
+          <div className="absolute top-1 right-1 flex flex-col gap-1">
+              <button onClick={() => askConfirmation(s)}>
+                <RxCross2 size={20} className="text-red-800"/>
+              </button>
+              {s.status !== "PENDING" &&
+              <button onClick={() => askConfirmationPending(s)}>
+                <ClipboardClock size={20} className="text-orange-400"/>
+              </button>}
+              <Link className=" nav-link" href={`/spot/modify/${s.id}`}>
+                <FaPencilAlt size={20} className="py-1" />
+              </Link>
+        </div>
             <div className={`absolute top-1 left-1 rounded-full w-[15px] h-[15px]
               ${s.status === "APPROVED" ? "bg-green-500" : ""}
               ${s.status === "PENDING" ? "bg-orange-400 animate-pulse" : ""}

@@ -251,7 +251,7 @@ export default function SpotForm() {
                 const files = Array.from(e.target.files)
                 const onlyVideos = files.filter(f => f.type.startsWith('video/'))
                 if (onlyVideos.length !== files.length) { setError("Only videos accepted"); e.target.value = ''; return }
-                if (onlyVideos.length > 5) { setError("Max 5 videos"); e.target.value = ''; return }
+                if (onlyVideos.length > 3) { setError("Max 3 videos"); e.target.value = ''; return }
                 setVideos(e.target.files)
               }}
             />

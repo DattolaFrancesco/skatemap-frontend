@@ -1,4 +1,5 @@
-import ModifySpotForm from "@/app/(account)/dashboard/components/ModifySpotForm";
+
+import ModifySpotForm from "../../registration/components/ModifySpotForm";
 import SpotDetailPreview from "../../registration/components/SpotDetailPreview";
 
 export default function ModifySpot(){
