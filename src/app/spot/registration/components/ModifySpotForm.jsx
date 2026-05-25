@@ -31,7 +31,7 @@ export default function ModifySpotForm() {
   const [eliminatedExistsImages,setEliminatedExistsImages] = useState({id:[]})
   const [eliminatedExistsVideos,setEliminatedExistsVideos] = useState({id:[]})
   let imageRestrictionNumber = 5 -  (existsImages?.length - eliminatedExistsImages?.id?.length);
-  let videoRestrictionNumber = 5 -  (existsVideos?.length - eliminatedExistsVideos?.id?.length);
+  let videoRestrictionNumber = 3 -  (existsVideos?.length - eliminatedExistsVideos?.id?.length);
   const [images,setImages] = useState(null)
   const [videos,setVideos] = useState(null)
   const [error, setError] = useState(null)
@@ -303,7 +303,7 @@ export default function ModifySpotForm() {
                 const files = Array.from(e.target.files)
                 const onlyVideos = files.filter(f => f.type.startsWith('video/'))
                 if (onlyVideos.length !== files.length) { setError("Only videos accepted"); e.target.value = ''; return }
-                if (onlyVideos.length > videoRestrictionNumber) { setError("Max 5 videos"); e.target.value = ''; return }
+                if (onlyVideos.length > videoRestrictionNumber) { setError("Max 3 videos"); e.target.value = ''; return }
                 setVideos(e.target.files)
               }}
             />
