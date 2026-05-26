@@ -1,0 +1,12 @@
+'use client'
+import useNavigationStore from "../store/NavigationStore";
+
+export default function TransitionLink({ href, children, className }) {
+  const setPendingHref = useNavigationStore((state) => state.setPendingHref);
+
+  return (
+    <button className={className} onClick={() => {setPendingHref(href);console.log(href)}}>
+      {children}
+    </button>
+  );
+}

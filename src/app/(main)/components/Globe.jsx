@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import useInsetStore from "@/app/(main)/store/InsetStore"
+import useNavigationStore from '../store/NavigationStore'
+import { useRouter } from "next/navigation";
 import SpotDetails from './SpotDetails'
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 
 export default function Globe({ searchParams }) {
@@ -11,9 +15,17 @@ export default function Globe({ searchParams }) {
   const [windowWidthCustom, setWindowWidthCustom] = useState(null)
   const mapInstance = useRef(null)
   const mapRef = useRef(null)
+  const containerRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
   const [primary, setPrimary] = useState("#ff0000");
+  const router = useRouter();
+  const pendingHref = useNavigationStore((state) => state.pendingHref);
+  const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
+  const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+  const statusHref = useNavigationStore((state) => state.statusHref);
+  const coordsRef = useRef({ lng: 10 });
+  const animatedRef = useRef(false)
 
   const getSpot = useCallback(async()=>{
     const params = await searchParams
@@ -86,7 +98,6 @@ export default function Globe({ searchParams }) {
 
   setPrimary(value);
   }, []);
-
   useEffect(()=>{
     if(!spot || !mapReady) return
     if(mapInstance.current.getSource('spots')){
@@ -148,10 +159,70 @@ export default function Globe({ searchParams }) {
   }
 
 }, [primary, mapReady]);
+useEffect(() => {
+  if (!pendingHref) return
+  setStatusHref(true)
+  gsap.killTweensOf(coordsRef.current)
+  gsap.killTweensOf(containerRef.current)
+  gsap.to(coordsRef.current, {
+    lng: -370,
+    duration: 1.5,
+    ease: "power1",
+    onUpdate: () => {
+      if (!mapInstance.current) return
+      mapInstance.current.setCenter([
+        coordsRef.current.lng % 360,
+        40
+      ])
+    },
+  })
+  gsap.to(containerRef.current, {
+    yPercent: 200,
+    duration: 1.5,
+    ease: "power3.inOut",
+
+    onComplete: () => {
+      clearPendingHref()
+      router.push(pendingHref)
+    }
+  })
+}, [pendingHref])
+
+useGSAP(() => {
+  if (!mapReady) return
+  if (animatedRef.current) return
+  animatedRef.current = true
+  gsap.killTweensOf(coordsRef.current)
+  gsap.set(containerRef.current, {
+    yPercent: 200
+  })
+  gsap.to(coordsRef.current, {
+    lng: 720,
+    duration: 1.5,
+    ease: "power1",
+    onUpdate: () => {
+      if (!mapInstance.current) return
+
+      mapInstance.current.setCenter([
+        coordsRef.current.lng % 360,
+        40
+      ])
+    },
+  })
+  gsap.to(containerRef.current, {
+    yPercent: 0,
+    duration: 1.5,
+    ease: "power3.inOut",
+    onComplete:()=>{
+        setStatusHref(false)
+    }
+  })
+
+}, { dependencies: [mapReady] })
   return (
-    <div className={`${windowWidthCustom>450 && window.innerHeight >500 ?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
+    <div  className={`${windowWidthCustom>450 && window.innerHeight >500 ?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
       <SpotDetails/>
-      <div className="aspect-square w_custom_globe rounded-full overflow-hidden relative ">
+      <div ref={containerRef} className="aspect-square w_custom_globe rounded-full overflow-hidden relative ">
         {!mapReady && (
           <div className="absolute inset-0 rounded-full bg-[#1a1a1a] animate-pulse flex items-center justify-center z-10">
             <div className="w-3/4 h-3/4 rounded-full border border-white/5" />

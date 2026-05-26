@@ -103,6 +103,10 @@ background-color: var(--button-color);
     button:hover{
         background-color: var(--primary)
     }
+    .disabled-btn{
+        pointer-events: none;
+        opacity: 0.5;
+    }
     .nav-link:hover{
         background-color: var(--primary)
     }

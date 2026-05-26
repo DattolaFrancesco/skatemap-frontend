@@ -2,6 +2,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeLoader from "./(main)/components/ThemeLoader";
 import BgThemeLoader from "./(main)/components/BgThemeLoader";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+
+gsap.registerPlugin(useGSAP);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
