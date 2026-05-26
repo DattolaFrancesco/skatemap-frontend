@@ -1,5 +1,6 @@
 
-import SpotDetailPreview from "../components/SpotDetailPreview";
+
+import MapWithData from "@/app/googleMaps/MapWithData";
 import SpotForm from "../components/SpotForm";
 
 export default function SpotRegistration(){
@@ -9,7 +10,7 @@ export default function SpotRegistration(){
         <SpotForm/>
       </div>
       <div className="w-full md:w-1/2 h-full">
-        <SpotDetailPreview/>
+        <MapWithData/>
       </div>
     </div>
   )

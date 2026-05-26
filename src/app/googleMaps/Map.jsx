@@ -3,7 +3,7 @@
 import { GoogleMap, Autocomplete, useLoadScript, Marker } from "@react-google-maps/api";
 import { useRef, useState } from "react";
 
-export default function MapWithSearch({lat,lng}) {
+export default function Map({lat,lng}) {
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],

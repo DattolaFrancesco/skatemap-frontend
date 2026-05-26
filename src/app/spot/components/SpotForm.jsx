@@ -2,12 +2,10 @@
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
 import usePinRegistration from "@/app/spot/components/PinRegistration";
-import dynamic from "next/dynamic";
 import useSpotForm from "./SpotFormStore"
 import Link from "next/link";
 
 
-const MapSpotRegistration = dynamic(() => import('./MapSpotRegistration'), { ssr: false })
 
 const options = [
   { value: 'RAIL', label: 'Rail' },
@@ -35,26 +33,11 @@ export default function SpotForm() {
   useEffect(() => {
     if (!pin) return
     setForm((prev) => ({ ...prev, latitude: pin.lat, longitude: pin.lng }));
-    handleCoordinates(pin.lat, pin.lng)
   }, [pin])
   useEffect(() => {
     setSpot(form)
   }, [form])
-  async function handleCoordinates(lat, lng) {
-    try {
-      const [bigData, nominatim] = await Promise.all([
-        fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`).then(r => r.json()),
-        fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=en`).then(r => r.json())
-      ])
-      const city = (bigData.city || bigData.locality || '').toUpperCase()
-      const continent = (bigData.continent || '').toUpperCase().replace(/\s/g, '')
-      const country = (bigData.countryName || '').toUpperCase()
-      const street = (nominatim.address?.road || nominatim.address?.pedestrian || nominatim.address?.footway || '').toUpperCase()
-      setForm((prev) => ({ ...prev, city, continent, country, street }))
-    } catch (err) {
-      console.log(err.message)
-    }
-  }
+
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -202,9 +185,6 @@ export default function SpotForm() {
               <label className="text-xs md:text-sm lg:text-2xl font-semibold">LONGITUDE</label>
               <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm opacity-50" readOnly name="longitude" value={form.longitude} placeholder="Click on map" />
             </div>
-          </div>
-          <div className="w-full">
-            <MapSpotRegistration />
           </div>
         </div>
 
