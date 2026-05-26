@@ -7,7 +7,6 @@ export default function BgThemeLoader() {
     const saved = localStorage.getItem("BgTheme");
 
     if (saved) {
-        console.log(saved)
        document.documentElement.classList.add(saved)
     }
   }, []);

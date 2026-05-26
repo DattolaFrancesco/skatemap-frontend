@@ -18,6 +18,7 @@ export default  function Grid({ searchParams }){
     const containerRef = useRef(null)
     const smallContainerRef = useRef(null)
     const [data, setData] = useState(null)
+    const errorRef = useRef(false)
     async function getSpot(){
         const params = await searchParams
         const query = new URLSearchParams(params) 
@@ -35,6 +36,8 @@ export default  function Grid({ searchParams }){
         }
         catch(error){
             console.log(error.message)
+            errorRef.current = true;
+            clearPendingHref()
             setStatusHref(false)
         }
     }
@@ -59,8 +62,13 @@ export default  function Grid({ searchParams }){
             }
         })
        },{scope:containerRef, dependencies:[data]})
+       function returnSafe(){
+        clearPendingHref()
+        router.push(pendingHref)
+       }
      useEffect(()=>{
         if(!pendingHref) return
+        if(errorRef.current) return returnSafe()
         if(!data || !smallContainerRef.current) return
         setStatusHref(true)
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
