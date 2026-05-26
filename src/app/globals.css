@@ -4,23 +4,25 @@
   --button-color: #cacece;
   --button-color-active: #5d5d5d;
   --button-color-form: #9e9e9e;
-   --primary: #fbca07;
+    --primary: #fbca07;
 }
 /* themes ------------------------------------------------------------------------------*/
     .theme-yellow {
-    --primary: 234 179 8;
+    --primary: #fbca07;
     }
-
     .theme-green {
-    --primary: 34 197 94;
+    --primary: #25f40a;
+    }
+    .theme-blue {
+    --primary: #0e0af4;
     }
 
     .theme-red {
-    --primary: 255 3 3;
+    --primary: #fb0707;
     }
 
     .theme-orange {
-    --primary: 255 166 0;
+    --primary: #9e6400;
     }
 
 html, body {

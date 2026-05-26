@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import ThemeLoader from "./(main)/components/ThemeLoader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,8 +35,8 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} w-full h-full antialiased`}
-    >
+      className={`${geistSans.variable} ${geistMono.variable} w-full h-full antialiased `}>
+        <ThemeLoader/>
       <body className="min-h-screen flex flex-col">{children}</body>
     </html>
   );

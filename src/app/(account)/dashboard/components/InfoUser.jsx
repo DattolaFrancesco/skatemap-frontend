@@ -97,7 +97,7 @@ export default function InfoUser(){
         <>
             <div className="w-full">
               <div className="flex items-start">
-                    <h1 className="text-6xl text-amber-400 font-bold">{user.username}</h1>
+                    <h1 className="text-6xl text-primary font-bold">{user.username}</h1>
                     <div className="flex ms-auto"> <Link href={"/"} className="nav-link">HOME</Link></div>
               </div>
             <div>            
@@ -109,11 +109,11 @@ export default function InfoUser(){
                         <div className="flex gap-3">
                             <div className="flex flex-col justify-center items-center">
                                 <p className="text-3xl  md:text-6xl bg-transparent font-sans ">{spot?.length}</p>
-                                <p className="text-md md:text-xl bg-transparent text-amber-400">SPOTS</p>
+                                <p className="text-md md:text-xl bg-transparent text-primary">SPOTS</p>
                             </div>
                             <div className="flex flex-col justify-center items-center">
                                 <p className="text-3xl  md:text-6xl bg-transparent font-sans">{spotFav?.length}</p>
-                                <p className="text-md md:text-xl bg-transparent text-amber-400">FAVOURITES</p>
+                                <p className="text-md md:text-xl bg-transparent text-primary">FAVOURITES</p>
                             </div>
                         </div>
                     </div>
