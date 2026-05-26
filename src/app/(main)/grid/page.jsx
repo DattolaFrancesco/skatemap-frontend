@@ -35,6 +35,7 @@ export default  function Grid({ searchParams }){
         }
         catch(error){
             console.log(error.message)
+            setStatusHref(false)
         }
     }
     useEffect(()=>{
