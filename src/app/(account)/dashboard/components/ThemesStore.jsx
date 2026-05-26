@@ -1,8 +1,19 @@
-import { create } from "zustand";
-const useThemeStore = create((set)=>({
-    theme: localStorage.getItem("theme"),
-    setTheme: (data) => set({ theme: data }),
-    bgTheme: null,
-    setBgTheme: (data) => set({ bgTheme: data })
-}))
-export default useThemeStore;
+import { create } from "zustand"
+import { persist } from "zustand/middleware"
+
+const useThemeStore = create(
+  persist(
+    (set) => ({
+      theme: "theme-green",
+      setTheme: (theme) => set({ theme }),
+
+      bgTheme: "bg-white-custom",
+      setBgTheme: (bgTheme) => set({ bgTheme }),
+    }),
+    {
+      name: "theme-storage"
+    }
+  )
+)
+
+export default useThemeStore
