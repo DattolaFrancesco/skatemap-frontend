@@ -97,23 +97,23 @@ export default function InfoUser(){
         <>
             <div className="w-full">
               <div className="flex items-start">
-                    <h1 className="text-6xl">{user.username}</h1>
+                    <h1 className="text-6xl text-primary-500 font-bold">{user.username}</h1>
                     <div className="flex ms-auto"> <Link href={"/"} className="nav-link">HOME</Link></div>
               </div>
             <div>            
-                <div className="w-full flex justify-between">
-                     <div className="flex flex-col justify-end">
-                        <p className="text-md md:text-2xl bg-transparent mt-3">{user.name +" "+ user.surname}</p>
-                        <p className="text-md md:text-2xl bg-transparent">{user.email}</p>
+                <div className="w-full flex justify-between mb-1">
+                     <div className="flex flex-col justify-end gap-1">
+                        <p className="text-md md:text-2xl  mt-3  px-2">{user.name +" "+ user.surname}</p>
+                        <p className="text-md md:text-2xl px-2">{user.email}</p>
                     </div>
                         <div className="flex gap-3">
                             <div className="flex flex-col justify-center items-center">
-                                <p className="text-3xl  md:text-6xl bg-transparent font-sans">{spot?.length}</p>
-                                <p className="text-md md:text-xl bg-transparent">SPOTS</p>
+                                <p className="text-3xl  md:text-6xl bg-transparent font-sans ">{spot?.length}</p>
+                                <p className="text-md md:text-xl bg-transparent text-primary-500">SPOTS</p>
                             </div>
                             <div className="flex flex-col justify-center items-center">
                                 <p className="text-3xl  md:text-6xl bg-transparent font-sans">{spotFav?.length}</p>
-                                <p className="text-md md:text-xl bg-transparent">FAVOURITES</p>
+                                <p className="text-md md:text-xl bg-transparent text-primary-500">FAVOURITES</p>
                             </div>
                         </div>
                     </div>

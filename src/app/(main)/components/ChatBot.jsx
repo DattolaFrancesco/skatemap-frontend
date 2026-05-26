@@ -67,9 +67,9 @@ export default function ChatBot(){
             overflow-hidden transition-all duration-300  p-1 mt-1`}>
                 <div ref={chatEndRef} className="w-full overflow-y-scroll py-3">
                     {chat && chat?.map((m,index)=>(<p key={index} className={` wrap-break-word p-2 text-sm w-4/5 m-1 
-                        ${m.role === "bot"?"bg-black/20 me-auto":"ms-auto bg-black/50"} rounded-sm`}>{m.message}</p>))}
-                     {lastResponse.length>0 && <p className="bg-black/20 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">{lastResponse}</p>}
-                     {loadingMessage && <p className="bg-black/20 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm animate-pulse">...</p>}
+                        ${m.role === "bot"?"bg-primary-500 me-auto":"ms-auto bg-primary-700"} rounded-sm`}>{m.message}</p>))}
+                     {lastResponse.length>0 && <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">{lastResponse}</p>}
+                     {loadingMessage && <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm animate-pulse">...</p>}
                 </div>
               <form className={`flex gap-1 ${loading?"animate-pulse":""}`} onSubmit={handleSubmit}>
                 <TextareaAutosize minRows={1} value={lastPrompt} placeholder='have a chat!' onChange={(e)=>{setLastPrompt(e.target.value)}}
@@ -82,7 +82,7 @@ export default function ChatBot(){
             : 
             <div className={`${openChat?"h-[300px] md:h-[500px] border bg-white opacity-100":"h-0 opacity-0"} absolute min-w-[250px] sm:w-full flex flex-col justify-between 
             overflow-hidden transition-all duration-300  p-1 mt-1`}>
-                 <p className="bg-black/20 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">
+                 <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">
                  I'm skating right now. Gonna try a 12-stair set. I'll be back... hopefully! Meanwhile, have a look around.</p>
               <form className={`flex gap-1 ${loading?"animate-pulse":""}`} onSubmit={(e)=>e.preventDefault()}>
                 <TextareaAutosize minRows={1} value={lastPrompt} disabled={true} placeholder="He'll be back soon..."
