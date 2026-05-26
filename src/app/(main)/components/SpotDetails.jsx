@@ -8,6 +8,7 @@ import OpenMedia from "./OpenMedia";
 import Weather from "./Weather";
 import { useEffect, useState } from "react";
 import useUserStore from "@/app/(account)/dashboard/components/UserStore";
+import MapWithSearch from "@/app/test/page";
 
 export default function SpotDetails(){
      const spotOpen = useInsetStore((state) => state.spotOpen);
@@ -73,13 +74,13 @@ export default function SpotDetails(){
             setMediaOpen(null)
             setLiked(null)
         }}
-        className={` ${spotOpen ? "block" : "hidden"} fixed  inset-0 z-999 bg-black/30 h-full flex justify-center items-center`}>
+        className={` ${spotOpen ? "block" : "hidden"} fixed  inset-0 z-999 bg-black/30 min-h-full flex justify-center items-center`}>
             <div
             onClick={(e)=>e.stopPropagation()}
             className="bg_custom_spot_details  break-words overflow-hidden">
                {spotOpen && (
-                <main className="p-3 flex flex-col justify-between h-full overflow-scroll ">
-                    <div className="flex flex-col justify-between h-full relative">
+                <main className="p-3 flex flex-col h-full overflow-y-auto gap-5">
+                    <div className="flex flex-col justify-between  relative">
                         <div>
                             <div className="flex justify-between ">
                                 <h1 className="font-bold font_details_h1">{spotOpen.name.toUpperCase()}</h1>
@@ -91,29 +92,29 @@ export default function SpotDetails(){
                             <aside className="flex gap-1">
                             {[...Array(5)].map((_,i)=>(
                             <div key={i} className={`custom_box_size rounded-sm border 
-                                ${spotOpen.risk === "HIGH" ? "bg-black":""}
-                                ${spotOpen.risk === "MEDIUM" && i<3 ? "bg-black":""}
-                                ${spotOpen.risk === "LOW" && i<1 ? "bg-black":""}`}></div>
+                                ${spotOpen.risk === "HIGH" ? "bg-primary-500":""}
+                                ${spotOpen.risk === "MEDIUM" && i<3 ? "bg-primary-500":""}
+                                ${spotOpen.risk === "LOW" && i<1 ? "bg-primary-500":""}`}></div>
                             ))}
                             </aside>
                         </div>
-                   <div className="h-full flex flex-col justify-around">
+                   <div className="h-full flex flex-col py-5 gap-5 ">
                         <section>
-                            <div className="flex justify-between"><p>CONTINENT</p><p>{spotOpen.continents.replace("NORTH","NORTH\n").replace("SOUTH", "SOUTH\n")}</p></div>
-                            <div className="flex justify-between border-t"><p>COUNTRY</p><p>{spotOpen.country}</p></div>
-                            <div className="flex justify-between border-t"><p>CITY</p><p>{spotOpen.city}</p></div>
-                            <div className="flex justify-between border-t"><p>STREET</p><p>{spotOpen.street}</p></div>
-                            <div className="flex justify-between border-t"><p>WEATHER</p><Weather city={spotOpen.city}/></div>
-                            <div className="flex justify-between border-t"><p>TYPE</p><p>{spotOpen.spotTypes.map((t)=>t.toUpperCase()).join(", ")}</p></div>
-                            <div className="flex justify-between border-t"><p>RISK</p><p>{spotOpen.risk}</p></div>
+                            <div className="flex justify-between"><p className="font-bold">CONTINENT</p><p>{spotOpen.continents.replace("NORTH","NORTH\n").replace("SOUTH", "SOUTH\n")}</p></div>
+                            <div className="flex justify-between border-primary-300 border-t"><p className="font-bold">COUNTRY</p><p>{spotOpen.country}</p></div>
+                            <div className="flex justify-between border-primary-300 border-t"><p className="font-bold">CITY</p><p>{spotOpen.city}</p></div>
+                            <div className="flex justify-between border-primary-300 border-t"><p className="font-bold">STREET</p><p>{spotOpen.street}</p></div>
+                            <div className="flex justify-between border-primary-300 border-t"><p className="font-bold">WEATHER</p><Weather city={spotOpen.city}/></div>
+                            <div className="flex justify-between border-primary-300 border-t"><p className="font-bold">TYPE</p><p>{spotOpen.spotTypes.map((t)=>t.toUpperCase()).join(", ")}</p></div>
+                            <div className="flex justify-between border-primary-300 border-t "><p className="font-bold">RISK</p><p>{spotOpen.risk}</p></div>
                         </section>
-                        <section>
-                            <p>{spotOpen.description}</p>
+                        <section className="py-20" >
+                                <p className=" wrap-break-word">{spotOpen.description}</p>
                         </section>
                         <OpenMedia/>
                    </div>
                      </div>
-                    <section>
+                    <section className="py-5 flex flex-col gap-5">
                         <div>
                             <h2 className="font-semibold font_details_h2">Images</h2>
                             <CarouselMedia media={spotOpen.image}/>
@@ -123,6 +124,10 @@ export default function SpotDetails(){
                             <CarouselMedia media={spotOpen.video}/>
                         </div>
                     </section>
+                    <div className="w-full py-3 flex flex-col">
+                        <p className="font-semibold font_details_h2 text-center mb-3">Google maps spot location</p>
+                        <MapWithSearch lat={spotOpen.latitude} lng={spotOpen.longitude} />
+                    </div>
                 </main>
                )}
             </div>
