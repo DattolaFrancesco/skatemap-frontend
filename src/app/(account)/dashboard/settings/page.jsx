@@ -4,18 +4,19 @@ import { useEffect, useState } from "react"
 export default function Settings(){
     const setAllowBot = useChatStore((data)=>data.setAllowBot)
     const allowBot = useChatStore((data)=>data.allowBot)
-    const [theme,setTheme] = useState(localStorage.getItem("theme") || "theme-yellow")
-    useEffect(()=>{},[allowBot])
+    const [theme,setTheme] = useState(null)
     useEffect(()=>{
-        document.querySelector("html").classList.remove(
+        document.documentElement.classList.remove(
                 "theme-yellow",
                 "theme-red",
                 "theme-blue",
                 "theme-green",
+                "theme-violet",
                 "theme-orange"
         )
-        document.querySelector("html").classList.add(theme)
-        localStorage.setItem("theme",theme)
+        document.documentElement.classList.add(theme)
+        if(theme != null)localStorage.setItem("theme",theme)
+        setTheme(localStorage.getItem("theme"))
     },[theme])
     return(
       <div className="flex flex-col">
