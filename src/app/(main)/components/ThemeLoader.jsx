@@ -7,7 +7,7 @@ export default function ThemeLoader() {
     const saved = localStorage.getItem("theme");
 
     if (saved) {
-      document.documentElement.className = saved;
+      document.documentElement.classList.add(saved)
     }
   }, []);
 
