@@ -2,7 +2,7 @@
 
 function LinksSkeleton() {
   return (
-    <div className="w-full flex flex-wrap justify-between gap-2 py-2 border-t border-b mt-3">
+    <div className="w-full flex flex-wrap justify-between gap-2 py-2  mt-3">
       <div className="flex gap-2">
         <div className="nav-link w-16 h-5 animate-pulse bg-black/20" />
         <div className="nav-link w-20 h-5 animate-pulse bg-black/20" />
