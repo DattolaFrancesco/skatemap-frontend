@@ -49,16 +49,12 @@ export default function Settings(){
         localStorage.setItem("theme", theme)
     }, [theme])
     useEffect(() => {
-    if (!bgTheme) return
-
-    const bg =
-        bgTheme === "bg-dark-custom"
-            ? "url('/dark-bg.jpg')"
-            : "url('/white-bg.jpg')"
-
-    document.documentElement.style.setProperty("--bg-image", bg)
-
-    localStorage.setItem("BgTheme", bgTheme)
+        document.documentElement.classList.remove(
+            "bg-white-custom",
+            "bg-dark-custom"
+        )
+        document.documentElement.classList.add(bgTheme)
+        localStorage.setItem("BgTheme", bgTheme)
 }, [bgTheme])
     useEffect(()=>{getUser()},[])
     return(
