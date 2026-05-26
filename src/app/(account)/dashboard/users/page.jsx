@@ -66,12 +66,12 @@ export default function User() {
             </div>
       {users.map((u) => (
         <div key={u.user.id} className="grid grid-col-2 sm:grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_30px] gap-2 items-center py-2 border-b">
-          <p className="px-3  text-sm lg:text-lg bg-amber-50 ">{u.user.username}</p>
-          <p className="px-3  text-sm lg:text-lg bg-amber-50 ">{u.user.name}</p>
-          <p className="px-3  text-sm lg:text-lg bg-amber-50 ">{u.user.surname}</p>
-          <p className="px-3  text-sm lg:text-lg bg-amber-50 ">{u.user.email}</p>
+          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-amber-100 to-amber-200 ">{u.user.username}</p>
+          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-amber-200 to-amber-300 ">{u.user.name}</p>
+          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-amber-300 to-amber-400 ">{u.user.surname}</p>
+          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-amber-400 to-amber-500 ">{u.user.email}</p>
           <select
-            className="bg_login py-1"
+            className="bg-gradient-to-r from-amber-500 to-amber-600 py-1"
             defaultValue={u.user.authorities[0]?.authority}
             onChange={async (e) => await fetchChangeRole(u.user.id, e.target.value)}
           >
@@ -80,7 +80,7 @@ export default function User() {
           </select>
           <button
             onClick={() => askConfermation(u.user)}
-            className="flex items-center justify-center ms-auto w-7 h-7 hover:bg-black/10 cursor-pointer"
+            className="flex items-center justify-center ms-auto w-7 h-7 bg-primary cursor-pointer"
           >
             <RxCross2 size={14} />
           </button>

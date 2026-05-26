@@ -45,7 +45,7 @@ export default function NavBar(){
 }, [selected, router,search])
 
     return(
-       <div>
+       <div className="z-999">
         <nav className="navbar p-2">
         <section className="left flex flex-col h-full">
             {/* input search div */}

@@ -90,11 +90,11 @@ export default  function MySpots(){
                 <div className="border-b py-2 flex flex-wrap justify-between gap-2">
                     <div className=" flex gap-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
-                            className={`${status === "approved"?"bg-black/40":""}`}>APPROVED</button>
+                            className={`${status === "approved"?"bg-amber-400":""}`}>APPROVED</button>
                         <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
-                            className={`${status === "pending"?"bg-black/40":""}`}>PENDING</button>
+                            className={`${status === "pending"?"bg-amber-400":""}`}>PENDING</button>
                         <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
-                            className={`${status === "unapproved"?"bg-black/40":""}`}>UNAPPROVED</button>
+                            className={`${status === "unapproved"?"bg-amber-400":""}`}>UNAPPROVED</button>
                     </div>
                 </div>
                 <SpotDetails/>

@@ -10,10 +10,10 @@ export default function NavLinks({params}){
         <Link className={`nav-link ${pathname === "/"?"bg-black/40!":""}`} href={`/?${params?.toString()}`}>Map</Link>
       </div>
 
-      <div className="flex gap-1">
+      <div className="flex flex-wrap gap-1 justify-end">
         <Link className="nav-link" href="/donate">Donate</Link>
-        <Link className="nav-link" href="/login">Login/Signup</Link>
         <Link className="nav-link" href="/dashboard">Profile</Link>
+        <Link className="nav-link" href="/login">Login</Link>
       </div>
 
     </div>

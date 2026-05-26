@@ -128,8 +128,7 @@ export default function Globe({ searchParams }) {
     }
   },[mapReady,spot])
   return (
-    <div className='w-full flex flex-col justify-center items-center'>
-      {spot?.length === 0 && <h1 className="text-2xl px-2">There aren't spot</h1> }
+    <div className={`${windowWidthCustom>450?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
       <SpotDetails/>
       <div className="aspect-square w_custom_globe rounded-full overflow-hidden relative">
         {!mapReady && (
