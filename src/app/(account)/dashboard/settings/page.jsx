@@ -59,11 +59,11 @@ export default function Settings(){
     useEffect(()=>{getUser()},[])
     return(
       <div className="flex flex-col">
-            {user?.authorities[0].authority === "super_admin" && <div className="flex justify-between py-2  border-b ">
+            {user?.authorities[0].authority === "super_admin" && <div className="flex justify-between py-2 border-gray-custom  border-b ">
                 <p className={`bg-transparent text-xl text-primary font-bold${allowBot?"":"opacity-50"}`}>Chat Bot</p>
                 <input type="checkbox" id="switch" checked={allowBot} onChange={()=>setAllowBot(!allowBot)}/><label htmlFor="switch">Toggle</label>
             </div>}
-            <div className="flex justify-between py-2   border-b ">
+            <div className="flex justify-between py-2 border-gray-custom  border-b ">
                 <p className={`bg-transparent text-xl text-primary font-bold `}>Theme</p>
                 <select onChange={(e)=>setTheme(e.target.value)} className="text-primary-500" value={theme}>
                     <option value="theme-green">GREEN</option>
@@ -74,7 +74,7 @@ export default function Settings(){
                     <option value="theme-orange">ORANGE</option>
                 </select>
             </div>
-            <div className="flex justify-between py-2   border-b ">
+            <div className="flex justify-between py-2 border-gray-custom  border-b ">
                 <p className={`bg-transparent text-xl text-primary font-bold `}>Bg Theme</p>
                 <select onChange={(e)=>setBgTheme(e.target.value)} className="text-primary-500" value={bgTheme}>
                     <option value="bg-white-custom">WHITE</option>

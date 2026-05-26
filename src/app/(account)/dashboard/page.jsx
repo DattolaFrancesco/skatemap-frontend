@@ -87,7 +87,7 @@ export default  function MySpots(){
                   </div>
                 </div>
                 </div>
-                <div className="border-b py-2 flex flex-wrap justify-between gap-2">
+                <div className="border-gray-custom border-b py-2 flex flex-wrap justify-between gap-2">
                     <div className=" flex gap-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
                             className={`${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
