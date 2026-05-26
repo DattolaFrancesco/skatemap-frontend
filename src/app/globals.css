@@ -8,15 +8,18 @@
     --primary-300: #9bf122;
     --primary-500: #92e100;
     --primary-700: #488a01;
-    --bg-image: url("/white-bg.jpg");
+    --bg-image: url("/white-bg.webp");
     }
     html {
     background-image: var(--bg-image);
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
+    font-family: monospace;
+    overscroll-behavior: none;
     }
     .bg-dark-custom{
-        --bg-image: url("/dark-bg.jpg");
+        --bg-image: url("/dark-bg.webp");
     }
 /* themes ------------------------------------------------------------------------------*/
     .theme-violet {
@@ -62,6 +65,9 @@
     textarea,
     select {
 	    font-size: 16px;
+    }
+    .border-gray-custom {
+        border-color: rgb(144, 144, 144);
     }
 
 /* NAV BAR custom grid for the spot section ------------------------------------------------------------------------------*/

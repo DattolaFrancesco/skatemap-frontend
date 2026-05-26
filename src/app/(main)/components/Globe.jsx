@@ -149,9 +149,9 @@ export default function Globe({ searchParams }) {
 
 }, [primary, mapReady]);
   return (
-    <div className={`${windowWidthCustom>450?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
+    <div className={`${windowWidthCustom>450 && window.innerHeight >500 ?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
       <SpotDetails/>
-      <div className="aspect-square w_custom_globe rounded-full overflow-hidden relative">
+      <div className="aspect-square w_custom_globe rounded-full overflow-hidden relative ">
         {!mapReady && (
           <div className="absolute inset-0 rounded-full bg-[#1a1a1a] animate-pulse flex items-center justify-center z-10">
             <div className="w-3/4 h-3/4 rounded-full border border-white/5" />

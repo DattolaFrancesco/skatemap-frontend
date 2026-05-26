@@ -101,12 +101,12 @@ export default function InfoUser(){
                     <div className="flex ms-auto"> <Link href={"/"} className="nav-link">HOME</Link></div>
               </div>
             <div>            
-                <div className="w-full flex justify-between mb-3">
+                <div className="w-full flex flex-col md:flex-row justify-between mb-3">
                      <div className="flex flex-col justify-end gap-1">
-                        <p className="text-md md:text-2xl  mt-3  px-2">{user.name +" "+ user.surname}</p>
-                        <p className="text-md md:text-2xl px-2">{user.email}</p>
+                        <p className="text-md md:text-2xl  mt-3  px-2 w-fit">{user.name +" "+ user.surname}</p>
+                        <p className="text-md md:text-2xl px-2 w-fit">{user.email}</p>
                     </div>
-                        <div className="flex gap-3">
+                        <div className="flex justify-center md:justify-end gap-3">
                             <div className="flex flex-col justify-center items-center">
                                 <p className="text-3xl  md:text-6xl bg-transparent font-sans  text-primary-700">{spot?.length}</p>
                                 <p className="text-md md:text-xl bg-transparent text-primary-500">SPOTS</p>

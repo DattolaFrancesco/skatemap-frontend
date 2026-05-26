@@ -36,7 +36,11 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} w-full h-full antialiased `}>
+      className={`${geistSans.variable} ${geistMono.variable} w-full h-full antialiased bg-black/60`}>
+    <head>
+        <link rel="preload" as="image" href="/white-bg.webp" />
+        <link rel="preload" as="image" href="/dark-bg.webp" />
+      </head>
         <ThemeLoader/>
         <BgThemeLoader/>
       <body className="min-h-screen flex flex-col">{children}</body>
