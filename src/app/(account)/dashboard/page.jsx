@@ -98,8 +98,8 @@ export default  function MySpots(){
                     </div>
                 </div>
                 <SpotDetails/>
-                <div className="grid_custom gap-1  py-3">
-                   {data.content.length === 0 && <h1 className="text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
+                <div className="grid_custom gap-1  py-3 relative">
+                   {data.content.length === 0 && <h1 className="absolute text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
