@@ -20,14 +20,15 @@ export default function Settings(){
     return(
       <div className="flex flex-col">
             <div className="flex justify-between py-2 border-b ">
-                <p className={`bg-transparent text-xl text-primary ${allowBot?"":"opacity-50"}`}>Chat Bot</p>
+                <p className={`bg-transparent text-xl text-primary font-bold${allowBot?"":"opacity-50"}`}>Chat Bot</p>
                 <input type="checkbox" id="switch" checked={allowBot} onChange={()=>setAllowBot(!allowBot)}/><label htmlFor="switch">Toggle</label>
             </div>
             <div className="flex justify-between py-2 border-b ">
-                <p className={`bg-transparent text-xl text-primary `}>Theme</p>
+                <p className={`bg-transparent text-xl text-primary font-bold`}>Theme</p>
                 <select onChange={(e)=>setTheme(e.target.value)} value={theme}>
                     <option value="theme-yellow">YELLOW</option>
                     <option value="theme-red">RED</option>
+                    <option value="theme-violet">VIOLET</option>
                     <option value="theme-blue">BLUE</option>
                     <option value="theme-green">GREEN</option>
                     <option value="theme-orange">ORANGE</option>

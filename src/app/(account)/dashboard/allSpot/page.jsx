@@ -150,11 +150,11 @@ export default function AllSpotGrid() {
             <SpotCard spot={s} />
           <div className="absolute top-1 right-1 flex flex-col gap-1">
               <button onClick={() => askConfirmation(s)}>
-                <RxCross2 size={20} className="text-red-800"/>
+                <RxCross2 size={20} />
               </button>
               {s.status !== "PENDING" &&
               <button onClick={() => askConfirmationPending(s)}>
-                <ClipboardClock size={20} className="text-orange-400"/>
+                <ClipboardClock size={20}/>
               </button>}
               <Link className=" nav-link" href={`/spot/modify/${s.id}`}>
                 <FaPencilAlt size={20} className="py-1" />

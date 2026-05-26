@@ -53,7 +53,7 @@ export default function NavBar(){
             <aside className="flex gap-0.5 pt-1">
                     {/* filter main div  */}
                    <div><button  
-                    className={`${!filterOpen?null :"bg-black/40"}`}
+                    className={`${!filterOpen?null :"bg-primary-500"}`}
                     onClick={()=>{
                     setFilterOpen(!filterOpen)
                     setOpenFilter(null)
@@ -64,14 +64,14 @@ export default function NavBar(){
                             <div className="relative" >
                                 <button
                                     data-label="Location"
-                                    className={`w-full ${openFilter == null || openFilter !== "Location"   ? null : "bg-black/40"}`}
+                                    className={`w-full ${openFilter == null || openFilter !== "Location"   ? null : "bg-primary-500"}`}
                                     onClick={()=>{setOpenFilter(openFilter === "Location"?null :"Location")}}>Location
                                 </button>
                                 <div 
                                 className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Location" ? "" : "invisible"}`}>
                                    {filters.location.map((f,index)=>(
                                     <button key={index} onClick={()=>multipleSelection("location",f)} 
-                                    className={selected.location.includes(f)?"bg-black/40":""}
+                                    className={selected.location.includes(f)?"bg-primary-500":""}
                                     >{f}</button>
                                    ))}
                                 </div> 
@@ -79,14 +79,14 @@ export default function NavBar(){
                             <div className="relative">
                                 <button 
                                 data-label="Type"
-                                className={`w-full ${openFilter == null || openFilter !== "Type"   ? null : "bg-black/40"}`}
+                                className={`w-full ${openFilter == null || openFilter !== "Type"   ? null : "bg-primary-500"}`}
                                 onClick={()=>{setOpenFilter(openFilter === "Type"?null :"Type")}}>Type
                                 </button>
                                 <div
                                     className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Type" ? "" : "invisible"}`}>
                                     {filters.type.map((f,index)=>(
                                         <button key={index} onClick={()=>multipleSelection("type",f)}
-                                        className={selected.type.includes(f)?"bg-black/40":""}
+                                        className={selected.type.includes(f)?"bg-primary-500":""}
                                         >{f}</button>
                                     ))}
                                 </div>
@@ -101,7 +101,7 @@ export default function NavBar(){
                                 className={`absolute flex flex-col gap-0.5 top-0 left-[103%] ${openFilter === "Risk" ? "" : "invisible"}`}>
                                     {filters.risk.map((f,index)=>(
                                         <button key={index} onClick={()=>multipleSelection("risk",f)}
-                                        className={selected.risk.includes(f)?"bg-black/40":""}
+                                        className={selected.risk.includes(f)?"bg-primary-500":""}
                                         >{f}</button>
                                     ))}
                                 </div>
@@ -110,7 +110,7 @@ export default function NavBar(){
                     </div>
             </aside>
             <div className="mt-auto flex flex-col gap-1">
-                <button className="w-fit active:bg-black/40"onClick={()=>{
+                <button className="w-fit"onClick={()=>{
                     setSelected({ location: [], type: [], risk: [] }); 
                     setSearch(null)
                     inputRef.current.value=""

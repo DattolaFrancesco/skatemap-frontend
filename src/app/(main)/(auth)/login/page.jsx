@@ -79,7 +79,7 @@ export default function Login() {
             <button
               disabled={loading}
               type="submit"
-              className="bg-black/30 hover:bg-black/40 text-2xl font-semibold w-1/3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary-300  text-2xl font-semibold w-1/3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "..." : "SUBMIT"}
             </button>

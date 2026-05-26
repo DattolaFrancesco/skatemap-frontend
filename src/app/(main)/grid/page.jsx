@@ -21,8 +21,8 @@ export default async function Grid({ searchParams }){
     catch(error){
         console.log(error.message)
     }
-    if(!data) return <h1 className="text-2xl px-2">Server is not available</h1> 
-    if(data?.content?.length === 0) return <h1 className="text-2xl px-2">There aren't spot</h1> 
+    if(!data) return <h1 className="text-2xl px-2 text-primary-500">Server is not available</h1> 
+    if(data?.content?.length === 0) return <h1 className="text-2xl px-2 text-primary-500">There aren't spot</h1> 
     return (
         <div>
             <SpotDetails/>

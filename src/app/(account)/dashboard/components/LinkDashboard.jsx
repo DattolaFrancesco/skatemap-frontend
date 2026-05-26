@@ -48,16 +48,16 @@ export default function LinkDashboard(){
     return(
         <div className="w-full flex flex-wrap justify-between gap-2  py-2 border-t border-b ">
                <div className="flex flex-wrap gap-2">
-                    <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?" bg-primary!":""}`}>MY SPOTS</Link>
-                      {isAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link ${pathname === "/dashboard/allSpot"?" bg-primary!":""}`}>ALL SPOTS</Link>}
-                    <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-primary!":""}`}>FAVOURITES</Link>
+                    <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?"bg-primary-500":""}`}>MY SPOTS</Link>
+                      {isAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link ${pathname === "/dashboard/allSpot"?" bg-primary-500":""}`}>ALL SPOTS</Link>}
+                    <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-primary-500":""}`}>FAVOURITES</Link>
                     {isAdmin && 
-                    <Link href={"/dashboard/requests"} className={`relative nav-link ${pathname === "/dashboard/requests"?" bg-primary!":""}`}>
+                    <Link href={"/dashboard/requests"} className={`relative nav-link ${pathname === "/dashboard/requests"?" bg-primary-500":""}`}>
                       REQUESTS
                    {pending > 0 && <div className="absolute rounded-full w-2 h-2 top-[-3] right-[-3] bg-red-500 text-[10px] animate-pulse"></div>}
                     </Link>}
-                    {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-primary!":""}`}>USERS</Link>}
-                    {isSuperAdmin && <Link href={"/dashboard/settings"} className={`nav-link ${pathname === "/dashboard/settings"?" bg-primary!":""}`}>SETTING</Link>}
+                    {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-primary-500":""}`}>USERS</Link>}
+                    {isSuperAdmin && <Link href={"/dashboard/settings"} className={`nav-link ${pathname === "/dashboard/settings"?" bg-primary-500":""}`}>SETTING</Link>}
                </div>
                <div className="flex gap-2">
                  <Link href={"/spot/registration"} className={`nav-link `}>ADD SPOT</Link>

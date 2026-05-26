@@ -13,6 +13,7 @@ export default function Globe({ searchParams }) {
   const mapRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
+  const [primary, setPrimary] = useState("#ff0000");
 
   const getSpot = useCallback(async()=>{
     const params = await searchParams
@@ -78,6 +79,13 @@ export default function Globe({ searchParams }) {
     })
     return () => mapInstance.current.remove()
   }, [])
+  useEffect(() => {
+    const value = getComputedStyle(document.documentElement)
+    .getPropertyValue("--primary")
+    .trim();
+
+  setPrimary(value);
+  }, []);
 
   useEffect(()=>{
     if(!spot || !mapReady) return
@@ -106,7 +114,7 @@ export default function Globe({ searchParams }) {
         id: 'spots-layer',
         type: 'circle',
         source: 'spots',
-        paint: { 'circle-radius': 4, 'circle-color': '#ffffff' }
+        paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
       })
       mapInstance.current.on('click', 'spots-layer', (e) => {
         const feature = e.features[0]
@@ -127,6 +135,17 @@ export default function Globe({ searchParams }) {
       })
     }
   },[mapReady,spot])
+  useEffect(() => {
+  if (!mapInstance.current || !mapReady) return;
+
+  if (mapInstance.current.getLayer("spots-layer")) {
+    mapInstance.current.setPaintProperty(
+      "spots-layer",
+      "circle-color",
+      `rgb(${primary})`
+    );
+  }
+}, [primary, mapReady]);
   return (
     <div className={`${windowWidthCustom>450?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
       <SpotDetails/>

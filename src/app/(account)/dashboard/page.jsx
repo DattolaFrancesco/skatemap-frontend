@@ -69,7 +69,7 @@ export default  function MySpots(){
          }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
-    if(!data) return <h1 className=" text-2xl animate-pulse">Loading spots...</h1> 
+    if(!data) return <h1 className=" text-2xl animate-pulse text-primary-500">Loading spots...</h1> 
         return  ( 
             <div>
                {message.type === "bad" ?
@@ -90,20 +90,20 @@ export default  function MySpots(){
                 <div className="border-b py-2 flex flex-wrap justify-between gap-2">
                     <div className=" flex gap-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
-                            className={`${status === "approved"?"bg-amber-400":""}`}>APPROVED</button>
+                            className={`${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
                         <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
-                            className={`${status === "pending"?"bg-amber-400":""}`}>PENDING</button>
+                            className={`${status === "pending"?"bg-primary-500":""}`}>PENDING</button>
                         <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
-                            className={`${status === "unapproved"?"bg-amber-400":""}`}>UNAPPROVED</button>
+                            className={`${status === "unapproved"?"bg-primary-500":""}`}>UNAPPROVED</button>
                     </div>
                 </div>
                 <SpotDetails/>
                 <div className="grid_custom gap-1  py-3">
-                   {data.content.length === 0 && <h1 className="text-2xl mt-2">You don't have any spot that satisfy the filters</h1>}
+                   {data.content.length === 0 && <h1 className="text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20} className="text-red-800"/></button>
+                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
                         <Link className="absolute top-7 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
                             ${s.status === "APPROVED"?"bg-green-500":""}
