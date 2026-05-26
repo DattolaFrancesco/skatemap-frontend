@@ -49,13 +49,18 @@
     --primary-700: #693a01;
     }
 
-html, body {
-  height: 100%;
-    background-image: url("/white-bg.jpg");
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-}
+    .bg-dark-custom{
+        background-image: url("/dark-bg.jpg") ;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+    .bg-white-custom{
+        background-image: url("/white-bg.jpg") ;
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
 
     input,
     textarea,
@@ -118,6 +123,9 @@ background-color: var(--button-color);
     input:focus {
         outline: none;
         border: 1px solid black;
+    }
+    select:focus {
+        outline: none;
     }
     h1{
         letter-spacing: -10%;

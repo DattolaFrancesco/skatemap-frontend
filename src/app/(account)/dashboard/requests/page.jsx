@@ -109,7 +109,7 @@ export default function Request(){
         setApprovedSpot(spot)
     }
     useEffect(()=>{getSpots()},[refresh])
-    if(!spot || spot?.content?.length === 0) return <h1 className="text-2xl">You don't have any spot request to review</h1>
+    if(!spot || spot?.content?.length === 0) return <h1 className="text-2xl text-primary-500 ">You don't have any spot request to review</h1>
     return (
         <>
         <div className="grid_custom gap-1  py-3">

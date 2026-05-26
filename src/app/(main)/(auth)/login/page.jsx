@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { RxCross2 } from "react-icons/rx"
 import Link from "next/link";
+import useUserStore from "@/app/(account)/dashboard/components/UserStore";
 
 export default function Login() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null)
+  const setUser = useUserStore((data)=> data.setUser)
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
@@ -31,6 +33,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+      setUser(data)
       localStorage.setItem('token', data.message);
       await getUserId()
     } catch (err) {
