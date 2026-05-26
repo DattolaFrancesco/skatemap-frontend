@@ -215,6 +215,7 @@ useGSAP(() => {
     ease: "power3.inOut",
     onComplete:()=>{
         setStatusHref(false)
+        coordsRef.current = { lng: 10 }
     }
   })
 
