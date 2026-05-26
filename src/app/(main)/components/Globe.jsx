@@ -136,15 +136,17 @@ export default function Globe({ searchParams }) {
     }
   },[mapReady,spot])
   useEffect(() => {
+
   if (!mapInstance.current || !mapReady) return;
 
   if (mapInstance.current.getLayer("spots-layer")) {
     mapInstance.current.setPaintProperty(
       "spots-layer",
       "circle-color",
-      `rgb(${primary})`
+      primary
     );
   }
+
 }, [primary, mapReady]);
   return (
     <div className={`${windowWidthCustom>450?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>

@@ -44,7 +44,7 @@ export default function Favourites(){
 
     useEffect(()=>{console.log(spots)},[spots])
     useEffect(()=>{getFav()},[])
-    if(!spots || spots.content.length === 0)return <h1 className="text-2xl">You don't have favourite spots</h1>
+    if(!spots || spots.content.length === 0)return <h1 className="text-2xl text-primary-500">You don't have favourite spots</h1>
     return (
         <>
             <div className="grid_custom gap-1  py-3">
