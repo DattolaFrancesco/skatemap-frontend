@@ -8,7 +8,16 @@
     --primary-300: #9bf122;
     --primary-500: #92e100;
     --primary-700: #488a01;
-}
+    --bg-image: url("/white-bg.jpg");
+    }
+    html {
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    }
+    .bg-dark-custom{
+        --bg-image: url("/dark-bg.jpg");
+    }
 /* themes ------------------------------------------------------------------------------*/
     .theme-violet {
     --primary: #a777ff;
@@ -49,24 +58,12 @@
     --primary-700: #693a01;
     }
 
-    .bg-dark-custom{
-        background-image: url("/dark-bg.jpg") ;
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
-    .bg-white-custom{
-        background-image: url("/white-bg.jpg") ;
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
-
     input,
     textarea,
     select {
 	    font-size: 16px;
     }
+
 /* NAV BAR custom grid for the spot section ------------------------------------------------------------------------------*/
 .navbar{
     display: grid;

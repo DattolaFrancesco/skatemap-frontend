@@ -8,7 +8,8 @@ export default function Settings(){
     const allowBot = useChatStore((data)=>data.allowBot)
     const theme = useThemeStore((data)=>data.theme)
     const setTheme = useThemeStore((data)=>data.setTheme)
-    const [BgTheme,setBgTheme] = useState(null)
+    const bgTheme = useThemeStore((data)=>data.bgTheme)
+    const setBgTheme = useThemeStore((data)=>data.setBgTheme)
     const [user,setUser] = useState(null)
     async function getUser() {
     try {
@@ -31,7 +32,7 @@ export default function Settings(){
         const savedTheme = localStorage.getItem("theme")
         const savedBg = localStorage.getItem("BgTheme")
         if(savedTheme) setTheme(savedTheme)
-        //if(savedBg) setBgTheme(savedBg)
+        if(savedBg) setBgTheme(savedBg)
     }, [])
 
    // THEME
@@ -47,17 +48,18 @@ export default function Settings(){
         document.documentElement.classList.add(theme)
         localStorage.setItem("theme", theme)
     }, [theme])
+    useEffect(() => {
+    if (!bgTheme) return
 
-    // BACKGROUND
-    // useEffect(() => {
-    //     document.body.classList.remove(
-    //         "bg-white-custom",
-    //         "bg-dark-custom"
-    //     )
-    //     document.body.classList.add(BgTheme)
-    //     localStorage.setItem("BgTheme", BgTheme)
+    const bg =
+        bgTheme === "bg-dark-custom"
+            ? "url('/dark-bg.jpg')"
+            : "url('/white-bg.jpg')"
 
-    // }, [BgTheme])
+    document.documentElement.style.setProperty("--bg-image", bg)
+
+    localStorage.setItem("BgTheme", bgTheme)
+}, [bgTheme])
     useEffect(()=>{getUser()},[])
     return(
       <div className="flex flex-col">
@@ -78,7 +80,7 @@ export default function Settings(){
             </div>
             <div className="flex justify-between py-2   border-b ">
                 <p className={`bg-transparent text-xl text-primary font-bold `}>Bg Theme</p>
-                <select onChange={(e)=>setBgTheme(e.target.value)} className="text-primary-500" value={BgTheme}>
+                <select onChange={(e)=>setBgTheme(e.target.value)} className="text-primary-500" value={bgTheme}>
                     <option value="bg-white-custom">WHITE</option>
                     <option value="bg-dark-custom">DARK</option>
                 </select>
