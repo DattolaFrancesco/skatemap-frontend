@@ -8,7 +8,7 @@ import OpenMedia from "./OpenMedia";
 import Weather from "./Weather";
 import { useEffect, useState } from "react";
 import useUserStore from "@/app/(account)/dashboard/components/UserStore";
-import MapWithSearch from "@/app/test/page";
+import Map from "@/app/googleMaps/Map";
 
 export default function SpotDetails(){
      const spotOpen = useInsetStore((state) => state.spotOpen);
@@ -126,7 +126,7 @@ export default function SpotDetails(){
                     </section>
                     <div className="w-full py-3 flex flex-col">
                         <p className="font-semibold font_details_h2 text-center mb-3">Google maps spot location</p>
-                        <MapWithSearch lat={spotOpen.latitude} lng={spotOpen.longitude} />
+                        <Map lat={spotOpen.latitude} lng={spotOpen.longitude} />
                     </div>
                 </main>
                )}
