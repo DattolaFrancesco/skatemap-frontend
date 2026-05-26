@@ -2,14 +2,12 @@
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
 import usePinRegistration from "@/app/spot/components/PinRegistration";
-import dynamic from "next/dynamic";
 import useSpotForm from "@/app/spot/components/SpotFormStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { RxCross2 } from "react-icons/rx";
 import { useRouter } from "next/navigation"
 
-const MapSpotRegistration = dynamic(() => import('@/app/spot/components/MapSpotRegistration'), { ssr: false })
 
 const options = [
   { value: 'RAIL', label: 'Rail' },
