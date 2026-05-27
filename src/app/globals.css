@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 /* custom var  */
 :root {
   --button-color: #cacece;
@@ -268,127 +269,126 @@ background-color: var(--button-color);
 /* QUERY for the grid section ----------------------------------------------------------------------------------*/
 
 @media (min-width: 500px) {
-.grid_custom{
-    grid-template-columns: repeat(2,1fr);
-}
-/* nav bar grid section */
-.navbar{
-    grid-template-columns: repeat(2,1fr);
-    grid-template-areas: "left right";
-}
-.height_custom_spot_card{
-    height: 250px;
-}
-/* details card section */
-.bg_custom_spot_details{
-    width: 90%;
-    height: 70%;
-    font-size: 15px;
-}
-.font_details_h1{
-    font-size: 22px;
-}
-.font_details_h2{
-    font-size: 17px;
-}
-.custom_box_size{
-    width: 12px;
-    height: 12px;
-}
-/* globe */
- .w_custom_globe{
-    width: 65%;
+    .grid_custom{
+        grid-template-columns: repeat(2,1fr);
+    }
+    /* nav bar grid section */
+    .navbar{
+        grid-template-columns: repeat(2,1fr);
+        grid-template-areas: "left right";
+    }
+    .height_custom_spot_card{
+        height: 250px;
+    }
+    /* details card section */
+    .bg_custom_spot_details{
+        width: 90%;
+        height: 70%;
+        font-size: 15px;
+    }
+    .font_details_h1{
+        font-size: 22px;
+    }
+    .font_details_h2{
+        font-size: 17px;
+    }
+    .custom_box_size{
+        width: 12px;
+        height: 12px;
+    }
+    /* globe */
+    .w_custom_globe{
+        width: 65%;
     }  
 }
 @media (min-width: 768px) {
-.grid_custom{
-    grid-template-columns: repeat(3,1fr);
-}
-/* nav bar grid section */
-.navbar{
-    grid-template-columns: repeat(3,1fr);
-    grid-template-areas: "left . right";
-}
-/* details card section */
-.bg_custom_spot_details{
-    width: 70%;
-    height: 90%;
-    font-size: 18px;
-}
-.font_details_h1{
-    font-size: 26px;
-}
-.font_details_h2{
-    font-size: 23px;
-}
-.custom_box_size{
-    width: 14px;
-    height: 14px;
-}
-/* globe */
- .w_custom_globe{
-    width: 60%;
-} 
+    .grid_custom{
+        grid-template-columns: repeat(3,1fr);
+    }
+    /* nav bar grid section */
+    .navbar{
+        grid-template-columns: repeat(3,1fr);
+        grid-template-areas: "left . right";
+    }
+    /* details card section */
+    .bg_custom_spot_details{
+        width: 70%;
+        height: 90%;
+        font-size: 18px;
+    }
+    .font_details_h1{
+        font-size: 26px;
+    }
+    .font_details_h2{
+        font-size: 23px;
+    }
+    .custom_box_size{
+        width: 14px;
+        height: 14px;
+    }
+    /* globe */
+    .w_custom_globe{
+        width: 60%;
+    } 
 }
 @media (min-width: 1024px) {
-.grid_custom{
-    grid-template-columns: repeat(4,1fr);
-}
-/* nav bar grid section */
-.navbar{
-    grid-template-columns: repeat(4,1fr);
-    grid-template-areas: "left . . right";
-}
-/* details card section */
-.bg_custom_spot_details{
-    width: 55%;
-    height: 90%;
-}
-/* globe */
- .w_custom_globe{
-    width: 40%;
-} 
+    .grid_custom{
+        grid-template-columns: repeat(4,1fr);
+    }
+    /* nav bar grid section */
+    .navbar{
+        grid-template-columns: repeat(4,1fr);
+        grid-template-areas: "left . . right";
+    }
+    /* details card section */
+    .bg_custom_spot_details{
+        width: 55%;
+        height: 90%;
+    }
+    /* globe */
+    .w_custom_globe{
+        width: 40%;
+    } 
 }
 @media (min-width: 1280px) {
-.grid_custom{
-    grid-template-columns: repeat(5,1fr);
-}
-/* nav bar grid section */
-.navbar{
-    grid-template-columns: repeat(5,1fr);
-    grid-template-areas: "left . . . right";
-}
-/* globe */
- .w_custom_globe{
-    width: 35%;
-} 
+    .grid_custom{
+        grid-template-columns: repeat(5,1fr);
+    }
+    /* nav bar grid section */
+    .navbar{
+        grid-template-columns: repeat(5,1fr);
+        grid-template-areas: "left . . . right";
+    }
+    /* globe */
+    .w_custom_globe{
+        width: 35%;
+    } 
 }
 @media (min-width: 1480px) {
-.height_custom_spot_card{
-    height: 320px;
+    .height_custom_spot_card{
+        height: 320px;
+    }
+    /* details card section */
+    .bg_custom_spot_details{
+        width: 50%;
+        height: 90%;
+        font-size: 18px;
+    }
+    .font_details_h1{
+        font-size: 35px;
+    }
+    .font_details_h2{
+        font-size: 25px;
+    }
+    .custom_box_size{
+        width: 15px;
+        height: 15px;
+    }
+    /* globe */
+    .w_custom_globe{
+        width: 45rem;
+    } 
 }
-/* details card section */
-.bg_custom_spot_details{
-    width: 50%;
-    height: 90%;
-    font-size: 18px;
-}
-.font_details_h1{
-    font-size: 35px;
-}
-.font_details_h2{
-    font-size: 25px;
-}
-.custom_box_size{
-    width: 15px;
-    height: 15px;
-}
-/* globe */
- .w_custom_globe{
-    width: 45rem;
-} 
-}
-
 
 
 

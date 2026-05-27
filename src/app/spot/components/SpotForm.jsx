@@ -1,23 +1,23 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
-import usePinRegistration from "@/app/spot/components/PinRegistration";
 import useSpotForm from "./SpotFormStore"
 import Link from "next/link";
+import MapWithData from "@/app/googleMaps/MapWithData";
 
 
 
 const options = [
-  { value: 'RAIL', label: 'Rail' },
-  { value: 'LEDGE', label: 'Ledge' },
-  { value: 'STREET', label: 'Street' },
-  { value: 'SKATEPARK', label: 'Skatepark' },
-  { value: 'STAIR', label: 'Stair' },
+  { value: 'RAIL'},
+  { value: 'LEDGE' },
+  { value: 'STREET'},
+  { value: 'SKATEPARK'},
+  { value: 'STAIR' },
 ]
 
 export default function SpotForm() {
-  const pin = usePinRegistration((state) => state.pin);
-  const setSpot = useSpotForm((data) => data.setSpot);
+  const latLng = useSpotForm((data) => data.latLng);
+  const position = useSpotForm((data) => data.position);
   const [images, setImages] = useState([])
   const [videos, setVideos] = useState([])
   const [error, setError] = useState(null)
@@ -31,12 +31,15 @@ export default function SpotForm() {
     city: '', country: '', continent: '', street: '',
   });
   useEffect(() => {
-    if (!pin) return
-    setForm((prev) => ({ ...prev, latitude: pin.lat, longitude: pin.lng }));
-  }, [pin])
+    if (!latLng) return
+    setForm((prev) => ({ ...prev, latitude: latLng.lat, longitude:latLng.lng }));
+  }, [latLng])
   useEffect(() => {
-    setSpot(form)
-  }, [form])
+     if (!position) return;
+    setForm((prev) => ({ ...prev, country: position.country, city:position.city, street:position.street }));
+    console.log(form)
+  }, [position])
+
 
 
   function handleChange(e) {
@@ -159,135 +162,161 @@ export default function SpotForm() {
   }
 
   return (
-  <div className={`flex flex-col w-full h-full justify-center items-center ${loading ? "animate-pulse" : ""}`}>
-    <div className="w-full mb-0.5 md:mb-1">
-      <Link href={"/"} className={`nav-link block text-center py-0.5 text-xs md:text-sm ${loading ? "invisible" : ""}`}>BACK</Link>
-    </div>
-    <div className="w-full h-full bg_login px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
-      <form onSubmit={handleSubmit} className="h-full flex flex-col justify-between gap-1.5 md:gap-2 lg:gap-3">
-
+  <div className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""}`}>
+     
+    <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
+      <section className="flex justify-between py-2">
+         <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">ADD SPOT</h1>
+          <Link href={"/"} className={`w-fit h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</Link>
+      </section>
+      <form autoComplete="off" onSubmit={handleSubmit} className="md:h-full flex flex-col  gap-1.5 md:gap-2 lg:gap-3">
         {/* TOP: name + map */}
-        <div className="flex flex-row gap-1.5 md:gap-2 lg:gap-3">
-          <div className="flex flex-col gap-1 w-1/2">
-            <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold">ADD SPOT</h1>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex justify-between">
-                <label className="text-xs md:text-sm lg:text-2xl font-semibold">NAME</label>
-                <p className={`text-xs self-end ${form.name.length > 30 ? "text-red-800" : ""}`}>{form.name.length}/30</p>
-              </div>
-              <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <label className="text-xs md:text-sm lg:text-2xl font-semibold">LATITUDE</label>
-              <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm opacity-50" readOnly name="latitude" value={form.latitude} placeholder="Click on map" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <label className="text-xs md:text-sm lg:text-2xl font-semibold">LONGITUDE</label>
-              <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm opacity-50" readOnly name="longitude" value={form.longitude} placeholder="Click on map" />
+          <h1 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">01/LOCATION</h1>
+         <div className="flex flex-col md:flex-row h-full gap-1.5 md:gap-2 lg:gap-3">
+              <div className="flex flex-col gap-1 w-full md:w-1/2 min-h-[300px] md:min-h-0 md:flex-1 border relative">
+            <MapWithData/>
+            <div className="absolute flex  gap-1 bottom-1 left-1">
+             <div className="flex flex-col gap-0.5 w-[30%]">
+                  <label className="text-sm font-semibold text-primary-700">LATITUDE</label>
+                  <input autoComplete="new-password" name="street" className="bg-white text-sm  w-full" readOnly name="latitude" value={form.latitude} placeholder="Click on map" />
+                </div>
+                <div className="flex flex-col gap-0.5 w-[30%]">
+                  <label className="text-sm font-semibold text-primary-700">LONGITUDE</label>
+                  <input autoComplete="new-password" name="street" className="bg-white text-sm w-full" readOnly name="longitude" value={form.longitude} placeholder="Click on map" />
             </div>
           </div>
-        </div>
+              </div>
+              <div className="flex flex-col gap-1 w-full md:w-1/2 md:justify-between">
+                    <div className="flex flex-col gap-0.5 mb-2">
+                      <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">CONTINENT</label>
+                      <select className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="continent" value={form.continent} onChange={handleChange}>
+                        <option value="">Select</option>
+                        <option value="AFRICA">AFRICA</option>
+                        <option value="ANTARCTICA">ANTARCTICA</option>
+                        <option value="ASIA">ASIA</option>
+                        <option value="EUROPE">EUROPE</option>
+                        <option value="NORTHAMERICA">N. AMERICA</option>
+                        <option value="OCEANIA">OCEANIA</option>
+                        <option value="SOUTHAMERICA">S. AMERICA</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-0.5 mb-2">
+                      <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">COUNTRY</label>
+                      <input autoComplete="new-password" name="street" onKeyDown={(e) => {if (e.key === 'Enter') e.preventDefault()}} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 mb-2">
+                      <label className="text-sm lg:text-2xl font-semibold w-fit bg-primary">CITY</label>
+                      <input autoComplete="new-password" name="street" onKeyDown={(e) => {if (e.key === 'Enter') e.preventDefault()}} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="city" value={form.city} onChange={handleChange} placeholder="City" />
+                    </div>
+                    <div className="flex flex-col gap-0.5 ">
+                      <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">STREET</label>
+                      <input autoComplete="new-password" name="street" onKeyDown={(e) => {if (e.key === 'Enter') e.preventDefault()}} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
+                    </div>
+              </div>
+         </div>
 
         {/* GRID FIELDS */}
-        <div className="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-1.5 md:gap-2 lg:gap-3">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">CONTINENT</label>
-            <select className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="continent" value={form.continent} onChange={handleChange}>
-              <option value="">Select</option>
-              <option value="AFRICA">AFRICA</option>
-              <option value="ANTARCTICA">ANTARCTICA</option>
-              <option value="ASIA">ASIA</option>
-              <option value="EUROPE">EUROPE</option>
-              <option value="NORTHAMERICA">N. AMERICA</option>
-              <option value="OCEANIA">OCEANIA</option>
-              <option value="SOUTHAMERICA">S. AMERICA</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">COUNTRY</label>
-            <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-sm lg:text-2xl font-semibold">CITY</label>
-            <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="city" value={form.city} onChange={handleChange} placeholder="City" />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">STREET</label>
-            <input className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">RISK</label>
-            <select className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="risk" value={form.risk} onChange={handleChange}>
-              <option value="LOW">LOW</option>
-              <option value="MEDIUM">MEDIUM</option>
-              <option value="HIGH">HIGH</option>
-            </select>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">TYPES</label>
-            <Select
-              isMulti
-              options={options}
-              value={options.filter((o) => form.types.includes(o.value))}
-              onChange={(selected) => setForm((prev) => ({
-                ...prev,
-                types: selected ? selected.map((s) => s.value) : [],
-              }))}
-            />
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <div className="flex flex-col gap-0.5">
-              <div className="flex justify-between items-center">
-                <label className="text-xs md:text-sm font-semibold">IMAGES</label>
-                <button type="button" onClick={() => imageInputRef.current.click()} className="text-xs border px-2 py-0.5">+ Add</button>
-              </div>
-              <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
-              <div className="flex flex-wrap gap-1 mt-1">
-                {images.map((file, i) => (
-                  <div key={i} className="relative w-16 h-16">
-                    <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
-                    <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+        <div>
+           <article className="flex items-end justify-between">
+             <h1 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">02/IDENTITY</h1>
+             <p className="py-1 px-2 text-xs md:text-md w-fit bg-transparent text-primary-500">How locals call it and how it skates</p>
+           </article>
+          <section className="flex flex-col md:flex-row gap-2 md:gap-5">
+              <article className="w-1/2">
+                  <div className="flex flex-col gap-0.5 mb-2">
+                    <div className="flex justify-between ">
+                      <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">NAME</label>
+                      <p className={`text-xs `}></p>
+                      <p className={`text-xs self-end bg-transparent text-primary-500 ${form.name.length > 30 ? "text-red-800" : ""}`}>{form.name.length}/30</p>
+                    </div>
+                    <input autoComplete="new-password" name="street" onKeyDown={(e) => {if (e.key === 'Enter') e.preventDefault()}}  className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
                   </div>
+              </article>
+            <article className="flex flex-col gap-0.5 ">
+              <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">RISK</label>
+             <div className="flex gap-2">
+                <button type="button" onClick={()=>setForm((prev) => ({ ...prev, risk:"LOW"}))} className={`w-fit border ${form.risk === "LOW"? "bg-primary-500": ""} py-0.5 md:py-2 px-2 md:px-5`}>LOW</button>
+                <button type="button" onClick={()=>setForm((prev) => ({ ...prev, risk:"MEDIUM"}))} className={`w-fit border ${form.risk === "MEDIUM"? "bg-primary-500": ""} py-0.5 md:py-2 px-2 md:px-5`}>MEDIUM</button>
+                <button type="button" onClick={()=>setForm((prev) => ({ ...prev, risk:"HIGH"}))} className={`w-fit border ${form.risk === "HIGH"? "bg-primary-500": ""} py-0.5 md:py-2 px-2 md:px-5`}>HIGH</button>
+             </div>
+            </article>
+          </section>
+           <article className="flex flex-col gap-0.5">
+             <div className="flex flex-col gap-2 w-fit">
+           <article className="flex items-end justify-between">
+              <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">TYPES</label>
+              <p className="text-xs bg-transparent text-primary-500">{form.types.length}/{options.length} selected</p>
+           </article>
+              <div className="flex gap-2">
+                {options.map((t)=>(
+                  <button type="button" 
+                 onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,types: prev.types.includes(t.value)
+                            ? prev.types.filter(x => x !== t.value)
+                            : [...prev.types, t.value],
+                        }))
+                      }
+                  className={`w-fit border ${form.types.includes(t.value)? "bg-primary-500": ""}md:py-2 px-2 md:px-5`}>{t.value}</button>
                 ))}
               </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-0.5">
-              <div className="flex flex-col gap-0.5">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs md:text-sm font-semibold">VIDEOS</label>
-                  <button type="button" onClick={() => videoInputRef.current.click()} className="text-xs border px-2 py-0.5">+ Add</button>
+             </div>
+            </article>
+     <section className="flex flex-col md:flex-row w-full py-3 gap-5">
+            <div className="flex flex-row md:flex-col justify-between md:justify-start md:w-1/2  gap-2 pt-1 ">
+                <div className="flex flex-col w-1/2 md:w-full  gap-0.5">
+                <div className="flex justify-between  items-center">
+                  <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">IMAGES</label>
+                  <button type="button" onClick={() => imageInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                 </div>
-                <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {videos.map((file, i) => (
+                <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
+                <div className="flex flex-wrap  gap-1 mt-1">
+                  {images.map((file, i) => (
                     <div key={i} className="relative w-16 h-16">
-                      <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded"></video>
-                      <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                      <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
+                      <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
                     </div>
                   ))}
                 </div>
-              </div>
-          </div>
-        </div>
-
+                </div>
+                <div className="flex flex-col w-1/2 md:w-full  gap-0.5">
+                <div className="flex flex-col  gap-0.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">VIDEOS</label>
+                    <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
+                  </div>
+                  <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {videos.map((file, i) => (
+                      <div key={i} className="relative w-16 h-16">
+                        <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded"></video>
+                        <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                </div>
+            </div>
         {/* DESCRIPTION */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col w-full md:w-1/2 gap-0.5 md:ps-2 pt-2 md:pt-0 justify-between">
+          <article className="flex flex-col gap-2 mb-1">
           <div className="flex justify-between">
-            <label className="text-xs md:text-sm lg:text-2xl font-semibold">DESCRIPTION</label>
-            <p className="text-xs self-end">{form.description.length}/500</p>
-          </div>
-          <textarea required className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm w-full" rows={2} name="description" value={form.description} onChange={handleChange} placeholder="Description" />
+              <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">DESCRIPTION</label>
+              <p className="bg-tra text-xs self-end bg-transparent text-primary-500">{form.description.length}/500</p>
+            </div>
+            <textarea onKeyDown={(e) => {if (e.key === 'Enter') e.preventDefault()}}  required className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm w-full" rows={2} name="description" value={form.description} onChange={handleChange} placeholder="Description" />
+          </article>
+          <article className="flex justify-between">
+          {error && <p className="text-red-800 text-xl py-0.5 bg-transparent ">{error}</p>}
+          {message && <p className="text-green-800 text-xl py-0.5 bg-transparent ">{message}</p>}
+            <button disabled={loading} type="submit" className="hover:bg-primary text-xs md:text-sm lg:text-2xl xl:text-2xl 
+            font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+              SUBMIT
+            </button>
+          </article>
         </div>
-
-        {error && <p className="text-red-800 text-xs py-0.5">{error}</p>}
-        {message && <p className="text-green-800 text-xs py-0.5">{message}</p>}
-
-        <aside className="flex justify-end">
-          <button disabled={loading} type="submit" className="bg-black/30 hover:bg-black/40 text-xs md:text-sm lg:text-2xl xl:text-2xl font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            SUBMIT
-          </button>
-        </aside>
+     </section>
+        </div>
       </form>
     </div>
   </div>
