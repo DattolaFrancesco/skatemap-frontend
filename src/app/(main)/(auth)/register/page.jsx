@@ -81,7 +81,7 @@ export default function Register() {
       })
   }, [pendingHref])
   return (
-    <div ref={scopeContainerRef} className="w-full h-full flex justify-end items-start">
+    <div ref={scopeContainerRef} className="w-full h-full flex justify-end items-start overflow-hidden">
       <div ref={containerRef} className={`w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <section className="flex justify-between">
           <h1 className="text-4xl font-bold">REGISTER</h1>
