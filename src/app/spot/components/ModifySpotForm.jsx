@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import Select from 'react-select';
-import usePinRegistration from "@/app/spot/components/PinRegistration";
 import useSpotForm from "@/app/spot/components/SpotFormStore";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,7 +21,6 @@ export default function ModifySpotForm() {
   const pathname = usePathname()
   const sections = pathname.split("/")
   const section = sections[3]
-  const pin = usePinRegistration((state) => state.pin);
   const setSpot = useSpotForm((data) => data.setSpot);
   const [existsImages,setExistsImages] = useState(null)
   const [existsVideos,setExistsVideos] = useState(null)
@@ -42,21 +40,21 @@ export default function ModifySpotForm() {
     description: '', risk: 'LOW', types: [],
     city: '', country: '', continent: '', street: '',
   });
-  useEffect(() => {
-    if(firstLoad) return
-    if (!pin) return
-    setForm((prev) => ({ ...prev, latitude: pin.lat, longitude: pin.lng }));
-    handleCoordinates(pin.lat, pin.lng)
-  }, [pin])
-  useEffect(() => {
-    setSpot(form)
-  }, [form])
-  useEffect(() => {
-    console.log(videoRestrictionNumber)
-  }, [videoRestrictionNumber])
-  useEffect(() => {
-    getSpot()
-  }, [])
+  // useEffect(() => {
+  //   if(firstLoad) return
+  //   if (!pin) return
+  //   setForm((prev) => ({ ...prev, latitude: pin.lat, longitude: pin.lng }));
+  //   handleCoordinates(pin.lat, pin.lng)
+  // }, [pin])
+  // useEffect(() => {
+  //   setSpot(form)
+  // }, [form])
+  // useEffect(() => {
+  //   console.log(videoRestrictionNumber)
+  // }, [videoRestrictionNumber])
+  // useEffect(() => {
+  //   getSpot()
+  // }, [])
   async function getSpot() {
   const token = localStorage.getItem('token')
     try{const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${section}`, {

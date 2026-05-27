@@ -25,7 +25,7 @@ export default function Globe({ searchParams }) {
   const setStatusHref = useNavigationStore((state) => state.setStatusHref);
   const coordsRef = useRef({ lng: 10 });
   const animatedRef = useRef(false)
-
+  const [delay, setDelay] = useState(null)
   const getSpot = useCallback(async()=>{
     const params = await searchParams
     const query = new URLSearchParams(params)  
@@ -57,7 +57,15 @@ export default function Globe({ searchParams }) {
     if (windowWidthCustom < 1480) return 1.5   
     return 2
   },[windowWidthCustom])
-
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    setDelay(true)
+  }, 500)
+  return () => clearTimeout(timer)
+}, [])
+useEffect(() => {
+  if (mapReady) setDelay(false)
+}, [mapReady])
   useEffect(() => {
     getSpot()
     setWindowWidthCustom(window.innerWidth)
@@ -217,6 +225,10 @@ useGSAP(() => {
         coordsRef.current = { lng: 10 }
     }
   })
+  gsap.to(mapRef.current, {
+    opacity:1,
+    ease: "power3.inOut",
+  })
 
 }, { dependencies: [mapReady] })
   return (
@@ -225,13 +237,13 @@ useGSAP(() => {
     <div  className={`${windowWidthCustom>450 && window.innerHeight >500 ?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
       <div ref={containerRef} className="aspect-square w_custom_globe rounded-full overflow-hidden relative ">
         {!mapReady && (
-          <div className="absolute inset-0 rounded-full bg-[#1a1a1a] animate-pulse flex items-center justify-center z-10">
+          <div className={`absolute inset-0 rounded-full bg-[#1a1a1a] flex items-center justify-center z-10 ${delay ? "animate-pulse": "opacity-0" }`}>
             <div className="w-3/4 h-3/4 rounded-full border border-white/5" />
             <div className="absolute w-1/2 h-px bg-white/5" />
             <div className="absolute w-px h-1/2 bg-white/5" />
           </div>
-        )}
-        <div ref={mapRef} className="w-full h-full" />
+        )} 
+        <div ref={mapRef} className="w-full h-full opacity-0" />
       </div>
     </div>
   </>

@@ -105,7 +105,7 @@ export default function Login() {
       <div ref={containerRef} className={`w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col ${loading ? "animate-pulse pointer-events-none" : ""}`}>
         <section className="flex justify-between ">
           <h1 className="text-4xl font-bold">LOGIN</h1>
-          <RxCross2 size={38} onClick={() => router.push(`/`)} className="cursor-pointer" />
+             <TransitionLink className={`nav-link `} href="/"> <RxCross2 size={38}/></TransitionLink>
         </section>
         <form onSubmit={handleSubmit} className="flex flex-col flex-grow-1 justify-around">
           <h1 className="text-2xl font-semibold">EMAIL</h1>
@@ -119,7 +119,7 @@ export default function Login() {
           {error && <p className="text-red-800 py-1">{error}</p>}
           <aside className="flex justify-between items-end py-1">
             <p className="text-xs">IF YOU DON'T HAVE AN ACCOUNT YET <span className="underline">
-              <TransitionLink className={` *:nav-link ${statusHref?" disabled-btn":""}`} href="/register">REGISTER</TransitionLink>
+              <TransitionLink className={`nav-link ${statusHref?" disabled-btn":""}`} href="/register">REGISTER</TransitionLink>
               </span></p>
             <button
               disabled={loading}

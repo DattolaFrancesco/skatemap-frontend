@@ -1,11 +1,10 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
-import Select from 'react-select';
 import useSpotForm from "./SpotFormStore"
 import Link from "next/link";
-import MapWithData from "@/app/googleMaps/MapWithData";
+import dynamic from 'next/dynamic'
 
-
+const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
 const options = [
   { value: 'RAIL'},
