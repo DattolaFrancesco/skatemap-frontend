@@ -79,7 +79,7 @@ export default function NavBar(){
 
     }
     return(
-       <div className="z-99">
+       <div className="z-10">
         <nav className="navbar p-2">
         <section className="left flex flex-col h-full">
             {/* input search div */}

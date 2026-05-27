@@ -43,7 +43,7 @@ export default  function Grid({ searchParams }){
     }
     useEffect(()=>{
         getSpot()
-    },[])
+    },[searchParams])
     useGSAP(()=>{
         if(!data || !smallContainerRef.current) return
         console.log(statusHref)

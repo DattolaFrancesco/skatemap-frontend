@@ -74,7 +74,7 @@ export default function SpotDetails(){
             setMediaOpen(null)
             setLiked(null)
         }}
-        className={` ${spotOpen ? "block" : "hidden"} fixed  inset-0 z-999 bg-black/30 min-h-full flex justify-center items-center`}>
+        className={` ${spotOpen ? "block" : "hidden"} fixed  inset-0 z-999  bg-black/30 min-h-full flex justify-center items-center`}>
             <div
             onClick={(e)=>e.stopPropagation()}
             className="bg_custom_spot_details  break-words overflow-hidden">

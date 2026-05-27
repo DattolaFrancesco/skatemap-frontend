@@ -3,7 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TransitionLink from "./TransitionLink";
 import useNavigationStore from "../store/NavigationStore";
-import { useEffect } from "react";
 
 export default function NavLinks({params}){
   const pathname = usePathname()
@@ -16,9 +15,9 @@ export default function NavLinks({params}){
       </div>
 
       <div className="flex flex-wrap gap-1 justify-end">
-        <Link className="nav-link" href="/donate">Donate</Link>
-        <Link className="nav-link" href="/dashboard">Profile</Link>
-        <Link className="nav-link" href="/login">Login</Link>
+        <TransitionLink className={`nav-link ${pathname === "/donate"?"bg-primary-500":""}  ${statusHref?" disabled-btn":""}`} href={`/donate?${params?.toString()}`}>Donate</TransitionLink>
+        <TransitionLink className={`nav-link ${statusHref?" disabled-btn":""}`} href={`/dashboard`}>Profile</TransitionLink>
+        <TransitionLink className={`nav-link ${pathname === "/login"?"bg-primary-500":""}  ${statusHref?" disabled-btn":""}`} href={`/login?${params?.toString()}`}>Login</TransitionLink>
       </div>
 
     </div>
