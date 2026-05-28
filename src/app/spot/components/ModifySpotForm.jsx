@@ -43,23 +43,19 @@ export default function ModifySpotForm() {
   const [form, setForm] = useState({
     name: '', latitude: '', longitude: '',
     description: '', risk: 'LOW', types: [],
-    city: '', country: '', continent: '', street: '',
+    city: '', country: '', continent: '', street: ''
   });
 
   useEffect(() => { getSpot() }, [])
-
-  // aggiorna lat/lng dal click sulla mappa (come SpotForm)
   useEffect(() => {
     if (!latLng || !latLng.lat) return
     setForm((prev) => ({ ...prev, latitude: latLng.lat, longitude: latLng.lng }));
   }, [latLng])
-
-  // aggiorna indirizzo dal geocoder (come SpotForm)
   useEffect(() => {
     if (!position || !position.country) return;
     setForm((prev) => ({ ...prev, country: position.country, city: position.city, street: position.street }));
   }, [position])
-
+  
   async function getSpot() {
     const token = localStorage.getItem('token')
     try {
@@ -72,7 +68,7 @@ export default function ModifySpotForm() {
       setForm({
         name: data.name, latitude: data.latitude, longitude: data.longitude,
         description: data.description, risk: data.risk, types: data.spotTypes.map((t) => t),
-        city: data.city, country: data.country, continent: data.continents, street: data.street,
+        city: data.city, country: data.country, continent: data.continents, street: data.street
       })
       // pre-posiziona il marker sulla mappa
       setLatLng({ lat: data.latitude, lng: data.longitude })
@@ -80,13 +76,11 @@ export default function ModifySpotForm() {
       setExistsVideos(data.video)
     } catch (err) { console.log(err.message) }
   }
-
   function handleChange(e) {
     const { name, value } = e.target;
     if (name === 'description' && value.length > 500) return
     setForm((prev) => ({ ...prev, [name]: value }));
   }
-
   function handleAddImages(e) {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
     const merged = [...images, ...incoming]
@@ -94,7 +88,6 @@ export default function ModifySpotForm() {
     setImages(merged)
     e.target.value = ''
   }
-
   function handleAddVideos(e) {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
     const merged = [...videos, ...incoming]
@@ -102,41 +95,12 @@ export default function ModifySpotForm() {
     setVideos(merged)
     e.target.value = ''
   }
-
   function removeImage(index) {
     setImages(prev => prev.filter((_, i) => i !== index))
   }
-
   function removeVideo(index) {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
-
-  async function deleteExistingImage() {
-    const token = localStorage.getItem('token')
-    await Promise.all(
-      eliminatedExistsImages.id.map(async (i) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/${i}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("delete existing images failed");
-      })
-    )
-  }
-
-  async function deleteExistingVideo() {
-    const token = localStorage.getItem('token')
-    await Promise.all(
-      eliminatedExistsVideos.id.map(async (i) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/${i}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        })
-        if (!res.ok) throw new Error("delete existing videos failed");
-      })
-    )
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.latitude || !form.longitude) {
@@ -148,13 +112,28 @@ export default function ModifySpotForm() {
       setError("At least 1 image required")
       return
     }
-    setLoading(true)
+      const eliminatedMedia = [
+        ...eliminatedExistsImages.id,
+        ...eliminatedExistsVideos.id
+      ];
+      const payload = {
+        ...form,
+        eliminatedMedia
+      };
+      const formData = new FormData();
+      formData.append(
+        "spot",
+        new Blob([JSON.stringify(payload)], {
+          type: "application/json"
+        })
+      );
+      const media = [...images, ...videos];
+      media.forEach(f => formData.append("media", f));
+      console.log(images)
+      console.log(videos)
+      setLoading(true)
     try {
-      await deleteExistingImage()
-      await deleteExistingVideo()
-      await handleImagesSubmit(section)
-      await handleVideosSubmit(section)
-      await handleForm(section)
+      await handleForm(section, formData)
       setLoading(false)
       router.push('/dashboard')
     } catch (err) {
@@ -163,42 +142,19 @@ export default function ModifySpotForm() {
     }
   }
 
-  async function handleForm(spotId) {
+  async function handleForm(spotId, formData) {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-      body: JSON.stringify(form),
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/upload/${spotId}`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
+      body: formData,
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
+    const text = await res.text()
+    if (!res.ok) {
+          throw new Error(text.message+" try again, it could be the media format");
+    };
   }
 
-  async function handleVideosSubmit(spotId) {
-    if (!videos || videos.length === 0) return
-    const formData = new FormData()
-    videos.forEach(e => formData.append("file", e));
-    const token = localStorage.getItem('token')
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/video/${spotId}`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
-      body: formData,
-    })
-    if (!res.ok) throw new Error("Video upload failed");
-  }
-
-  async function handleImagesSubmit(spotId) {
-    if (!images || images.length === 0) return
-    const formData = new FormData()
-    images.forEach(e => formData.append("file", e));
-    const token = localStorage.getItem('token')
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/image/${spotId}`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
-      body: formData,
-    })
-    if (!res.ok) throw new Error("Image upload failed");
-  }
 
   return (
     <div className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""}`}>
