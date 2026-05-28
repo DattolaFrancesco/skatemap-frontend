@@ -67,11 +67,11 @@ export default function ChatBot(){
             overflow-hidden transition-all duration-300  p-1 mt-1`}>
                 <div ref={chatEndRef} className="w-full overflow-y-scroll py-3">
                     {chat && chat?.map((m,index)=>(<p key={index} className={` wrap-break-word p-2 text-sm w-4/5 m-1 
-                        ${m.role === "bot"?"bg-primary-500 me-auto":"ms-auto bg-primary-700"} rounded-sm`}>{m.message}</p>))}
+                        ${m.role === "bot"?"bg-primary-500 me-auto":"ms-auto bg-primary-700"} rounded-sm text-white`}>{m.message}</p>))}
                      {lastResponse.length>0 && <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm">{lastResponse}</p>}
-                     {loadingMessage && <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm animate-pulse">...</p>}
+                     {loadingMessage && <p className="bg-primary-500 wrap-break-word p-2 text-sm w-4/5 m-1 me-auto rounded-sm animate-pulse text-white">...</p>}
                 </div>
-              <form className={`flex gap-1 ${loading?"animate-pulse":""}`} onSubmit={handleSubmit}>
+              <form className={`flex gap-1 ${loading?"animate-pulse":""} `} onSubmit={handleSubmit}>
                 <TextareaAutosize minRows={1} value={lastPrompt} placeholder='have a chat!' onChange={(e)=>{setLastPrompt(e.target.value)}}
                 onKeyDown={(e)=>{
                     if(e.key === "Enter")handleSubmit(e)}}

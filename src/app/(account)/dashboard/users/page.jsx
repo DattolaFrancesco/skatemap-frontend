@@ -65,7 +65,7 @@ export default function User() {
                 </div>
             </div>
       {users.map((u) => (
-        <div key={u.user.id} className="grid grid-col-2 sm:grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_30px] gap-2 items-center py-2 border-gray-custom border-b">
+        <div key={u.user.id} className="grid grid-col-2 sm:grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_30px] gap-2 items-center py-2 ">
           <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] ">{u.user.username}</p>
           <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] ">{u.user.name}</p>
           <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)]">{u.user.surname}</p>

@@ -34,7 +34,7 @@ export default function SearchFilters() {
   }, [selected, router, search])
 
   return (
-    <div className="flex flex-col gap-0.5 mt-2  border-gray-custom border-b pb-2">
+    <div className="flex flex-col gap-0.5 mt-2  ">
       <input ref={inputRef} type="text" placeholder="Search" onChange={(e) => setSearch(e.currentTarget.value)} className="w-full md:w-1/2" />
       <aside className="flex gap-0.5">
         <button className={`${!filterOpen ? null : "bg-primary-500"} h-fit`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>

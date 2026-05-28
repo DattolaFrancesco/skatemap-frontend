@@ -87,7 +87,7 @@ export default  function MySpots(){
                   </div>
                 </div>
                 </div>
-                <div className="border-gray-custom border-b py-2 flex flex-wrap justify-between gap-2">
+                <div className=" py-2 flex flex-wrap justify-between gap-2">
                     <div className=" flex gap-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
                             className={`${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
@@ -103,8 +103,8 @@ export default  function MySpots(){
                     {data.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1 "><RxCross2 size={20}/></button>
-                        <Link className="absolute top-7 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
+                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1"><RxCross2 size={20}/></button>
+                        <Link className="absolute top-8 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
                         <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
                             ${s.status === "APPROVED"?"bg-green-500":""}
                              ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
