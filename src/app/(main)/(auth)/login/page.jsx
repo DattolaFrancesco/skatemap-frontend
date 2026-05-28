@@ -9,6 +9,8 @@ import { useGSAP } from "@gsap/react";
 import useNavigationStore from "../../store/NavigationStore";
 import TransitionLink from "../../components/TransitionLink";
 
+const API = process.env.NEXT_PUBLIC_API_URL;
+
 export default function Login() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -19,7 +21,7 @@ export default function Login() {
   const pendingHref = useNavigationStore((state) => state.pendingHref);
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
   const setStatusHref = useNavigationStore((state) => state.setStatusHref);
-    const statusHref = useNavigationStore((state) => state.statusHref);
+  const statusHref = useNavigationStore((state) => state.statusHref);
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
@@ -34,9 +36,8 @@ export default function Login() {
 
   async function sendLogin() {
     setLoading(true)
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/auth/login`;
     try {
-      const res = await fetch(url, {
+      const res = await fetch(`${API}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -54,7 +55,7 @@ export default function Login() {
 
   async function getUserId() {
     try {
-      const res = await fetch("http://localhost:3003/account", {
+      const res = await fetch(`${API}/account`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -69,22 +70,19 @@ export default function Login() {
       setLoading(false)
     }
   }
+
   useGSAP(() => {
     if (!containerRef.current) return
     gsap.killTweensOf(containerRef.current)
-    gsap.set(containerRef.current, {
-      xPercent: 100
-    })
+    gsap.set(containerRef.current, { xPercent: 100 })
     gsap.to(containerRef.current, {
       xPercent: 0,
       duration: 0.75,
       ease: "power3.inOut",
-      onComplete:()=>{
-          setStatusHref(false)
-      }
+      onComplete: () => { setStatusHref(false) }
     })
-
   }, { dependencies: [scopeContainerRef] })
+
   useEffect(() => {
     if (!pendingHref) return
     setStatusHref(true)
@@ -93,19 +91,19 @@ export default function Login() {
       xPercent: 100,
       duration: 0.75,
       ease: "power3.inOut",
-
       onComplete: () => {
         clearPendingHref()
         router.push(pendingHref)
       }
     })
-}, [pendingHref])
+  }, [pendingHref])
+
   return (
     <div ref={scopeContainerRef} className="w-full h-full flex justify-end items-start overflow-hidden">
       <div ref={containerRef} className={`w-[90%] md:w-[40%] bg_login px-2 py-0.5 flex flex-col ${loading ? "animate-pulse pointer-events-none" : ""}`}>
-        <section className="flex justify-between ">
+        <section className="flex justify-between">
           <h1 className="text-4xl font-bold">LOGIN</h1>
-             <TransitionLink className={`nav-link `} href="/"> <RxCross2 size={38}/></TransitionLink>
+          <TransitionLink className="nav-link" href="/"><RxCross2 size={38}/></TransitionLink>
         </section>
         <form onSubmit={handleSubmit} className="flex flex-col flex-grow-1 justify-around">
           <h1 className="text-2xl font-semibold">EMAIL</h1>
@@ -120,11 +118,11 @@ export default function Login() {
           <aside className="flex justify-between items-end py-1">
             <p className="text-xs">IF YOU DON'T HAVE AN ACCOUNT YET <span className="underline">
               <TransitionLink className={`nav-link ${statusHref?" disabled-btn":""}`} href="/register">REGISTER</TransitionLink>
-              </span></p>
+            </span></p>
             <button
               disabled={loading}
               type="submit"
-              className="bg-primary-300  text-2xl font-semibold w-1/3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary-300 text-2xl font-semibold w-1/3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "..." : "SUBMIT"}
             </button>
