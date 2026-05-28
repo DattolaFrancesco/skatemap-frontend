@@ -40,14 +40,17 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} w-full h-full antialiased bg-black/60`}>
+      className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
     <head>
         <link rel="preload" as="image" href="/white-bg.webp" />
         <link rel="preload" as="image" href="/dark-bg.webp" />
       </head>
         <ThemeLoader/>
         <BgThemeLoader/>
-      <body className="min-h-screen flex flex-col">{children}</body>
+      <body className="h-dvh flex flex-col">
+        <div id="bg-fixed"></div>
+        {children}
+      </body>
     </html>
   );
 }

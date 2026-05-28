@@ -12,16 +12,21 @@
     --bg-image: url("/white-bg.webp");
     }
     html {
-    background-image: var(--bg-image);
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     font-family: monospace;
     overscroll-behavior: none;
+    }
+    #bg-fixed {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image: var(--bg-image);
+        background-size: cover;
+        background-position: center;
     }
     .bg-dark-custom{
         --bg-image: url("/dark-bg.webp");
     }
+
 /* themes ------------------------------------------------------------------------------*/
     .theme-violet {
     --primary: #a777ff;
@@ -81,6 +86,7 @@
 }
 .left{grid-area: left;}
 .right{grid-area: right;}
+
 
 /* LOGIN/REGISTER/FORM ------------------------------------------------------------------------------------------------------------*/
 .bg_login{
