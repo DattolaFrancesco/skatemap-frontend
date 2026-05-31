@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { use, useCallback, useEffect, useRef, useState } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import useInsetStore from "@/app/(main)/store/InsetStore"
@@ -26,9 +26,9 @@ export default function Globe({ searchParams }) {
   const coordsRef = useRef({ lng: 10 });
   const animatedRef = useRef(false)
   const [delay, setDelay] = useState(null)
-  const getSpot = useCallback(async()=>{
-    const params = await searchParams
-    const query = new URLSearchParams(params)  
+  const resolvedParams = use(searchParams)
+  const getSpot = async (resolvedParams) => {
+    const query = new URLSearchParams(resolvedParams)  
     const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/approved/all?${query.toString()}`;
     try {
       const res = await fetch(url,{
@@ -38,10 +38,11 @@ export default function Globe({ searchParams }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setSpot(data.content)
+      console.log("fetch degli spot - globe")
     } catch(error) {
       console.log(error.message)
     }
-  },[searchParams])
+  }
 
   const getZoom = useCallback(() => {
     if(!windowWidthCustom){
@@ -67,12 +68,14 @@ useEffect(() => {
   if (mapReady) setDelay(false)
 }, [mapReady])
   useEffect(() => {
-    getSpot()
     setWindowWidthCustom(window.innerWidth)
     const handleResize = () => setWindowWidthCustom(window.innerWidth)
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [getSpot])
+  }, [])
+  useEffect(() => {
+    getSpot(resolvedParams)
+  }, [resolvedParams])
 
   useEffect(() => {
     if (!mapInstance.current) return

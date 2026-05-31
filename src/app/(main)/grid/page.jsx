@@ -32,6 +32,7 @@ export default  function Grid({ searchParams }){
         })
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
+        console.log("fetch degli spot - grid")
         setData(data)
         }
         catch(error){
