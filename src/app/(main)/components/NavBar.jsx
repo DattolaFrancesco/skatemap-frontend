@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+import useNavigationStore from "../store/NavigationStore"
+import useSpotStore from "../store/SpotStore"
 
 export default function NavBar() {
     const filters = {
@@ -27,6 +29,7 @@ export default function NavBar() {
     const riskBtnRef = useRef(null)
     const isAnimating = useRef(false)
     const currentParentY = useRef(0)
+    const setReset = useSpotStore((data)=>data.setReset)
 
     useEffect(() => {
         const p = new URLSearchParams()
@@ -34,7 +37,7 @@ export default function NavBar() {
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
         if (search !== null) p.append("search", search)
-        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+        router.push(`?${p.toString()}&_t=${1}`, { scroll: false })
         setParams(p)
     }, [selected, router, search])
 
@@ -195,6 +198,7 @@ export default function NavBar() {
                             setSearch(null)
                             inputRef.current.value = ""
                             router.push(``)
+                            setReset(true)
                         }}>
                             Reset filters
                         </button>
