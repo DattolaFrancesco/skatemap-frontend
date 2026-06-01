@@ -1,5 +1,4 @@
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TransitionLink from "./TransitionLink";
 import useNavigationStore from "../store/NavigationStore";

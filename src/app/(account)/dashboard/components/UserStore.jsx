@@ -2,6 +2,8 @@ import { create } from "zustand";
 const useUserStore = create((set)=>({
     user: null,
     setUser: (data) => set({ user: data }),
+    spots: 0,
+    setSpots: (data) => set({ spots: data }),
     refresh: true,
     setRefresh: (data) => set({ refresh: data }),
     pendingSpots: true,

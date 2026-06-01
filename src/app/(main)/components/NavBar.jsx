@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+import useSpotStore from "../store/SpotStore"
 
 export default function NavBar() {
     const filters = {
@@ -15,6 +16,7 @@ export default function NavBar() {
     const [selected, setSelected] = useState({ location: [], type: [], risk: [] })
     const [params, setParams] = useState(null)
     const [search, setSearch] = useState(null)
+    const searchFilter = useRef(null)
     const [filterOpen, setFilterOpen] = useState(false)
     const [openFilter, setOpenFilter] = useState(null)
     const tlRef = useRef(null)
@@ -27,6 +29,9 @@ export default function NavBar() {
     const riskBtnRef = useRef(null)
     const isAnimating = useRef(false)
     const currentParentY = useRef(0)
+    const setReset = useSpotStore((data)=>data.setReset)
+    const firstRender = useSpotStore((data)=>data.firstRender)
+    const firstRenderGrid = useSpotStore((data)=>data.firstRenderGrid)
 
     useEffect(() => {
         const p = new URLSearchParams()
@@ -36,8 +41,21 @@ export default function NavBar() {
         if (search !== null) p.append("search", search)
         router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
         setParams(p)
+        p.delete("_t")
+        if(p.toString() === "" && firstRender == 1) {
+             setReset(true)
+         }
+        if(p.toString() === "" && firstRenderGrid == 1) {
+             setReset(true)
+         }
     }, [selected, router, search])
-
+    const handleSearch = (e) =>{
+        const search = e.currentTarget.value
+        clearInterval(searchFilter.current)
+        searchFilter.current = setTimeout(() => { 
+            setSearch(search)
+        }, 600);
+    }
     const multipleSelection = (category, f) => {
         setSelected(prev => ({
             ...prev,
@@ -147,7 +165,7 @@ export default function NavBar() {
             <nav className="navbar p-2">
                 <section className="left flex flex-col h-full">
                     <div>
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={(e) => setSearch(e.currentTarget.value)} className="w-full"/>
+                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full"/>
                     </div>
                     <aside className="flex gap-0.5 pt-1">
                         <div>
@@ -195,6 +213,7 @@ export default function NavBar() {
                             setSearch(null)
                             inputRef.current.value = ""
                             router.push(``)
+                            setReset(true)
                         }}>
                             Reset filters
                         </button>

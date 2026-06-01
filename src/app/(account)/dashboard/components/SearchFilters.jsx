@@ -15,6 +15,7 @@ export default function SearchFilters() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [openFilter, setOpenFilter] = useState(null)
   const inputRef = useRef(null)
+  const debounceRef = useRef(null)
   const router = useRouter()
 
   const multipleSelection = (category, f) => {
@@ -22,6 +23,14 @@ export default function SearchFilters() {
       ...prev,
       [category]: prev[category].includes(f) ? prev[category].filter(x => x != f) : [...(prev[category] || []), f]
     }))
+  }
+
+  const handleSearch = (e) => {
+    const val = e.currentTarget.value
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      setSearch(val)
+    }, 600)
   }
 
   useEffect(() => {
@@ -34,8 +43,8 @@ export default function SearchFilters() {
   }, [selected, router, search])
 
   return (
-    <div className="flex flex-col gap-0.5 mt-2  ">
-      <input ref={inputRef} type="text" placeholder="Search" onChange={(e) => setSearch(e.currentTarget.value)} className="w-full md:w-1/2" />
+    <div className="flex flex-col gap-0.5 mt-2">
+      <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full md:w-1/2" />
       <aside className="flex gap-0.5">
         <button className={`${!filterOpen ? null : "bg-primary-500"} h-fit`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
         <div className={`${filterOpen ? "" : "hidden"}`}>
@@ -45,7 +54,7 @@ export default function SearchFilters() {
               return (
                 <div key={label} className="flex flex-wrap gap-0.5">
                   <div><button className="bg-primary" onClick={() => setOpenFilter(openFilter === label ? null : label)}>{label}</button></div>
-                  <div className={`flex flex-wrap  gap-0.5  `}>
+                  <div className="flex flex-wrap gap-0.5">
                     {filters[key].map((f, i) => (
                       <button key={i} onClick={() => multipleSelection(key, f)} className={selected[key].includes(f) ? "bg-primary-500" : ""}>{f}</button>
                     ))}

@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import SpotCard from "@/app/(main)/components/SpotCard"
 import SpotDetails from "@/app/(main)/components/SpotDetails"
 import { RxCross2 } from "react-icons/rx"
@@ -23,22 +23,34 @@ export default function AllSpotGrid() {
   const pendingSpots = useUserStore((data)=> data.pendingSpots)
   const refresh = useUserStore((data)=> data.refresh)
   const setRefresh = useUserStore((data)=> data.setRefresh)
+  const firstDataRef = useRef(null)
+  const firstRenderRef = useRef(false)
 
-  async function getSpots() {
+async function getSpots() {
+    const query = new URLSearchParams(searchParams)
+    query.delete('_t')
+    if (query.toString() === "" && firstRenderRef.current) {
+        setData(firstDataRef.current)  
+        return
+    }
     const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all?${searchParams.toString()}`
     try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
-      })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.message)
+        const res = await fetch(url, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(json.message)
+        if (!firstRenderRef.current && query.toString() === "") {
+            firstDataRef.current = data   
+            firstRenderRef.current = true
+        }
         console.log(data)
-      setData(json)
+        setData(data)
     } catch(err) {
-      console.log(err.message)
+        console.log(err.message)
     }
-  }
+}
 
   function askConfirmation(spot) {
     setAskPermission(true)
@@ -145,7 +157,7 @@ export default function AllSpotGrid() {
       <SearchFilters />
       <SpotDetails />
       <div className="grid_custom gap-1 py-3">
-        {data.content.map((s) => (
+        {data?.content?.map((s) => (
           <div key={s.id} className="relative">
             <SpotCard spot={s} />
           <div className="absolute top-1 right-1 flex flex-col gap-1">

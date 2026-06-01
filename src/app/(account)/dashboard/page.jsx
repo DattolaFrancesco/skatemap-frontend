@@ -71,7 +71,7 @@ export default  function MySpots(){
     useEffect(()=>{getSpots()},[status])
     if(!data) return <h1 className=" text-2xl animate-pulse text-primary-500">Loading spots...</h1> 
         return  ( 
-            <div className="">
+            <div>
                {message.type === "bad" ?
                <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
                {message.type === "good" ?
