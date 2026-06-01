@@ -58,13 +58,17 @@ export default function Grid({ searchParams }) {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.message)
+                console.log("start")
             if (firstRender === 0 && query.toString() !== "" && firstSpotStore == null) {
+                console.log(1)
                 await getAllSpot()
                 setSpotStore(data)
             } else if (firstRender === 0 && query.toString() === "") {
+                console.log(2)
                 setFirstSpotStore(data)
                 setSpotStore(data)
             } else {
+                console.log(3)
                 setSpotStore(data)
                 setReset(false)
             }
@@ -100,7 +104,7 @@ export default function Grid({ searchParams }) {
     useEffect(() => {
         if (!pendingHref) return
         if (errorRef.current) { clearPendingHref(); router.push(pendingHref); return }
-        if (!spotStore || !smallContainerRef.current) return
+        if (!firstSpotStore || !smallContainerRef.current) { clearPendingHref();setFirstRender(0); router.push(pendingHref); return }
         setStatusHref(true)
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
         gsap.killTweensOf(els)
@@ -113,6 +117,7 @@ export default function Grid({ searchParams }) {
             onComplete: () => {
                 clearPendingHref()
                 setFirstRender(0)
+                console.log(pendingHref, "test")
                 router.push(pendingHref)
             }
         })
