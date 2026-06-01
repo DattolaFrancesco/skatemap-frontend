@@ -54,13 +54,13 @@ export default function Globe({ searchParams }) {
         setSpotStore(data.content)
       }
       if(!reset && firstRender == 0 && query.toString() === "") {
+        console.log(data.content)
         setSpotStore(data.content)
         setFirstSpotStore(data.content)
       }
       else {
         setSpotStore(data.content)
       }
-      console.log("fetch degli spot - globe")
     } catch(error) {
       console.log(error.message)
     }
@@ -179,8 +179,9 @@ useEffect(() => {
           paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
         })
         mapInstance.current.on('click', 'spots-layer', (e) => {
-          const feature = e.features[0]
-          setSpotOpen(JSON.parse(feature.properties.spot))
+            const feature = e.features[0]
+            const parsed = JSON.parse(feature.properties.spot)
+            setSpotOpen(parsed.id)
         })
         let popUp;
         mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
@@ -188,7 +189,7 @@ useEffect(() => {
           const params = JSON.parse(e.features[0].properties.spot);
           popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
             .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.image[0]?.link}" class="popup-image"/>`)
+            .setHTML(`<img src="${params?.image?.link}" class="popup-image"/>`)
             .addTo(mapInstance.current)
         })
         mapInstance.current.on('mouseleave', 'spots-layer', () => {
@@ -200,7 +201,6 @@ useEffect(() => {
   useEffect(()=>{
     if(!firstSpotStore || !mapReady) return
     if(reset){
-      console.log("resettato")
       if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
           type: 'FeatureCollection',
@@ -236,9 +236,10 @@ useEffect(() => {
         mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
           mapInstance.current.getCanvas().style.cursor = 'pointer'
           const params = JSON.parse(e.features[0].properties.spot);
+          console.log(params)
           popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
             .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.image[0]?.link}" class="popup-image"/>`)
+            .setHTML(`<img src="${params?.image?.link}" class="popup-image"/>`)
             .addTo(mapInstance.current)
         })
         mapInstance.current.on('mouseleave', 'spots-layer', () => {

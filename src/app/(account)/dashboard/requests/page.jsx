@@ -12,7 +12,8 @@ import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 
 export default function Request(){
     const [spot,setSpot] = useState(null)
-    const [refresh, setRefresh] = useState(false)
+    const refresh = useUserStore((data)=> data.refresh)
+    const setRefresh = useUserStore((data)=> data.setRefresh)
     const [askPermissionToUnApprove, setAskPermissionToUnApprove] = useState(false)
     const [askPermissionToApprove, setAskPermissionToApprove] = useState(false)
     const [message, setMessage] = useState({message:"",type:""})

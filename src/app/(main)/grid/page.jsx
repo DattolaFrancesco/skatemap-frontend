@@ -58,17 +58,13 @@ export default function Grid({ searchParams }) {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.message)
-                console.log("start")
             if (firstRender === 0 && query.toString() !== "" && firstSpotStore == null) {
-                console.log(1)
                 await getAllSpot()
                 setSpotStore(data)
             } else if (firstRender === 0 && query.toString() === "") {
-                console.log(2)
                 setFirstSpotStore(data)
                 setSpotStore(data)
             } else {
-                console.log(3)
                 setSpotStore(data)
                 setReset(false)
             }
