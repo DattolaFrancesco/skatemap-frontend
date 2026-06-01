@@ -1,6 +1,7 @@
+const API = process.env.NEXT_PUBLIC_API_URL;
+
 export async function getUser(){
-  const url = "http://localhost:3003/account";
-  const res = await fetch(url, {
+  const res = await fetch(`${API}/account`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -11,9 +12,9 @@ export async function getUser(){
   if (!res.ok) throw new Error(data.message);
   return data;
 }
+
 export async function getAllUserandAdmin(){
-  const url = "http://localhost:3003/account/all/users";
-  const res = await fetch(url, {
+  const res = await fetch(`${API}/account/all/users`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -24,9 +25,9 @@ export async function getAllUserandAdmin(){
   if (!res.ok) throw new Error(data.message);
   return data;
 }
+
 export async function deleteUser(id){
-  const url = `http://localhost:3003/account/${id}`;
-  const res = await fetch(url, {
+  const res = await fetch(`${API}/account/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -37,9 +38,9 @@ export async function deleteUser(id){
   if (!res.ok) throw new Error(data.message);
   return data;
 }
-export async function changeRole(id,value){
-  const url = `http://localhost:3003/account/${id}`;
-  const res = await fetch(url, {
+
+export async function changeRole(id, value){
+  const res = await fetch(`${API}/account/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
