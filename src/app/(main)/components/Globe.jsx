@@ -27,20 +27,21 @@ export default function Globe({ searchParams }) {
   const animatedRef = useRef(false)
   const [delay, setDelay] = useState(null)
   const resolvedParams = use(searchParams)
-  const firstRender = useNavigationStore((data)=>data.firstRender)
-  const setFirstRender = useNavigationStore((data)=>data.setFirstRender)
-  const spotStore = useSpotStore((data)=>data.spot)
+  const firstRender = useSpotStore((data)=>data.firstRender)
+  const setFirstRender = useSpotStore((data)=>data.setFirstRender)
   const reset = useSpotStore((data)=>data.reset)
-   const setReset = useSpotStore((data)=>data.setReset)
+  const setReset = useSpotStore((data)=>data.setReset)
+  const spotStore = useSpotStore((data)=>data.spot)
   const setSpotStore = useSpotStore((data)=>data.setSpot)
   const firstSpotStore = useSpotStore((data)=>data.firstSpot)
   const setFirstSpotStore = useSpotStore((data)=>data.setFirstSpot)
+  
   const getSpot = async (resolvedParams) => {
     const query = new URLSearchParams(resolvedParams)  
-    console.log(query.toString())
-    if(query.toString() === "_t=1" && firstRender == 1) return
-    setFirstRender(1)
     const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/approved/all?${query.toString()}`;
+    query.delete('_t')
+    if(query.toString() === "" && firstRender == 1) return
+     setFirstRender(1)
     try {
       const res = await fetch(url,{
         method:"GET",
@@ -48,16 +49,39 @@ export default function Globe({ searchParams }) {
       })
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
-      if(!reset && firstRender == 0) {
+      if( firstSpotStore == null && firstRender == 0 && query.toString() !== "") {
+        await getAllSpot()
+        setSpotStore(data.content)
+      }
+      if(!reset && firstRender == 0 && query.toString() === "") {
         setSpotStore(data.content)
         setFirstSpotStore(data.content)
       }
-      else setSpotStore(data.content)
+      else {
+        setSpotStore(data.content)
+      }
       console.log("fetch degli spot - globe")
     } catch(error) {
       console.log(error.message)
     }
   }
+  async function getAllSpot(){
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all`;
+        try {
+            const res = await fetch(url, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message);
+           setFirstSpotStore(data.content)
+        } catch(error) {
+            console.log(error.message)
+            errorRef.current = true;
+            clearPendingHref()
+            setStatusHref(false)
+        }
+    }
   const getZoom = useCallback(() => {
     if(!windowWidthCustom){
       if (window.innerWidth < 480) return 0.8   
@@ -88,6 +112,8 @@ useEffect(() => {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
   useEffect(() => {
+    setReset(false)
+    setFirstRender(0)
     getSpot(resolvedParams)
   }, [resolvedParams])
 
@@ -124,10 +150,11 @@ useEffect(() => {
   }, []);
   useEffect(()=>{
     if(!spotStore || !mapReady) return
+    if(reset) return
       if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
           type: 'FeatureCollection',
-          features: spotStore.map(s => ({
+          features: spotStore?.map(s => ({
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
             properties: { spot: s }
@@ -138,7 +165,7 @@ useEffect(() => {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: spotStore.map(s => ({
+            features: spotStore?.map(s => ({
               type: 'Feature',
               geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
               properties: { spot: s }
@@ -171,12 +198,13 @@ useEffect(() => {
       }
   },[mapReady,spotStore])
   useEffect(()=>{
-    if(!spotStore || !mapReady) return
+    if(!firstSpotStore || !mapReady) return
     if(reset){
+      console.log("resettato")
       if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
           type: 'FeatureCollection',
-          features: firstSpotStore.map(s => ({
+          features: firstSpotStore?.map(s => ({
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
             properties: { spot: s }
@@ -187,7 +215,7 @@ useEffect(() => {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: firstSpotStore.map(s => ({
+            features: firstSpotStore?.map(s => ({
               type: 'Feature',
               geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
               properties: { spot: s }
@@ -260,6 +288,7 @@ useEffect(() => {
 
     onComplete: () => {
       clearPendingHref()
+      setFirstRender(0)
       router.push(pendingHref)
     }
   })

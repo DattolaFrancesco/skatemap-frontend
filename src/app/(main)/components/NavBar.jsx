@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import useNavigationStore from "../store/NavigationStore"
 import useSpotStore from "../store/SpotStore"
 
 export default function NavBar() {
@@ -30,6 +29,8 @@ export default function NavBar() {
     const isAnimating = useRef(false)
     const currentParentY = useRef(0)
     const setReset = useSpotStore((data)=>data.setReset)
+    const firstRender = useSpotStore((data)=>data.firstRender)
+    const firstRenderGrid = useSpotStore((data)=>data.firstRenderGrid)
 
     useEffect(() => {
         const p = new URLSearchParams()
@@ -37,9 +38,18 @@ export default function NavBar() {
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
         if (search !== null) p.append("search", search)
-        router.push(`?${p.toString()}&_t=${1}`, { scroll: false })
+        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
         setParams(p)
-    }, [selected, router, search])
+        p.delete("_t")
+        if(p.toString() === "" && firstRender == 1) {
+            console.log("dentro")
+             setReset(true)
+         }
+        if(p.toString() === "" && firstRenderGrid == 1) {
+            //console.log("dentro")
+             setReset(true)
+         }
+    }, [selected, router,search])
 
     const multipleSelection = (category, f) => {
         setSelected(prev => ({
