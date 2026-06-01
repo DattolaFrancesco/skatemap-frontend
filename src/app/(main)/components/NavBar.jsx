@@ -16,6 +16,7 @@ export default function NavBar() {
     const [selected, setSelected] = useState({ location: [], type: [], risk: [] })
     const [params, setParams] = useState(null)
     const [search, setSearch] = useState(null)
+    const searchFilter = useRef(null)
     const [filterOpen, setFilterOpen] = useState(false)
     const [openFilter, setOpenFilter] = useState(null)
     const tlRef = useRef(null)
@@ -42,15 +43,19 @@ export default function NavBar() {
         setParams(p)
         p.delete("_t")
         if(p.toString() === "" && firstRender == 1) {
-            console.log("dentro")
              setReset(true)
          }
         if(p.toString() === "" && firstRenderGrid == 1) {
-            //console.log("dentro")
              setReset(true)
          }
-    }, [selected, router,search])
-
+    }, [selected, router, search])
+    const handleSearch = (e) =>{
+        const search = e.currentTarget.value
+        clearInterval(searchFilter.current)
+        searchFilter.current = setTimeout(() => { 
+            setSearch(search)
+        }, 600);
+    }
     const multipleSelection = (category, f) => {
         setSelected(prev => ({
             ...prev,
@@ -160,7 +165,7 @@ export default function NavBar() {
             <nav className="navbar p-2">
                 <section className="left flex flex-col h-full">
                     <div>
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={(e) => setSearch(e.currentTarget.value)} className="w-full"/>
+                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full"/>
                     </div>
                     <aside className="flex gap-0.5 pt-1">
                         <div>
