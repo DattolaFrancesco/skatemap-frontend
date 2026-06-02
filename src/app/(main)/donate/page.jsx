@@ -16,7 +16,7 @@ export default function Donate(){
     const router = useRouter();
     const pendingHref = useNavigationStore((state) => state.pendingHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
-    const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+    //const setStatusHref = useNavigationStore((state) => state.setStatusHref);
 
     async function handleCreatePaymentIntent(){
          const url = `${process.env.NEXT_PUBLIC_API_URL}/donations`
