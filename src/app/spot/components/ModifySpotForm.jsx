@@ -144,7 +144,7 @@ export default function ModifySpotForm() {
 
   async function handleForm(spotId, formData) {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/upload/${spotId}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/modify/${spotId}`, {
       method: "POST",
       headers: { "Authorization": `Bearer ${token}` },
       body: formData,
