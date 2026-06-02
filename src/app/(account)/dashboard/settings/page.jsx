@@ -1,18 +1,18 @@
 'use client'
 import useChatStore from "@/app/(main)/store/ChatStore"
 import useThemeStore from "../components/ThemesStore"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Settings(){
-    const setAllowBot = useChatStore((data)=>data.setAllowBot)
-    const allowBot = useChatStore((data)=>data.allowBot)
     const theme = useThemeStore((data)=>data.theme)
     const setTheme = useThemeStore((data)=>data.setTheme)
     const bgTheme = useThemeStore((data)=>data.bgTheme)
     const setBgTheme = useThemeStore((data)=>data.setBgTheme)
     const [user,setUser] = useState(null)
+    const swicthStatusRef = useRef(null)
+    const [allowBotLocal, setAllowBotLocal] = useState(false)
 
     async function getUser() {
         try {
@@ -30,7 +30,42 @@ export default function Settings(){
             console.log(err.message)
         }
     }
-
+    async function getBotStatus(){
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/bot/get/status`;
+    try{
+        const res = await fetch(url,{
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+        })
+        const data = await res.json()
+        if(!res.ok) throw new Error("the bot is skating right now!, try later")
+        setAllowBotLocal(data.status)
+    }
+    catch(err){
+      console.log(err.message)
+    }}
+    async function setBotStatus() {
+        try {
+            const res = await fetch(`${API}/bot/status`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+            if (!res.ok) throw new Error(data.message);
+        } catch(err) {
+            console.log(err.message)
+        }
+    }
+    const handleBotSwitch = ()=>{
+      
+        setAllowBotLocal(!allowBotLocal)
+        clearInterval(swicthStatusRef.current)
+        swicthStatusRef.current = setTimeout(() => {
+              setBotStatus()
+        }, 500);
+    }
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme")
         const savedBg = localStorage.getItem("BgTheme")
@@ -60,13 +95,13 @@ export default function Settings(){
         localStorage.setItem("BgTheme", bgTheme)
     }, [bgTheme])
 
-    useEffect(()=>{getUser()},[])
+    useEffect(()=>{getUser(); getBotStatus()},[])
 
     return(
         <div className="flex flex-col">
             {user?.authorities[0].authority === "super_admin" && <div className="flex justify-between py-2">
-                <p className={`bg-transparent text-xl text-primary font-bold ${allowBot?"":"opacity-50"}`}>Chat Bot</p>
-                <input type="checkbox" id="switch" checked={allowBot} onChange={()=>setAllowBot(!allowBot)}/><label htmlFor="switch">Toggle</label>
+                <p className={`bg-transparent text-xl text-primary font-bold ${allowBotLocal?"":"opacity-80"}`}>Chat Bot</p>
+                <input type="checkbox" id="switch" checked={allowBotLocal} onChange={handleBotSwitch} /><label htmlFor="switch">Toggle</label>
             </div>}
             <div className="flex justify-between py-2">
                 <p className="bg-transparent text-xl text-primary font-bold">Theme</p>

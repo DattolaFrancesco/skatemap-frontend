@@ -45,7 +45,6 @@ async function getSpots() {
             firstDataRef.current = data   
             firstRenderRef.current = true
         }
-        console.log(data)
         setData(data)
     } catch(err) {
         console.log(err.message)

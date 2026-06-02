@@ -30,6 +30,7 @@ export default  function MySpots(){
         })
         const datas = await res.json();
         if (!res.ok) throw new Error(data.message);
+        console.log(datas,"t")
         setData(datas)
         }
         catch(error){

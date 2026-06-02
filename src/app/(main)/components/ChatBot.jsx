@@ -10,7 +10,7 @@ import { Send } from 'lucide-react';
 export default function ChatBot(){
     const chat = useChatStore((data)=>data.chat)
     const setChat = useChatStore((data)=>data.setChat)
-    const allowBot = useChatStore((data)=>data.allowBot)
+    const [allowBot, setAllowBot] = useState(false)
     const [lastResponse, setLastResponse] = useState([])
     const [lastPrompt, setLastPrompt] = useState("")
     const [openChat, setOpenChat] = useState(false)
@@ -42,6 +42,20 @@ export default function ChatBot(){
         setLoadingMessage(false)
         return err.message
     }}
+    async function getBotStatus(){
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/bot/get/status`;
+    try{
+        const res = await fetch(url,{
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+        })
+        const data = await res.json()
+        if(!res.ok) throw new Error("the bot is skating right now!, try later")
+        setAllowBot(data.status)
+    }
+    catch(err){
+      console.log(err.message)
+    }}
     async function handleSubmit(e){
         setLoading(true)
         setLoadingMessage(true)
@@ -59,6 +73,7 @@ export default function ChatBot(){
             behavior: "smooth"
         })
     },[chat])
+    useEffect(()=>{getBotStatus()},[])
     return (
         <div className="relative z-[9999]">
                 <button onClick={()=>setOpenChat(!openChat)} className="w-full text-start flex">

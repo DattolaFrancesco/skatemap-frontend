@@ -25,7 +25,6 @@ export default function InfoUser(){
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.message)
-            console.log(data)
             setUser(data)
         }
         catch(err){

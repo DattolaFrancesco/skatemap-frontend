@@ -19,17 +19,17 @@ export default function SpotDetails(){
      const [data, setData] = useState(null)
      const [refresh,setRefresh] =useState(null)
      const [liked, setLiked] =useState(null)
+     const [token, setToken] = useState(null)
 
     async function getSpot(){
         const token = localStorage.getItem('token')
         try{
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${spotOpen}`,{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/single/${spotOpen}`,{
                 method: "GET",
                 headers: { "Authorization": `Bearer ${token}` }
             })
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
-            console.log(data)
             setData(data)
         }catch(err){
             console.log(err.message)
@@ -43,7 +43,10 @@ export default function SpotDetails(){
                 headers: { "Authorization": `Bearer ${token}` }
             })
             const data = await res.json()
-            if(!res.ok) throw new Error("Can't connect to the server")
+            if(!res.ok){
+                if(data.message.includes("token")){console.log("You can't like post if you aren't logged in!")}
+                throw new Error()
+            }
             setLiked(data)
         }catch(err){
             console.log(err.message)
@@ -56,8 +59,7 @@ export default function SpotDetails(){
                 method: "POST",
                 headers: { "Authorization": `Bearer ${token}` }
             })
-            const data = await res.json()
-            if(!res.ok) throw new Error("Can't connect to the server")
+            if(!res.ok) throw new Error("Can't set fav")
             setRefresh(!refresh)
             setRefreshy(!refreshy)
         }catch(err){
@@ -73,7 +75,7 @@ export default function SpotDetails(){
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             })
-            if(!res.ok) throw new Error("Can't connect to the server")
+            if(!res.ok) throw new Error("Can't delete fav")
             setRefresh(!refresh)
             setLiked(null)
             setRefreshy(!refreshy)
@@ -83,6 +85,9 @@ export default function SpotDetails(){
             setRefreshy(!refreshy)
         }
     }
+    useEffect(() => {
+    setToken(localStorage.getItem('token'))
+    }, [])
     useEffect(()=>{
         if(!spotOpen) return
         getSpot()
@@ -107,7 +112,10 @@ export default function SpotDetails(){
                             <div className="flex justify-between ">
                                 <h1 className="font-bold font_details_h1">{data.name.toUpperCase()}</h1>
                                 <div className="flex justify-center items-center gap-3">
-                                    {liked ? <HeartOff size={30} onClick={()=>deleteFav()} className="cursor-pointer"/>:<Heart size={30} onClick={()=>setFav()} className="cursor-pointer"/>}
+                                  {token && <div>
+                                       {liked ? <HeartOff size={30} onClick={()=>deleteFav()} className="cursor-pointer"/>
+                                        :<Heart size={30} onClick={()=>setFav()} className="cursor-pointer"/>}
+                                   </div>}
                                     <RxCross2 size={38} onClick={()=>{setSpotOpen(null);setLiked(null)}} className="cursor-pointer"/>
                                 </div>
                             </div>

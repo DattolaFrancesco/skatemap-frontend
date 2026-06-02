@@ -54,7 +54,6 @@ export default function Globe({ searchParams }) {
         setSpotStore(data.content)
       }
       if(!reset && firstRender == 0 && query.toString() === "") {
-        console.log(data.content)
         setSpotStore(data.content)
         setFirstSpotStore(data.content)
       }

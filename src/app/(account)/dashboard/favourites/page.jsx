@@ -42,8 +42,7 @@ export default function Favourites(){
         }
     }
 
-    useEffect(()=>{console.log(spots)},[spots])
-    useEffect(()=>{getFav()},[])
+    useEffect(()=>{getFav()},[refresh])
     if(!spots || spots.content.length === 0)return <h1 className="text-2xl text-primary-500">You don't have favourite spots</h1>
     return (
         <>
@@ -52,7 +51,6 @@ export default function Favourites(){
                     {spots.content.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={()=>deleteFav(s.id)}className="absolute top-1 right-1 p-1"><HeartOff size={20}/></button>
                         </div>
                     ))}
             </div>
