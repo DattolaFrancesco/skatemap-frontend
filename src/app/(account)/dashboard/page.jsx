@@ -1,12 +1,13 @@
 'use client'
 import SpotCard from "@/app/(main)/components/SpotCard";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import useUserStore from "./components/UserStore";
-import Link from "next/link";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 import { useRouter } from "next/navigation";
 import useNavigationStore from "@/app/(main)/store/NavigationStore"
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 
 export default  function MySpots(){
@@ -18,9 +19,10 @@ export default  function MySpots(){
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState({message:"",type:""})
     const [eliminationSpot, setEliminationSpot] = useState(null)
+    const smallContainerRef = useRef(null)
     const router = useRouter();
-    const pendingHref = useNavigationStore((state) => state.pendingHref);
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+    const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     setStatusHref(false)
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/own?${status?`status=${status}`:""}`;
@@ -73,10 +75,47 @@ export default  function MySpots(){
          }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
-    useEffect(()=>{
-        if(!pendingHref) return
-        router.push(pendingHref)
-  },[pendingHref])
+    const {contextSafe} = useGSAP(()=>{},{scope: smallContainerRef})
+      useGSAP(() => {
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        if (!els.length) return
+        gsap.killTweensOf(els)
+        gsap.set(els, { yPercent: 200, opacity: 0 })
+        gsap.to(els, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.2,
+            stagger: 0.1,
+            ease: "power2.out",
+            clearProps: "transform,opacity",
+            onComplete: () => { setStatusHref(false) }
+        })
+    }, { scope: smallContainerRef, dependencies: [data] })
+    const handleModify = contextSafe((s,e)=>{
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        gsap.killTweensOf(els)
+        const spot = e.getBoundingClientRect()
+        const tl = gsap.timeline()
+        tl.to(e, {
+            scale:2,
+            x:window.innerWidth/2 -  spot.left - spot.width/2,
+            y:window.innerHeight/2 -  spot.top - spot.height/2,
+            zIndex:99999,
+            ease: "power2.out"
+        })
+        .to(e,{
+            yPercent:300,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+                clearPendingHref()
+                router.push(`/spot/modify/${s}`)
+             }
+        })
+    })
+
     if(!data) return <h1 className=" text-2xl animate-pulse text-primary-500">Loading spots...</h1> 
         return  ( 
             <div>
@@ -104,14 +143,14 @@ export default  function MySpots(){
                             className={`text-sm md:text-base ${status === "unapproved"?"bg-primary-500":""}`}>UNAPPROVED</button>
                 </div>
                 <SpotDetails/>
-                <div className="grid_custom gap-1 pt-2 relative">
+                <div ref={smallContainerRef} className="grid_custom gap-1 pt-2 relative">
                    {data.content.length === 0 && <h1 className="absolute text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
                     {data.content.map((s)=>(
                         <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
                         <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
                             <button onClick={(()=> askConfermation(s))} >DELETE</button>
-                            <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
+                            <button onClick={(e)=>handleModify(s.id,e.currentTarget.closest(".relative"))} className=" nav-link text-sm md:text-base">MODIFY</button>
                         </div>
                         <div className={`absolute top-1 left-1 text-sm md:text-base px-1 
                             ${s.status === "APPROVED"?"bg-green-300":""}

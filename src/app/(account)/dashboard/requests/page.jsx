@@ -2,10 +2,13 @@
 
 import SpotCard from "@/app/(main)/components/SpotCard";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import useUserStore from "../components/UserStore";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
+import { useRouter } from "next/navigation";
+import useNavigationStore from "@/app/(main)/store/NavigationStore"
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function Request(){
     const [spot,setSpot] = useState(null)
@@ -17,8 +20,12 @@ export default function Request(){
     const [unApprovedSpot, setUnApprovedSpot] = useState(null)
     const [approvedSpot, setApprovedSpot] = useState(null)
     const [loading, setLoading] = useState(false)
-     const setPendingSpots = useUserStore((data)=> data.setPendingSpots)
-     const pendingSpots = useUserStore((data)=> data.pendingSpots)
+    const setPendingSpots = useUserStore((data)=> data.setPendingSpots)
+    const pendingSpots = useUserStore((data)=> data.pendingSpots)
+    const smallContainerRef = useRef(null)
+    const router = useRouter();
+    const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+    const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/pending`;
         try
@@ -50,11 +57,7 @@ export default function Request(){
         })
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
-        setMessage({message:`${spotId?.name} approved successfully`, type:"good"})
-        setTimeout(() => {
-        setMessage({message:"",type:""}) 
         setRefresh(!refresh)
-        }, 3000);
         setLoading(false)
         setAskPermissionToApprove(false)
         setPendingSpots(!pendingSpots)
@@ -80,11 +83,7 @@ export default function Request(){
         })
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
-        setMessage({message:`${spotId?.name} unapproved successfully`, type:"bad"})
-        setTimeout(() => {
-        setMessage({message:"",type:""}) 
         setRefresh(!refresh)
-        }, 3000);
         setLoading(false)
         setAskPermissionToUnApprove(false)
         setPendingSpots(!pendingSpots)
@@ -107,10 +106,50 @@ export default function Request(){
         setApprovedSpot(spot)
     }
     useEffect(()=>{getSpots()},[refresh])
+     const {contextSafe} = useGSAP(()=>{},{scope: smallContainerRef})
+      useGSAP(() => {
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        if (!els.length) return
+        gsap.killTweensOf(els)
+        gsap.set(els, { yPercent: 200, opacity: 0 })
+        gsap.to(els, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.2,
+            stagger: 0.1,
+            ease: "power2.out",
+            clearProps: "transform,opacity",
+            onComplete: () => { setStatusHref(false) }
+        })
+    }, { scope: smallContainerRef, dependencies: [spot] })
+    const handleModify = contextSafe((s,e)=>{
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        gsap.killTweensOf(els)
+        const spot = e.getBoundingClientRect()
+        const tl = gsap.timeline()
+        tl.to(e, {
+            scale:2,
+            x:window.innerWidth/2 -  spot.left - spot.width/2,
+            y:window.innerHeight/2 -  spot.top - spot.height/2,
+            zIndex:99999,
+            ease: "power2.out"
+        })
+        .to(e,{
+            yPercent:300,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+                clearPendingHref()
+                router.push(`/spot/modify/${s}`)
+             }
+        })
+    })
     if(!spot || spot?.content?.length === 0) return <h1 className="text-2xl text-primary-500 ">You don't have any spot request to review</h1>
     return (
         <>
-        <div className="grid_custom gap-1  py-3">
+        <div className=" gap-1  py-3">
              {message.type === "bad" ?
                <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
             {message.type === "good" ?
@@ -138,16 +177,18 @@ export default function Request(){
                 </div>
             </div>
                 <SpotDetails/>
+                <div ref={smallContainerRef} className="grid_custom gap-1 py-3">
                     {spot.content?.map((s)=>(
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                       <div className="absolute top-1 right-1 flex flex-col gap-1">
+                       <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
                             <button onClick={(()=> askConfermationApproved(s))}  className="text-sm md:text-base">APPROVE</button>
                             <button onClick={(()=> askConfermationUnApproved(s))}  className="text-sm md:text-base">DELETE</button>
-                            <Link className="nav-link text-center text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
+                             <button onClick={(e)=>handleModify(s.id,e.currentTarget.closest(".relative"))} className=" nav-link text-sm md:text-base">MODIFY</button>
                        </div>
                         </div>
                     ))}
+                </div>
         </div>
         {spot?.totalPages>1 &&<ArrowPageSelector totalPages={spot?.totalPages}/>}
     </>

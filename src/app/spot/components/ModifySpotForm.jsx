@@ -1,10 +1,12 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import useSpotForm from "@/app/spot/components/SpotFormStore";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation"
 import dynamic from 'next/dynamic'
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import useNavigationStore from "@/app/(main)/store/NavigationStore";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
@@ -17,23 +19,23 @@ const options = [
 ]
 
 export default function ModifySpotForm() {
-  const router = useRouter()
+  const router = useRouter();
+  const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
+  const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+  const containerRef = useRef(null)
   const pathname = usePathname()
   const sections = pathname.split("/")
   const section = sections[3]
-
   const latLng = useSpotForm((data) => data.latLng);
   const position = useSpotForm((data) => data.position);
   const setLatLng = useSpotForm((data) => data.setLatLng);
   const setPosition = useSpotForm((data) => data.setPosition);
-
   const [existsImages, setExistsImages] = useState(null)
   const [existsVideos, setExistsVideos] = useState(null)
   const [eliminatedExistsImages, setEliminatedExistsImages] = useState({ id: [] })
   const [eliminatedExistsVideos, setEliminatedExistsVideos] = useState({ id: [] })
   let imageRestrictionNumber = 5 - (existsImages?.length - eliminatedExistsImages?.id?.length);
   let videoRestrictionNumber = 3 - (existsVideos?.length - eliminatedExistsVideos?.id?.length);
-
   const [images, setImages] = useState([])
   const [videos, setVideos] = useState([])
   const [error, setError] = useState(null)
@@ -152,14 +154,43 @@ export default function ModifySpotForm() {
           throw new Error(text.message+" try again, it could be the media format");
     };
   }
+    const {contextSafe} = useGSAP(()=>{},{ scope: containerRef })
+  useGSAP(()=>{
+    if(!containerRef.current) return
+      const form = containerRef.current
+      gsap.killTweensOf(form)
+      gsap.set(form,{yPercent:200})
+      gsap.to(form,{
+        yPercent:0,
+        duration:1,
+        ease:"power4.inOut",
+        onComplete: ()=>{
+          setStatusHref(false)
+        }
+      })
 
+  },{scope: containerRef})
+  const handleGoingBack = contextSafe(() => {
+      if(!containerRef.current) return
+      const form = containerRef.current
+      gsap.killTweensOf(form)
+      gsap.to(form,{
+        yPercent:200,
+        duration:1,
+        ease:"power4.inOut",
+        onComplete: ()=>{
+          clearPendingHref()
+          router.push("/dashboard")
+        }
+      })
+  })
 
   return (
-    <div className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""}`}>
+    <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""}`}>
       <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
         <section className="flex justify-between py-2">
           <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">EDIT SPOT</h1>
-          <Link href={"/dashboard"} className={`w-fit h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</Link>
+          <button onClick={()=>handleGoingBack()} className={`w-fit bg-transparent h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</button>
         </section>
 
         <form autoComplete="off" onSubmit={handleSubmit} className="md:h-full flex flex-col gap-1.5 md:gap-2 lg:gap-3">

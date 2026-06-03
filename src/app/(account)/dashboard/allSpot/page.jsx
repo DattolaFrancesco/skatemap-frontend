@@ -2,18 +2,20 @@
 import { useEffect, useState, useRef } from "react"
 import SpotCard from "@/app/(main)/components/SpotCard"
 import SpotDetails from "@/app/(main)/components/SpotDetails"
-import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import SearchFilters from "../components/SearchFilters";
 import useUserStore from "../components/UserStore";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector"
+import { useRouter } from "next/navigation";
+import useNavigationStore from "@/app/(main)/store/NavigationStore"
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 export default function AllSpotGrid() {
   const [data, setData] = useState(null)
   const [askPermission, setAskPermission] = useState(false)
   const [askPermissionPending, setAskPermissionPending] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState({ message: "", type: "" })
   const [eliminationSpot, setEliminationSpot] = useState(null)
   const searchParams = useSearchParams()
   const setPendingSpots = useUserStore((data)=> data.setPendingSpots)
@@ -22,14 +24,21 @@ export default function AllSpotGrid() {
   const setRefresh = useUserStore((data)=> data.setRefresh)
   const firstDataRef = useRef(null)
   const firstRenderRef = useRef(false)
+  const forcedRefreshRef = useRef(false)
+  const smallContainerRef = useRef(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0) 
+  const router = useRouter();
+  const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+  const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
 
-async function getSpots() {
+async function getSpots(forced = false) {
     const query = new URLSearchParams(searchParams)
     query.delete('_t')
-    if (query.toString() === "" && firstRenderRef.current) {
+    if (query.toString() === "" && firstRenderRef.current && !forced) {
         setData(firstDataRef.current)  
         return
     }
+    console.log("yes")
     const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all?${searchParams.toString()}`
     try {
         const res = await fetch(url, {
@@ -45,7 +54,7 @@ async function getSpots() {
         setData(data)
     } catch(err) {
         console.log(err.message)
-    }
+    }finally{forcedRefreshRef.current = false}
 }
 
   function askConfirmation(spot) {
@@ -68,12 +77,8 @@ async function getSpots() {
       if (!res.ok) throw new Error("Delete failed")
       await getSpots()
       setAskPermission(false)
-      setMessage({ message: `${eliminationSpot?.name} deleted successfully`, type: "good" })
-      setTimeout(() => setMessage({ message: "", type: "" }), 3000)
     } catch(err) {
-      setMessage({ message: `${eliminationSpot?.name} deleting went wrong, try again`, type: "bad" })
       setAskPermission(false)
-      setTimeout(() => setMessage({ message: "", type: "" }), 3000)
     } finally {
       setLoading(false)
       setPendingSpots(!pendingSpots)
@@ -95,12 +100,10 @@ async function getSpots() {
         if (!res.ok) throw new Error(data.message);
         await getSpots()
         setAskPermissionPending(false)
-        setMessage({ message: `${eliminationSpot?.name} returned pending successfully`, type: "pending" })
-        setTimeout(() => setMessage({ message: "", type: "" }), 3000)
+        forcedRefreshRef.current = true
+        setRefreshTrigger(prev => prev + 1)
       } catch(err) {
-        setMessage({ message: `${eliminationSpot?.name} pending went wrong, try again`, type: "bad" })
         setAskPermissionPending(false)
-        setTimeout(() => setMessage({ message: "", type: "" }), 3000)
       } finally {
         setLoading(false)
         setPendingSpots(spotId)
@@ -109,21 +112,53 @@ async function getSpots() {
 
   }
 
-  useEffect(() => { getSpots() }, [searchParams])
+  useEffect(() => { getSpots(forcedRefreshRef.current) }, [searchParams, refreshTrigger])
 
-  if (!data) return <h1 className="text-2xl animate-pulse">Loading spots...</h1>
+  const {contextSafe} = useGSAP(()=>{},{scope: smallContainerRef})
+      useGSAP(() => {
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        if (!els.length) return
+        gsap.killTweensOf(els)
+        gsap.set(els, { yPercent: 200, opacity: 0 })
+        gsap.to(els, {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.2,
+            stagger: 0.1,
+            ease: "power2.out",
+            clearProps: "transform,opacity",
+            onComplete: () => { setStatusHref(false) }
+        })
+    }, { scope: smallContainerRef, dependencies: [data] })
+    const handleModify = contextSafe((s,e)=>{
+        if (!smallContainerRef.current) return
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        gsap.killTweensOf(els)
+        const spot = e.getBoundingClientRect()
+        const tl = gsap.timeline()
+        tl.to(e, {
+            scale:2,
+            x:window.innerWidth/2 -  spot.left - spot.width/2,
+            y:window.innerHeight/2 -  spot.top - spot.height/2,
+            zIndex:99999,
+            ease: "power2.out"
+        })
+        .to(e,{
+            yPercent:300,
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+                clearPendingHref()
+                router.push(`/spot/modify/${s}`)
+             }
+        })
+    })
+
+  if (!data) return <h1 className="text-2xl animate-pulse text-primary-500">Loading spots...</h1>
   return (
     <div>
-      {message.type === "bad" || message.type === "good" && (
-        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-          <h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1>
-        </div>
-      )}
-      {message.type === "pending" && (
-        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-          <h1 className="bg-orange-500 text-2xl px-3 py-1 text-white">{message.message}</h1>
-        </div>
-      )}
+
 
       {/* modal conferma delete */}
       <div className={`${askPermission ? "block" : "hidden"} fixed h-full inset-0 z-50 bg-black/40 overflow-hidden`}>
@@ -152,13 +187,14 @@ async function getSpots() {
 
       <SearchFilters /> 
       <SpotDetails />
-      <div className="grid_custom gap-1 py-3">
+      <div ref={smallContainerRef} className="grid_custom gap-1 py-3">
         {data.content.map((s)=>(
           <div  key={s.id} className="relative">
            <SpotCard spot={s}/>
            <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
              <button onClick={(()=> askConfirmation(s))} >DELETE</button>
-             <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
+             <button onClick={(()=> askConfirmationPending(s))} >PENDING</button>
+             <button onClick={(e)=>handleModify(s.id,e.currentTarget.closest(".relative"))} className=" nav-link text-sm md:text-base">MODIFY</button>
            </div>
            <div className={`absolute top-1 left-1 text-sm md:text-base px-1
                ${s.status === "APPROVED"?"bg-green-300":""}

@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from "react"
 import useSpotForm from "./SpotFormStore"
-import Link from "next/link"
 import dynamic from 'next/dynamic'
 import { useRouter } from "next/navigation";
 import useNavigationStore from "@/app/(main)/store/NavigationStore"
@@ -24,10 +23,8 @@ function totalSize(files) {
 
 export default function SpotForm() {
   const router = useRouter();
-  const pendingHref = useNavigationStore((state) => state.pendingHref);
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
   const setStatusHref = useNavigationStore((state) => state.setStatusHref);
-  const statusHref = useNavigationStore((state) => state.statusHref);
   const containerRef = useRef(null)
   const latLng = useSpotForm((d) => d.latLng)
   const position = useSpotForm((d) => d.position)
