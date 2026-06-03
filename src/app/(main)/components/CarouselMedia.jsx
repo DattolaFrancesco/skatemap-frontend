@@ -19,16 +19,16 @@ export default function ImageCarousel({ media }) {
   const setMediaOpen = useInsetStore((state) => state.setMediaOpen)
 
   if (!media) return <CarouselSkeleton />
-  if (media.length === 0) return <p className="text-xs opacity-50 py-1">No media available</p>
+  if (media.length === 0) return <p className="text-xs opacity-50 py-1 bg-transparent">No media available</p>
 
   return (
     <div className="overflow-hidden" ref={emblaRef}>
       <div className="flex gap-1">
         {media.map((m, i) => {
           if (m.format === "image") {
-            return <img key={i} src={m.link} alt="spot media" onClick={() => setMediaOpen(m)} className="w-[100px] h-[100px] object-cover shrink-0" />
+            return <img key={i} src={m.link} alt="spot media" onClick={() => setMediaOpen(m)} className="w-[90%] h-[150px] md:h-[220px] object-cover shrink-0" />
           }
-          return <img key={i} src={m.thumbnailUrl} onClick={() => setMediaOpen(m)} className="w-[100px] h-[100px] object-cover shrink-0" />
+          return <img key={i} src={m.thumbnailUrl} onClick={() => setMediaOpen(m)} className="w-full h-[150px] md:h-[220px] object-cover shrink-0" />
         })}
       </div>
     </div>

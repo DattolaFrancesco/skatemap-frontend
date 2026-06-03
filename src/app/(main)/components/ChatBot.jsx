@@ -77,7 +77,7 @@ export default function ChatBot(){
     return (
         <div className="relative z-[9999]">
                 <button onClick={()=>setOpenChat(!openChat)} className="w-full text-start flex">
-                    Say something <span className='ms-auto'>{!openChat ? <ChevronDown/>: <ChevronUp/>}</span></button>
+                    Say something <span className='ms-auto'>{!openChat ? <ChevronDown size={20}/>: <ChevronUp size={20}/>}</span></button>
          {allowBot ? <div className={`${openChat?"h-[300px] md:h-[500px] border bg-white opacity-100":"h-0 opacity-0"} absolute min-w-[250px] sm:w-full flex flex-col justify-between 
             overflow-hidden transition-all duration-300  p-1 mt-1`}>
                 <div ref={chatEndRef} className="w-full overflow-y-scroll py-3">

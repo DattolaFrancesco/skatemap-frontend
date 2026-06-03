@@ -67,7 +67,7 @@
     --primary-700: #693a01;
     }
 
-    input,
+
     textarea,
     select {
 	    font-size: 16px;
@@ -98,6 +98,8 @@ background-color: var(--button-color);
 .bg_preview {
     background-color: var(--button-color);
 }
+
+
 /* LAYER BASE ------------------------------------------------------------------------------------------------------------*/
 @layer base{
     button{
@@ -136,7 +138,6 @@ background-color: var(--button-color);
     }
     input:focus {
         outline: none;
-        border: 1px solid black;
     }
     select:focus {
         outline: none;
