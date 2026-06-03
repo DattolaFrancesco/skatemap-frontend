@@ -25,6 +25,7 @@ export default function ModifySpotForm() {
   const latLng = useSpotForm((data) => data.latLng);
   const position = useSpotForm((data) => data.position);
   const setLatLng = useSpotForm((data) => data.setLatLng);
+  const setPosition = useSpotForm((data) => data.setPosition);
 
   const [existsImages, setExistsImages] = useState(null)
   const [existsVideos, setExistsVideos] = useState(null)
@@ -46,7 +47,7 @@ export default function ModifySpotForm() {
     city: '', country: '', continent: '', street: ''
   });
 
-  useEffect(() => { getSpot() }, [])
+  useEffect(() => { getSpot(); setPosition(null) }, [])
   useEffect(() => {
     if (!latLng || !latLng.lat) return
     setForm((prev) => ({ ...prev, latitude: latLng.lat, longitude: latLng.lng }));
@@ -57,10 +58,9 @@ export default function ModifySpotForm() {
   }, [position])
   
   async function getSpot() {
-    console.log(section)
     const token = localStorage.getItem('token')
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${section}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/single/${section}`, {
         method: "GET",
         headers: { "Authorization": `Bearer ${token}` }
       })
@@ -129,8 +129,6 @@ export default function ModifySpotForm() {
       );
       const media = [...images, ...videos];
       media.forEach(f => formData.append("media", f));
-      console.log(images)
-      console.log(videos)
       setLoading(true)
     try {
       await handleForm(section, formData)
@@ -170,7 +168,7 @@ export default function ModifySpotForm() {
           <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">01/LOCATION</h2>
           <div className="flex flex-col md:flex-row h-full gap-1.5 md:gap-2 lg:gap-3">
             <div className="flex flex-col gap-1 w-full md:w-1/2 min-h-[300px] md:min-h-0 md:flex-1 border relative">
-              <MapWithData />
+              <MapWithData lat={form.latitude} lng={form.longitude} />
               <div className="absolute flex gap-1 bottom-1 left-1">
                 <div className="flex flex-col gap-0.5 w-[30%]">
                   <label className="text-sm font-semibold text-primary-700">LATITUDE</label>

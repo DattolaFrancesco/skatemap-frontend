@@ -161,9 +161,9 @@ async function getSpots() {
              <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
            </div>
            <div className={`absolute top-1 left-1 text-sm md:text-base px-1
-               ${s.status === "APPROVED"?"bg-green-500":""}
-                ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
-                 ${s.status === "UNAPPROVED"?"bg-red-500":""}`}>{s.status}</div>
+               ${s.status === "APPROVED"?"bg-green-300":""}
+                ${s.status === "PENDING"?"bg-orange-300 animate-pulse":""}
+                 ${s.status === "UNAPPROVED"?"bg-red-400":""}`}>{s.status}</div>
            </div>
            ))}
       </div>

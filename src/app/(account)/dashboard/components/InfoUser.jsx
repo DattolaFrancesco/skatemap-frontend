@@ -5,12 +5,15 @@ import useUserStore from "./UserStore";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import useThemeStore from "./ThemesStore";
+import TransitionLink from "@/app/(main)/components/TransitionLink";
+import useNavigationStore from "@/app/(main)/store/NavigationStore";
 
 export default function InfoUser(){
     const setUser = useUserStore((data)=> data.setUser)
     const user = useUserStore((data)=> data.user)
     const refresh = useUserStore((data)=> data.refresh)
     const bgTheme = useThemeStore((data)=>data.bgTheme)
+    const statusHref = useNavigationStore((state) => state.statusHref);
     const router = useRouter()
 
     async function getUser(){
@@ -84,7 +87,7 @@ export default function InfoUser(){
                   <div className="flex flex-col gap-2 justify-center items-center">
                         <Link href={"/"} className="nav-link w-full text-center text-sm md:text-base">HOME</Link>
                         <button onClick={()=>{localStorage.removeItem('token') ;router.push("/login")}} className={`nav-link  w-full text-center text-sm md:text-base`}>LOG OUT</button>
-                        <Link href={"/spot/registration"} className={`block md:hidden ms-auto nav-link w-full text-center whitespace-nowrap text-sm md:text-base`}>ADD SPOT</Link>
+                        <TransitionLink className={`block md:hidden ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/spot/registration`}>ADD SPOT</TransitionLink>
                   </div>
                 </div>
 

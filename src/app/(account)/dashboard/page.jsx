@@ -2,11 +2,11 @@
 import SpotCard from "@/app/(main)/components/SpotCard";
 import { useEffect, useState } from "react";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
-import { RxCross2 } from "react-icons/rx";
-import { FaPencilAlt } from "react-icons/fa";
 import useUserStore from "./components/UserStore";
 import Link from "next/link";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
+import { useRouter } from "next/navigation";
+import useNavigationStore from "@/app/(main)/store/NavigationStore"
 
 
 export default  function MySpots(){
@@ -18,6 +18,10 @@ export default  function MySpots(){
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState({message:"",type:""})
     const [eliminationSpot, setEliminationSpot] = useState(null)
+    const router = useRouter();
+    const pendingHref = useNavigationStore((state) => state.pendingHref);
+    const setStatusHref = useNavigationStore((state) => state.setStatusHref);
+    setStatusHref(false)
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/own?${status?`status=${status}`:""}`;
         try
@@ -30,7 +34,6 @@ export default  function MySpots(){
         })
         const datas = await res.json();
         if (!res.ok) throw new Error(data.message);
-        console.log(datas,"t")
         setData(datas)
         }
         catch(error){
@@ -70,6 +73,10 @@ export default  function MySpots(){
          }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
+    useEffect(()=>{
+        if(!pendingHref) return
+        router.push(pendingHref)
+  },[pendingHref])
     if(!data) return <h1 className=" text-2xl animate-pulse text-primary-500">Loading spots...</h1> 
         return  ( 
             <div>
@@ -106,10 +113,10 @@ export default  function MySpots(){
                             <button onClick={(()=> askConfermation(s))} >DELETE</button>
                             <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
                         </div>
-                        <div className={`absolute top-1 left-1 text-sm md:text-base px-1
-                            ${s.status === "APPROVED"?"bg-green-500":""}
-                                ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
-                                ${s.status === "UNAPPROVED"?"bg-red-500":""}`}>{s.status}</div>
+                        <div className={`absolute top-1 left-1 text-sm md:text-base px-1 
+                            ${s.status === "APPROVED"?"bg-green-300":""}
+                                ${s.status === "PENDING"?"bg-orange-300 animate-pulse":""}
+                                ${s.status === "UNAPPROVED"?"bg-red-400":""}`}>{s.status}</div>
                         </div>
                         ))}
                 </div>

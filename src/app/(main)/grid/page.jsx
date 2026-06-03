@@ -113,7 +113,6 @@ export default function Grid({ searchParams }) {
             onComplete: () => {
                 clearPendingHref()
                 setFirstRender(0)
-                console.log(pendingHref, "test")
                 router.push(pendingHref)
             }
         })
