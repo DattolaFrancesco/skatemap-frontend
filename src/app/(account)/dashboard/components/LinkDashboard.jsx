@@ -27,26 +27,18 @@ export default function LinkDashboard(){
         </div>
     )
     return(
-        <div className="w-full flex flex-wrap justify-between gap-2  py-3 ">
-               <div className="flex flex-wrap gap-2">
-                    <Link href={"/dashboard/"} className={`nav-link ${pathname === "/dashboard"?"bg-primary-500":""}`}>MY SPOTS</Link>
-                      {isAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link ${pathname === "/dashboard/allSpot"?" bg-primary-500":""}`}>ALL SPOTS</Link>}
-                    <Link href={"/dashboard/favourites"} className={`nav-link ${pathname === "/dashboard/favourites"?" bg-primary-500":""}`}>FAVOURITES</Link>
+               <div className="flex flex-wrap gap-1 border-b pb-2 border-primary-500">
+                    <Link href={"/dashboard/"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard"?"bg-primary-500":""}`}>MY SPOTS</Link>
+                      {isAdmin && <Link href={"/dashboard/allSpot"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/allSpot"?" bg-primary-500":""}`}>ALL SPOTS</Link>}
+                    <Link href={"/dashboard/favourites"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/favourites"?" bg-primary-500":""}`}>FAV</Link>
                     {isAdmin && 
-                    <Link href={"/dashboard/requests"} className={`relative nav-link ${pathname === "/dashboard/requests"?" bg-primary-500":""}`}>
+                    <Link href={"/dashboard/requests"} className={`relative nav-link text-sm md:text-base ${pathname === "/dashboard/requests"?" bg-primary-500":""}`}>
                       REQUESTS
                    {user.existPending > 0 && <div className="absolute rounded-full w-2 h-2 top-[-3] right-[-3] bg-red-500 text-[10px] animate-pulse"></div>}
                     </Link>}
-                    {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link ${pathname === "/dashboard/users"?" bg-primary-500":""}`}>USERS</Link>}
-                    <Link href={"/dashboard/settings"} className={`nav-link ${pathname === "/dashboard/settings"?" bg-primary-500":""}`}>SETTING</Link>
+                    {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/users"?" bg-primary-500":""}`}>USERS</Link>}
+                    <Link href={"/dashboard/settings"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/settings"?" bg-primary-500":""}`}>SETTING</Link>
+                    <Link href={"/spot/registration"} className={`hidden md:block ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base`}>ADD SPOT</Link>
                </div>
-               <div className="flex gap-2">
-                 <Link href={"/spot/registration"} className={`nav-link `}>ADD SPOT</Link>
-                <button onClick={()=>{
-                localStorage.removeItem('token')
-                router.push("/login")
-               }} className={`nav-link`}>LOG OUT</button>
-               </div>
-        </div>
     )
 }       

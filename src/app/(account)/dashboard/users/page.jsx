@@ -48,7 +48,7 @@ export default function User() {
   if (!users || users.length === 0) return <h1 className="text-2xl mt-2">No users found</h1>
 
   return (
-    <div className="w-full flex flex-col ">
+    <div className="w-full flex flex-col overflow-x-hidden">
             {message.type === "bad" ?
             <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
             {message.type === "good" ?
@@ -64,14 +64,21 @@ export default function User() {
                   </div>
                 </div>
             </div>
+               <div className=" grid-cols-[1fr_1fr_1fr_1fr_100px_100px] gap-2 items-center py-2 hidden md:grid border-b border-dashed border-primary-500">
+                  <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">Username</p>
+                  <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">Name</p>
+                  <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Surname</p>
+                  <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">Email</p>
+                  <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">Role</p>
+               </div>
       {users.map((u) => (
-        <div key={u.user.id} className="grid grid-col-2 sm:grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_30px] gap-2 items-center py-2 ">
-          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] ">{u.user.username}</p>
-          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] ">{u.user.name}</p>
-          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)]">{u.user.surname}</p>
-          <p className="px-3  text-sm lg:text-lg bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] ">{u.user.email}</p>
+        <div key={u.user.id} className="grid grid-cols-3  md:grid-cols-[1fr_1fr_1fr_1fr_100px_100px] gap-2 items-center py-2 ">
+          <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">{u.user.username}</p>
+          <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">{u.user.name}</p>
+          <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">{u.user.surname}</p>
+          <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg ">{u.user.email}</p>
           <select
-            className="bg-gradient-to-r from-[var(--primary-300)] to-[var(--primary-500)] py-1"
+            className="text-primary-500 text-sm! lg:text-lg! px-2 w-fit col-start-1 md:col-start-5"
             defaultValue={u.user.authorities[0]?.authority}
             onChange={async (e) => await fetchChangeRole(u.user.id, e.target.value)}
           >
@@ -80,9 +87,9 @@ export default function User() {
           </select>
           <button
             onClick={() => askConfermation(u.user)}
-            className="flex items-center justify-center ms-auto w-7 h-7 bg-primary-500 cursor-pointer"
+            className="flex items-center justify-center md:ms-auto w-full md:w-fit bg-primary-500 cursor-pointer col-span-2 md:col-span-1"
           >
-            <RxCross2 size={14} />
+            DELETE
           </button>
         </div>
       ))}

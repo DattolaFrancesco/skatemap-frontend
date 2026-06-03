@@ -145,9 +145,9 @@ export default function Request(){
                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
                        <div className="absolute top-1 right-1 flex flex-col gap-1">
-                            <button onClick={(()=> askConfermationApproved(s))} ><Check size={20}/></button>
-                            <button onClick={(()=> askConfermationUnApproved(s))} ><X size={20}/></button>
-                            <Link className="nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
+                            <button onClick={(()=> askConfermationApproved(s))}  className="text-sm md:text-base">APPROVE</button>
+                            <button onClick={(()=> askConfermationUnApproved(s))}  className="text-sm md:text-base">DELETE</button>
+                            <Link className="nav-link text-center text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
                        </div>
                         </div>
                     ))}

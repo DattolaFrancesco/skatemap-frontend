@@ -153,31 +153,22 @@ async function getSpots() {
         </div>
       </div>
 
-      <SearchFilters />
+      <SearchFilters /> 
       <SpotDetails />
       <div className="grid_custom gap-1 py-3">
-        {data?.content?.map((s) => (
-          <div key={s.id} className="relative">
-            <SpotCard spot={s} />
-          <div className="absolute top-1 right-1 flex flex-col gap-1">
-              <button onClick={() => askConfirmation(s)}>
-                <RxCross2 size={20} />
-              </button>
-              {s.status !== "PENDING" &&
-              <button onClick={() => askConfirmationPending(s)}>
-                <ClipboardClock size={20}/>
-              </button>}
-              <Link className=" nav-link" href={`/spot/modify/${s.id}`}>
-                <FaPencilAlt size={20} className="py-1" />
-              </Link>
-        </div>
-            <div className={`absolute top-1 left-1 rounded-full w-[15px] h-[15px]
-              ${s.status === "APPROVED" ? "bg-green-500" : ""}
-              ${s.status === "PENDING" ? "bg-orange-400 animate-pulse" : ""}
-              ${s.status === "UNAPPROVED" ? "bg-red-500" : ""}`}
-            />
-          </div>
-        ))}
+        {data.content.map((s)=>(
+          <div  key={s.id} className="relative">
+           <SpotCard spot={s}/>
+           <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
+             <button onClick={(()=> askConfirmation(s))} >DELETE</button>
+             <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
+           </div>
+           <div className={`absolute top-1 left-1 text-sm md:text-base px-1
+               ${s.status === "APPROVED"?"bg-green-500":""}
+                ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
+                 ${s.status === "UNAPPROVED"?"bg-red-500":""}`}>{s.status}</div>
+           </div>
+           ))}
       </div>
        {data?.totalPages>1 &&<ArrowPageSelector totalPages={data?.totalPages}/>}
     </div>

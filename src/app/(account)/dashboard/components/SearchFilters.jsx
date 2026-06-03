@@ -44,19 +44,19 @@ export default function SearchFilters() {
 
   return (
     <div className="flex flex-col gap-0.5 mt-2">
-      <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full md:w-1/2" />
+      <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full md:w-1/2 text-sm md:text-base" />
       <aside className="flex gap-0.5">
-        <button className={`${!filterOpen ? null : "bg-primary-500"} h-fit`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
+        <button className={`${!filterOpen ? null : "bg-primary-500"} h-fit text-sm md:text-base`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
         <div className={`${filterOpen ? "" : "hidden"}`}>
           <div className="flex flex-col gap-0.5 w-fit generic_filters">
             {["Location", "Type", "Risk"].map((label) => {
               const key = label.toLowerCase()
               return (
                 <div key={label} className="flex flex-wrap gap-0.5">
-                  <div><button className="bg-primary" onClick={() => setOpenFilter(openFilter === label ? null : label)}>{label}</button></div>
+                  <div><button className="bg-primary " onClick={() => setOpenFilter(openFilter === label ? null : label)}>{label}</button></div>
                   <div className="flex flex-wrap gap-0.5">
                     {filters[key].map((f, i) => (
-                      <button key={i} onClick={() => multipleSelection(key, f)} className={selected[key].includes(f) ? "bg-primary-500" : ""}>{f}</button>
+                      <button key={i} onClick={() => multipleSelection(key, f)} className={`text-sm md:text-base ${selected[key].includes(f) ? "bg-primary-500" : ""}`}>{f}</button>
                     ))}
                   </div>
                 </div>
@@ -65,7 +65,7 @@ export default function SearchFilters() {
           </div>
         </div>
       </aside>
-      <button className="w-fit" onClick={() => {
+      <button className="w-fit text-sm md:text-base" onClick={() => {
         setSelected({ location: [], type: [], risk: [] })
         setSearch(null)
         inputRef.current.value = ""

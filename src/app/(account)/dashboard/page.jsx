@@ -88,28 +88,28 @@ export default  function MySpots(){
                   </div>
                 </div>
                 </div>
-                <div className=" py-2 flex flex-wrap justify-between gap-2">
-                    <div className=" flex gap-2">
+                    <div className=" flex  gap-1 pt-2">
                         <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
-                            className={`${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
+                            className={`text-sm md:text-base ${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
                         <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
-                            className={`${status === "pending"?"bg-primary-500":""}`}>PENDING</button>
+                            className={`text-sm md:text-base ${status === "pending"?"bg-primary-500":""}`}>PENDING</button>
                         <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
-                            className={`${status === "unapproved"?"bg-primary-500":""}`}>UNAPPROVED</button>
-                    </div>
+                            className={`text-sm md:text-base ${status === "unapproved"?"bg-primary-500":""}`}>UNAPPROVED</button>
                 </div>
                 <SpotDetails/>
-                <div className="grid_custom gap-1  py-3 relative">
+                <div className="grid_custom gap-1 pt-2 relative">
                    {data.content.length === 0 && <h1 className="absolute text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
                     {data.content.map((s)=>(
-                       <div  key={s.id} className="relative">
+                        <div  key={s.id} className="relative">
                         <SpotCard spot={s}/>
-                        <button onClick={(()=> askConfermation(s))} className="absolute top-1 right-1"><RxCross2 size={20}/></button>
-                        <Link className="absolute top-8 right-1  nav-link" href={`/spot/modify/${s.id}`}><FaPencilAlt size={20} className="py-1"/></Link>
-                        <div className={`absolute top-1 left-1  rounded-full w-[15px] h-[15px] 
+                        <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
+                            <button onClick={(()=> askConfermation(s))} >DELETE</button>
+                            <Link className=" nav-link text-sm md:text-base" href={`/spot/modify/${s.id}`}>MODIFY</Link>
+                        </div>
+                        <div className={`absolute top-1 left-1 text-sm md:text-base px-1
                             ${s.status === "APPROVED"?"bg-green-500":""}
-                             ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
-                              ${s.status === "UNAPPROVED"?"bg-red-500":""}`}></div>
+                                ${s.status === "PENDING"?"bg-orange-400 animate-pulse":""}
+                                ${s.status === "UNAPPROVED"?"bg-red-500":""}`}>{s.status}</div>
                         </div>
                         ))}
                 </div>

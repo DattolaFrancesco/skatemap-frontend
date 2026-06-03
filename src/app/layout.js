@@ -48,7 +48,9 @@ export default function RootLayout({ children }) {
         <ThemeLoader/>
         <BgThemeLoader/>
       <body className="h-dvh flex flex-col">
-        <div id="bg-fixed"></div>
+        <div 
+        id="bg-fixed"
+        ></div>
         {children}
       </body>
     </html>
