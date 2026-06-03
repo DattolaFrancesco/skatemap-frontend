@@ -208,7 +208,7 @@ export default function SpotDetails(){
                            <CarouselMedia media={data?.image}/>
                          </div>
                          <div className="w-1/2 border-s-2 border-primary-500 flex justify-center items-center p-2 relative">
-                           {maps ?<MiniGlobe lat={40} lng={5}/> : <Map lat={40} lng={5}/> }
+                           {maps ?<MiniGlobe lat={data?.latitude} lng={data?.longitude}/> : <Map lat={data?.latitude} lng={data?.longitude}/> }
                             <div className="absolute bottom-2 left-2 flex flex-col gap-2">
                                 <button onClick={()=>setMaps(!maps)} className="border bg-amber-50 px-3  cursor-pointer text-sm">CHANGE VISIBILITY</button>
                             </div>
