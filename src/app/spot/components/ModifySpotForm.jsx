@@ -57,6 +57,7 @@ export default function ModifySpotForm() {
   }, [position])
   
   async function getSpot() {
+    console.log(section)
     const token = localStorage.getItem('token')
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/${section}`, {
@@ -70,7 +71,6 @@ export default function ModifySpotForm() {
         description: data.description, risk: data.risk, types: data.spotTypes.map((t) => t),
         city: data.city, country: data.country, continent: data.continents, street: data.street
       })
-      // pre-posiziona il marker sulla mappa
       setLatLng({ lat: data.latitude, lng: data.longitude })
       setExistsImages(data.image)
       setExistsVideos(data.video)

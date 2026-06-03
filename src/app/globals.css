@@ -98,6 +98,8 @@ background-color: var(--button-color);
 .bg_preview {
     background-color: var(--button-color);
 }
+
+
 /* LAYER BASE ------------------------------------------------------------------------------------------------------------*/
 @layer base{
     button{

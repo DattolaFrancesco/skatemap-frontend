@@ -26,9 +26,9 @@ export default function ImageCarousel({ media }) {
       <div className="flex gap-1">
         {media.map((m, i) => {
           if (m.format === "image") {
-            return <img key={i} src={m.link} alt="spot media" onClick={() => setMediaOpen(m)} className="w-[100px] h-[100px] object-cover shrink-0" />
+            return <img key={i} src={m.link} alt="spot media" onClick={() => setMediaOpen(m)} className="w-[90%] h-[150px] md:h-[220px] object-cover shrink-0" />
           }
-          return <img key={i} src={m.thumbnailUrl} onClick={() => setMediaOpen(m)} className="w-[100px] h-[100px] object-cover shrink-0" />
+          return <img key={i} src={m.thumbnailUrl} onClick={() => setMediaOpen(m)} className="w-full h-[150px] md:h-[220px] object-cover shrink-0" />
         })}
       </div>
     </div>
