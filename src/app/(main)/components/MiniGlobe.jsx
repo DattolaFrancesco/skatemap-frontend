@@ -8,6 +8,7 @@ export default function MiniGlobe({ lat, lng }) {
   const mapRef = useRef(null)
   const mapInstance = useRef(null)
   const [windowWidthCustom, setWindowWidthCustom] = useState(null)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
@@ -41,6 +42,7 @@ export default function MiniGlobe({ lat, lng }) {
         new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([lng, lat])
         .addTo(mapInstance.current)
+        setLoaded(true)
     })
 
     return () => {
@@ -48,24 +50,42 @@ export default function MiniGlobe({ lat, lng }) {
       mapInstance.current = null
     }
   }, [])
-   const getZoom = useCallback(() => {
-      if(!windowWidthCustom){
-        if (window.innerWidth < 480) return 0.1   
-        if (window.innerWidth < 1024) return 0.5   
-        if (window.innerWidth < 1280) return 0.8   
-        if (window.innerWidth < 1480) return 1   
-        return 0.1
-      }
-      if (windowWidthCustom < 480) return 0.1  
-      if (windowWidthCustom < 1024) return 0.5  
-      if (windowWidthCustom < 1280) return 0.8  
-      if (windowWidthCustom < 1480) return 1   
-      return 0.1
-    },[windowWidthCustom])
+  const getZoom = useCallback(() => {
+     if(!windowWidthCustom){
+       if (window.innerWidth < 480) return 0.1   
+       if (window.innerWidth > 1024) return 1  
+       if (window.innerWidth > 1280) return 0.8   
+       if (window.innerWidth > 1480) return 1   
+       return 0.1
+     }
+     if (windowWidthCustom < 480) return 0.1  
+     if (windowWidthCustom > 1024) return 1  
+     if (windowWidthCustom > 1280) return 0.8  
+     if (windowWidthCustom > 1480) return 1   
+     return 0.1
+   },[windowWidthCustom])
+      useEffect(() => {
+        const handleResize = () => {
+            setWindowWidthCustom(window.innerWidth)
+            mapInstance.current?.resize()
+            mapInstance.current?.setZoom(getZoom())
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [getZoom])
 
-  return( 
-     <div className="aspect-square w_custom_globe rounded-full overflow-hidden">
+    return( 
+    <div className="aspect-square w-2/3 rounded-full overflow-hidden relative">
+        {!loaded && (
+            <div className="absolute inset-0 rounded-full bg-black flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-zinc-800 to-black animate-pulse flex items-center justify-center">
+                    <div className="w-2/3 h-2/3 rounded-full border border-zinc-700 flex items-center justify-center">
+                        <div className="w-1/3 h-1/3 rounded-full border border-zinc-600"/>
+                    </div>
+                </div>
+            </div>
+        )}
         <div ref={mapRef} className="w-full h-full" />
     </div>
-)
+    )
 }

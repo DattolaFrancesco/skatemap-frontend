@@ -16,7 +16,8 @@ export default function Map({lat,lng}) {
      <GoogleMap 
      mapContainerStyle={{ width:"100%", height:"100%"}} 
      center={{ lat, lng }} 
-     zoom={8}> 
+     zoom={5}
+     options={{ minZoom: 2 }}> 
      <Marker position={{ lat, lng }}/> 
      </GoogleMap>
       

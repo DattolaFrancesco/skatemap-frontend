@@ -19,7 +19,7 @@ export default function ImageCarousel({ media }) {
   const setMediaOpen = useInsetStore((state) => state.setMediaOpen)
 
   if (!media) return <CarouselSkeleton />
-  if (media.length === 0) return <p className="text-xs opacity-50 py-1">No media available</p>
+  if (media.length === 0) return <p className="text-xs opacity-50 py-1 bg-transparent">No media available</p>
 
   return (
     <div className="overflow-hidden" ref={emblaRef}>
