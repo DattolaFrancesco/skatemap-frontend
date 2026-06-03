@@ -3,7 +3,7 @@ import useInsetStore from "@/app/(main)/store/InsetStore"
 import CarouselMedia from "./CarouselMedia"
 import OpenMedia from "./OpenMedia";
 import Weather from "./Weather";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useUserStore from "@/app/(account)/dashboard/components/UserStore";
 import Map from "@/app/googleMaps/Map";
 import MiniGlobe from "./MiniGlobe";
@@ -19,6 +19,8 @@ export default function SpotDetails(){
      const [liked, setLiked] =useState(null)
      const [token, setToken] = useState(null)
      const [maps, setMaps] = useState(false)
+     const [pendingLike, setPendingLike] = useState(false)
+     const likedPending = useRef(false)
 
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -50,9 +52,15 @@ export default function SpotDetails(){
             setLiked(data)
         }catch(err){
             console.log(err.message)
+        } finally {
+            setPendingLike(false)
+            likedPending.current = false
         }
     }
     async function setFav(){
+        if(likedPending.current) return
+        likedPending.current = true
+        setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotOpen}`,{
@@ -62,13 +70,20 @@ export default function SpotDetails(){
             if(!res.ok) throw new Error("Can't set fav")
             setRefresh(!refresh)
             setRefreshy(!refreshy)
+            setLiked(true)
         }catch(err){
             console.log(err.message)
             setRefresh(!refresh)
             setRefreshy(!refreshy)
+        } finally {
+            setPendingLike(false)
+            likedPending.current = false
         }
     }
     async function deleteFav(){
+        if(likedPending.current) return
+        likedPending.current = true
+        setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spotOpen}`,{
@@ -83,6 +98,9 @@ export default function SpotDetails(){
             setRefresh(!refresh)
             setLiked(null)
             setRefreshy(!refreshy)
+        }finally {
+            setPendingLike(false)
+            likedPending.current = false
         }
     }
     useEffect(() => {
@@ -189,8 +207,8 @@ export default function SpotDetails(){
                         <h1 className="text-2xl font-bold">SPOT N°{data?.id?.slice(-5)}</h1>
                         {token && 
                         <div className="flex items-center gap-3 ">
-                             {liked ? <button onClick={()=>deleteFav()} className="cursor-pointer bg-transparent text-3xl hover:border-b">♥</button>
-                              :<button onClick={()=>setFav()} className="cursor-pointer bg-transparent text-3xl hover:border-b ">♡</button>}
+                             {liked ? <button onClick={()=>deleteFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♥</button>
+                              :<button onClick={()=>setFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♡</button>}
                             <button  onClick={()=>{
                                     setSpotOpen(null)
                                     setMediaOpen(null)
@@ -208,7 +226,7 @@ export default function SpotDetails(){
                            <CarouselMedia media={data?.image}/>
                          </div>
                          <div className="w-1/2 border-s-2 border-primary-500 flex justify-center items-center p-2 relative">
-                           {maps ?<MiniGlobe lat={40} lng={5}/> : <Map lat={40} lng={5}/> }
+                           {maps ?<MiniGlobe lat={data?.latitude} lng={data?.longitude}/> : <Map lat={data?.latitude} lng={data?.longitude}/> }
                             <div className="absolute bottom-2 left-2 flex flex-col gap-2">
                                 <button onClick={()=>setMaps(!maps)} className="border bg-amber-50 px-3  cursor-pointer text-sm">CHANGE VISIBILITY</button>
                             </div>

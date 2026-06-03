@@ -29,9 +29,6 @@ export default function MapWithData() {
   const latLng = useSpotForm((data) => data.latLng);
   const position = useSpotForm((data) => data.position);
 
-  // ---------------------------
-  // REVERSE GEOCODING (CLICK MAP)
-  // ---------------------------
   function getAddressFromCoords(lat, lng) {
     const geocoder = new google.maps.Geocoder();
 
@@ -43,7 +40,7 @@ export default function MapWithData() {
     geocoder.geocode(
       {
         location: { lat, lng },
-        language: "en", // 🔥 FORZA INGLESE
+        language: "en", 
       },
       (results, status) => {
         if (status === "OK" && results && results[0]) {
@@ -81,7 +78,6 @@ export default function MapWithData() {
 
   return (
     <div className="flex flex-col justify-center w-full h-full">
-      {/* ---------------- INPUT ---------------- */}
       <section className="flex">
         <Autocomplete
           className="w-full"
@@ -146,7 +142,6 @@ export default function MapWithData() {
         </button>
       </section>
 
-      {/* ---------------- MAP ---------------- */}
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
         center={{ lat: 44.432, lng: 3.23 }}
