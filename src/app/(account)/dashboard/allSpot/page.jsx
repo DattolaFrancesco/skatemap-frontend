@@ -2,9 +2,6 @@
 import { useEffect, useState, useRef } from "react"
 import SpotCard from "@/app/(main)/components/SpotCard"
 import SpotDetails from "@/app/(main)/components/SpotDetails"
-import { RxCross2 } from "react-icons/rx"
-import { FaPencilAlt } from "react-icons/fa"
-import { ClipboardClock } from 'lucide-react';
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import SearchFilters from "../components/SearchFilters";

@@ -4,9 +4,6 @@ import SpotCard from "@/app/(main)/components/SpotCard";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FaPencilAlt } from "react-icons/fa";
-import { X } from 'lucide-react';
-import { Check } from 'lucide-react';
 import useUserStore from "../components/UserStore";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 

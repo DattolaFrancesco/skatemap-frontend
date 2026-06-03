@@ -1,7 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
 import { getAllUserandAdmin, deleteUser, changeRole } from "@/app/(account)/dashboard/components/user";
-import { RxCross2 } from "react-icons/rx";
 
 export default function User() {
     const [loadingUsers, setLoadingUsers] = useState(true);
@@ -15,7 +14,7 @@ export default function User() {
     try {
       const data = await getAllUserandAdmin();
       setUsers(data.content);
-       setLoading(false)
+      setLoading(false)
 
     } catch (err) { console.log(err.message) }
     finally { setLoadingUsers(false); setLoading(false) }

@@ -2,7 +2,6 @@
 
 import SpotCard from "@/app/(main)/components/SpotCard"
 import { useEffect, useState } from "react"
-import { HeartOff } from 'lucide-react';
 import useUserStore from "../components/UserStore";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
