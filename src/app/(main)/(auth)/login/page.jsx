@@ -2,7 +2,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import { RxCross2 } from "react-icons/rx"
-import Link from "next/link";
 import useUserStore from "@/app/(account)/dashboard/components/UserStore";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
