@@ -13,7 +13,7 @@
     }
     html {
     font-family: monospace;
-    overscroll-behavior: none;
+    /* overscroll-behavior: none; */
     }
     #bg-fixed {
         position: fixed;

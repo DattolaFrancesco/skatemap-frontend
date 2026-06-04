@@ -6,19 +6,19 @@ import {
   useLoadScript,
   Marker,
 } from "@react-google-maps/api";
-import { useEffect, useRef, useState } from "react";
+import {  useRef, useState } from "react";
 import useSpotForm from "../spot/components/SpotFormStore";
 import { X } from "lucide-react";
 
-export default function MapWithData() {
+export default function MapWithData({lat, lng}) {
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
     libraries: ["places"],
   });
 
   const [coordinates, setCoordinates] = useState({
-    lat: 45.4642,
-    lng: 9.19,
+    lat: null,
+    lng: null,
   });
 
   const inputRef = useRef(null);
@@ -26,8 +26,6 @@ export default function MapWithData() {
 
   const setPosition = useSpotForm((data) => data.setPosition);
   const setLatLng = useSpotForm((data) => data.setLatLng);
-  const latLng = useSpotForm((data) => data.latLng);
-  const position = useSpotForm((data) => data.position);
 
   function getAddressFromCoords(lat, lng) {
     const geocoder = new google.maps.Geocoder();
@@ -70,9 +68,6 @@ export default function MapWithData() {
     );
   }
 
-  useEffect(() => {
-    console.log(latLng, position);
-  }, [latLng, position]);
 
   if (!isLoaded) return <p>Loading...</p>;
 
@@ -144,7 +139,7 @@ export default function MapWithData() {
 
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
-        center={{ lat: 44.432, lng: 3.23 }}
+        center={{ lat: lat ? lat : 42.4, lng: lng ? lng : 43.2 }}
         zoom={2}
         options={{ minZoom: 2 }}
         onClick={(e) => {
@@ -156,7 +151,10 @@ export default function MapWithData() {
           getAddressFromCoords(lat, lng);
         }}
       >
-        <Marker position={coordinates} />
+          <Marker position={{ 
+        lat: coordinates.lat || parseFloat(lat) || 45, 
+        lng: coordinates.lng || parseFloat(lng) || 10 
+    }} />
       </GoogleMap>
     </div>
   );

@@ -2,12 +2,14 @@
 import Link from "next/link";
 import useUserStore from "./UserStore";
 import { usePathname } from "next/navigation";
-import { useRouter } from 'next/navigation';
+import TransitionLink from "@/app/(main)/components/TransitionLink";
+import useNavigationStore from "@/app/(main)/store/NavigationStore";
+
 export default function LinkDashboard(){
-    const router = useRouter();
     const pathname = usePathname()
     const user = useUserStore((data)=> data.user)
     const role = user?.authorities?.[0];
+    const statusHref = useNavigationStore((state) => state.statusHref);
    const isAdmin =
       role === "admin" || role === "super_admin";
     const isSuperAdmin =
@@ -38,7 +40,7 @@ export default function LinkDashboard(){
                     </Link>}
                     {isSuperAdmin && <Link href={"/dashboard/users"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/users"?" bg-primary-500":""}`}>USERS</Link>}
                     <Link href={"/dashboard/settings"} className={`nav-link text-sm md:text-base ${pathname === "/dashboard/settings"?" bg-primary-500":""}`}>SETTING</Link>
-                    <Link href={"/spot/registration"} className={`hidden md:block ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base`}>ADD SPOT</Link>
+                    <TransitionLink className={`hidden md:block ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/spot/registration`}>ADD SPOT</TransitionLink>
                </div>
     )
 }       
