@@ -135,7 +135,8 @@ export default function ModifySpotForm() {
     try {
       await handleForm(section, formData)
       setLoading(false)
-      router.push('/dashboard')
+      handleGoingBack()
+      //router.push('/dashboard')
     } catch (err) {
       setError(err.message)
       setLoading(false)
@@ -152,7 +153,7 @@ export default function ModifySpotForm() {
     const text = await res.text()
     if (!res.ok) {
           throw new Error(text.message+" try again, it could be the media format");
-    };
+    }
   }
     const {contextSafe} = useGSAP(()=>{},{ scope: containerRef })
   useGSAP(()=>{

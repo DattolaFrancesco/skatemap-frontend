@@ -8,6 +8,7 @@ import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 import useNavigationStore from "@/app/(main)/store/NavigationStore"
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { useRouter } from "next/navigation";
 
 export default function Favourites(){
     const [spots, setSpots] = useState(null)
@@ -15,6 +16,9 @@ export default function Favourites(){
     const setRefresh = useUserStore((data)=> data.setRefresh)
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const smallContainerRef = useRef(null)
+    const pendingHref = useNavigationStore((state) => state.pendingHref);
+    const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
+    const router = useRouter();
     async function getFav(){
         const token = localStorage.getItem('token')
         try{
@@ -51,7 +55,7 @@ export default function Favourites(){
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
         if (!els.length) return
         gsap.killTweensOf(els)
-        gsap.set(els, { yPercent: 200, opacity: 0 })
+        gsap.set(els, { yPercent: 250, opacity: 0 })
         gsap.to(els, {
             yPercent: 0,
             opacity: 1,
@@ -63,6 +67,24 @@ export default function Favourites(){
         })
     }, { scope: smallContainerRef, dependencies: [spots] })
     useEffect(()=>{getFav()},[refresh])
+          useEffect(() => {
+        if (!pendingHref) return
+        setStatusHref(true)
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        gsap.killTweensOf(els)
+        gsap.killTweensOf(smallContainerRef.current)
+        gsap.to(smallContainerRef.current, {
+            yPercent: 250,
+            opacity:0,
+            duration: 0.75,
+            ease: "power3.inOut",
+
+            onComplete: () => {
+            clearPendingHref()
+            router.push(pendingHref)
+            }
+        })
+        }, [pendingHref])
     if(!spots || spots.content.length === 0)return <h1 className="text-2xl text-primary-500">You don't have favourite spots</h1>
     return (
         <>

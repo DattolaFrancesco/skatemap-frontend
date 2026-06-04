@@ -17,12 +17,15 @@ export default  function MySpots(){
     const setRefresh = useUserStore((data)=> data.setRefresh)
     const refresh = useUserStore((data)=> data.refresh)
     const [loading, setLoading] = useState(false)
-    const [message, setMessage] = useState({message:"",type:""})
     const [eliminationSpot, setEliminationSpot] = useState(null)
     const smallContainerRef = useRef(null)
+    const permissionRef = useRef(null)
+    const timelineRef = useRef(null)
+    const containerPermissionRef = useRef(null)
     const router = useRouter();
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
+    const pendingHref = useNavigationStore((state) => state.pendingHref);
     setStatusHref(false)
     async function getSpots(){
         const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/own?${status?`status=${status}`:""}`;
@@ -59,20 +62,12 @@ export default  function MySpots(){
         getSpots()
         setLoading(false)
         setAskPermission(false)
-        setMessage({message:`${eliminationSpot?.name} deleted successfully`, type:"good"})
-        setTimeout(() => {
-        setMessage({message:"",type:""}) 
-        }, 3000);
          setRefresh(!refresh)
       }
       catch(err){
-        setMessage({message:`${eliminationSpot?.name} deleting session went wrong, try again`, type:"bad"}); 
         setLoading(false);
         setAskPermission(false)}
          setRefresh(!refresh)
-         setTimeout(() => {
-         setMessage({message:"",type:""}) 
-         }, 3000);
     }
     useEffect(()=>{getSpots()},[status])
     const {contextSafe} = useGSAP(()=>{},{scope: smallContainerRef})
@@ -92,6 +87,7 @@ export default  function MySpots(){
             onComplete: () => { setStatusHref(false) }
         })
     }, { scope: smallContainerRef, dependencies: [data] })
+
     const handleModify = contextSafe((s,e)=>{
         if (!smallContainerRef.current) return
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
@@ -115,51 +111,90 @@ export default  function MySpots(){
              }
         })
     })
+        useGSAP(() => {
+        if (!containerPermissionRef.current) return
+        timelineRef.current = gsap.timeline({
+            paused: true,
+            onReverseComplete: () => {
+                gsap.set(containerPermissionRef.current, { visibility: "hidden" })
+            }
+        })
+        timelineRef.current
+            .set(permissionRef.current, { yPercent: -500 })
+            .to(permissionRef.current, { yPercent: 0, ease: "power2.out" })
 
-    if(!data) return <h1 className=" text-2xl animate-pulse text-primary-500">Loading spots...</h1> 
-        return  ( 
-            <div>
-               {message.type === "bad" ?
-               <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1></div>:null}
-               {message.type === "good" ?
-               <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce"><h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1></div>:null}
-                <div className={` ${askPermission ? "block" : "hidden"} fixed h-full  inset-0 z-50 bg-black/40 overflow-hidden`}>
-                <div className="w-full h-full flex justify-center items-center" >
-                  <div className={`bg-white ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-red-800 text-4xl p-5">do you realy want to delete {eliminationSpot?.name}?</h1>
-                       <div className="flex justify-center gap-3 p-3">
-                            <button onClick={()=>deleteSpotById(eliminationSpot.id)} className="px-5">Yes</button>
-                            <button onClick={()=>setAskPermission(false)} className="px-5">No</button>
-                       </div>
-                  </div>
+    }, { scope: containerPermissionRef })
+
+    useEffect(() => {
+        if (!timelineRef.current) return
+        if (askPermission) {
+            gsap.set(containerPermissionRef.current, { visibility: "visible" })
+            timelineRef.current.play()
+        } else {
+            timelineRef.current.reverse()
+        }
+    }, [askPermission])
+    useEffect(() => {
+        if (!pendingHref) return
+        setStatusHref(true)
+        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
+        gsap.killTweensOf(els)
+        gsap.killTweensOf(smallContainerRef.current)
+        gsap.to(smallContainerRef.current, {
+            yPercent: 200,
+            duration: 0.75,
+            ease: "power3.inOut",
+
+            onComplete: () => {
+            clearPendingHref()
+            router.push(pendingHref)
+            }
+        })
+        }, [pendingHref])
+
+    return (
+    <div>
+        <div ref={containerPermissionRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
+            <div className="w-full h-full flex justify-center items-center">
+                <div ref={permissionRef} className={`w-2/3 md:full bg-amber-50 border-primary-500 border-dotted border-3 ${loading ? "animate-pulse" : ""}`}>
+                    <h1 className="text-red-800 text-center text-xl md:text-4xl p-5">do you realy want to delete {eliminationSpot?.name}?</h1>
+                    <div className="flex justify-center gap-3 p-3">
+                        <button onClick={() => deleteSpotById(eliminationSpot.id)} className="px-5 text-sm md:text-xl">Yes</button>
+                        <button onClick={() => setAskPermission(false)} className="px-5 text-sm md:text-xl">No</button>
+                    </div>
                 </div>
-                </div>
-                    <div className=" flex  gap-1 pt-2">
-                        <button onClick={()=>status === "approved"?setStatus(null):setStatus("approved")}
-                            className={`text-sm md:text-base ${status === "approved"?"bg-primary-500":""}`}>APPROVED</button>
-                        <button onClick={()=>status === "pending"?setStatus(null):setStatus("pending")}
-                            className={`text-sm md:text-base ${status === "pending"?"bg-primary-500":""}`}>PENDING</button>
-                        <button onClick={()=>status === "unapproved"?setStatus(null):setStatus("unapproved")}
-                            className={`text-sm md:text-base ${status === "unapproved"?"bg-primary-500":""}`}>UNAPPROVED</button>
-                </div>
-                <SpotDetails/>
-                <div ref={smallContainerRef} className="grid_custom gap-1 pt-2 relative">
-                   {data.content.length === 0 && <h1 className="absolute text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
-                    {data.content.map((s)=>(
-                        <div  key={s.id} className="relative">
-                        <SpotCard spot={s}/>
-                        <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
-                            <button onClick={(()=> askConfermation(s))} >DELETE</button>
-                            <button onClick={(e)=>handleModify(s.id,e.currentTarget.closest(".relative"))} className=" nav-link text-sm md:text-base">MODIFY</button>
-                        </div>
-                        <div className={`absolute top-1 left-1 text-sm md:text-base px-1 
-                            ${s.status === "APPROVED"?"bg-green-300":""}
-                                ${s.status === "PENDING"?"bg-orange-300 animate-pulse":""}
-                                ${s.status === "UNAPPROVED"?"bg-red-400":""}`}>{s.status}</div>
-                        </div>
-                        ))}
-                </div>
-                 {data?.totalPages>1 &&<ArrowPageSelector totalPages={data?.totalPages}/>}
             </div>
-        )
+        </div>
+
+        {!data ? (
+            <h1 className="text-2xl animate-pulse text-primary-500">Loading spots...</h1>
+        ) : (
+            <div>
+                <div className="flex gap-1 pt-2">
+                    <button onClick={() => status === "approved" ? setStatus(null) : setStatus("approved")} className={`text-sm md:text-base ${status === "approved" ? "bg-primary-500" : ""}`}>APPROVED</button>
+                    <button onClick={() => status === "pending" ? setStatus(null) : setStatus("pending")} className={`text-sm md:text-base ${status === "pending" ? "bg-primary-500" : ""}`}>PENDING</button>
+                    <button onClick={() => status === "unapproved" ? setStatus(null) : setStatus("unapproved")} className={`text-sm md:text-base ${status === "unapproved" ? "bg-primary-500" : ""}`}>UNAPPROVED</button>
+                </div>
+                <SpotDetails />
+                <div ref={smallContainerRef} className="grid_custom gap-1 pt-2 relative">
+                    {data.content.length === 0 && <h1 className="absolute text-2xl mt-2 text-primary-500">You don't have any spot that satisfy the filters</h1>}
+                    {data.content.map((s) => (
+                        <div key={s.id} className="relative">
+                            <SpotCard spot={s} />
+                            <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
+                                <button onClick={() => askConfermation(s)}>DELETE</button>
+                                <button onClick={(e) => handleModify(s.id, e.currentTarget.closest(".relative"))} className="nav-link text-sm md:text-base">MODIFY</button>
+                            </div>
+                            <div className={`absolute top-1 left-1 text-sm md:text-base px-1 
+                                ${s.status === "APPROVED" ? "bg-green-300" : ""}
+                                ${s.status === "PENDING" ? "bg-orange-300 animate-pulse" : ""}
+                                ${s.status === "UNAPPROVED" ? "bg-red-400" : ""}`}>{s.status}</div>
+                        </div>
+                    ))}
+                </div>
+                {data?.totalPages > 1 && <ArrowPageSelector totalPages={data?.totalPages} />}
+            </div>
+        )}
+    </div>
+)
 }

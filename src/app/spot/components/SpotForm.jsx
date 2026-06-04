@@ -114,10 +114,10 @@ export default function SpotForm() {
         headers: { "Authorization": `Bearer ${token}` },
         body: formData,
       })
-      const data = await res.text()
+      const data = await res.json()
       if (!res.ok) throw new Error(data.message)
       setError(null)
-      setMessage("SPOT CREATED")
+      setMessage(data.message)
       setForm({
         name: '', latitude: '', longitude: '',
         description: '', risk: 'LOW', types: [],
