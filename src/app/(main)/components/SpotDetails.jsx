@@ -204,21 +204,23 @@ export default function SpotDetails(){
                 <div className="bg-amber-50">
                     <article  className="flex justify-between items-center gap-3 bg-primary-500 px-2 py-1">
                         <h1 className="text-2xl font-bold">SPOT N°{data?.id?.slice(-5)}</h1>
-                        {token && 
-                        <div className="flex items-center gap-3 ">
-                             {liked ? <button onClick={()=>deleteFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♥</button>
-                              :<button onClick={()=>setFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♡</button>}
-                            <button  onClick={()=>{
-                                    setSpotOpen(null)
-                                    setMediaOpen(null)
-                                    setLiked(null)
-                                    setMaps(false)
-                                    setTimeout(() => {
-                                    setData(null)
-                                    }, 200);
-                                }} className="cursor-pointer bg-transparent text-2xl hover:border-b">X</button>        
-                         </div>
-                         }
+                        <div  className="flex items-center gap-3 ">
+                            {token && 
+                            <div>
+                                 {liked ? <button onClick={()=>deleteFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♥</button>
+                                  :<button onClick={()=>setFav()}  className={`cursor-pointer bg-transparent text-3xl hover:scale-[1.2] ${pendingLike ? "animate-pulse" : ""}`}>♡</button>}       
+                             </div>
+                             }
+                             <button  onClick={()=>{
+                                        setSpotOpen(null)
+                                        setMediaOpen(null)
+                                        setLiked(null)
+                                        setMaps(false)
+                                        setTimeout(() => {
+                                        setData(null)
+                                        }, 200);
+                                    }} className="cursor-pointer bg-transparent text-2xl hover:border-b">X</button> 
+                        </div>
                     </article>
                     <article className={`flex h-full  `}>
                          <div className="w-1/2 h-full flex items-center justify-center p-2 my-auto">

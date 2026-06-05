@@ -6,6 +6,7 @@ import useUserStore from "../components/UserStore";
 import SpotDetails from "@/app/(main)/components/SpotDetails";
 import ArrowPageSelector from "@/app/(main)/components/ArrowPageSelector";
 import useNavigationStore from "@/app/(main)/store/NavigationStore"
+import useInsetStore from "@/app/(main)/store/InsetStore";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRouter } from "next/navigation";
@@ -16,11 +17,12 @@ export default function Favourites() {
     const [allFavs, setAllFavs] = useState(null)
     const [currentPage, setCurrentPage] = useState(0)
     const refresh = useUserStore((data) => data.refresh)
+    const setSpotOpen = useInsetStore((data) => data.setSpotOpen)
+    const setMediaOpen = useInsetStore((state)=>state.setMediaOpen)
     const setRefresh = useUserStore((data) => data.setRefresh)
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const smallContainerRef = useRef(null)
     const shouldBlockAnimateRef = useRef(false)
-    const refreshy = useUserStore((state)=>state.refresh)
     const pendingHref = useNavigationStore((state) => state.pendingHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     const router = useRouter();
@@ -101,6 +103,7 @@ export default function Favourites() {
             }
         })
     }, [pendingHref])
+    useEffect(()=>{ if(!allFavs || allFavs.length === 0)setMediaOpen(null);setSpotOpen(null);},[allFavs])
 
     if (!allFavs || allFavs.length === 0) return (
         <h1 className="text-2xl text-primary-500">You don't have favourite spots</h1>
