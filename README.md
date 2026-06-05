@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
+# Skatemap
 
-First, run the development server:
+Skatemap is a full-stack web application for the global skateboarding community. It provides an interactive map of skateboarding spots around the world, allowing users to discover, add, and manage locations from any country. The platform combines a cinematic frontend experience with a robust backend built for scale.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Overview
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+The core idea is simple: every skater has local knowledge that the rest of the world does not have access to. Skatemap turns that knowledge into a shared, searchable, and visually rich global database of spots. Users can browse spots on an interactive globe, filter by continent, risk level, and type, submit new spots for review, and save their favorites for quick access.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The platform includes a full role-based moderation system. Submitted spots go through a review pipeline before becoming publicly visible, ensuring data quality across the map.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Public**
+- Interactive 3D globe built with MapLibre GL, rendered as a WebGL sphere
+- Filter spots by continent, risk level, spot type, and free-text search
+- All filtering happens client-side after a single API call, with zero subsequent requests
+- Spot detail panel with media gallery, location info, and type tags
+- Grid view with the same filtering system and frontend pagination
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Authenticated users**
+- Submit new spots with photos and videos, uploaded via Cloudinary
+- Save spots to a personal favorites list
+- Manage your own spots: edit, delete, and track approval status
+- View spots filtered by status: approved, pending, unapproved
 
-## Deploy on Vercel
+**Administrators**
+- Full spot management dashboard
+- Approve, reject, or revert spots to pending status
+- Moderation queue for incoming requests
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+**Frontend**
+- Next.js 14 with App Router
+- React with Zustand for global state management
+- GSAP for all page transitions, entrance animations, and interactive effects
+- MapLibre GL for the WebGL globe and map rendering
+- Tailwind CSS
+
+---
+
+## Architecture decisions
+
+**Single-fetch filtering**
+Rather than making a new API call for every filter change, the frontend fetches all approved spots once on mount and stores them in Zustand. All filtering, searching, and pagination then happen in memory with no further network requests. This eliminates redundant calls and makes filters feel instantaneous.
+
+**Local state updates**
+After mutations like deleting a spot or approving a request, the frontend updates its local array directly rather than refetching. A delete removes the item by id, a status change maps over the array and updates only the affected object. This keeps the UI responsive and reduces backend load.
+
+
+---
+
+## Deployment
+
+The backend is deployed on Railway as a containerized Spring Boot application. The frontend is deployed on Vercel. Both environments are configured via environment variables with no hardcoded credentials.
+
+Backend repository: https://github.com/DattolaFrancesco/skatemap-be
