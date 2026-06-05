@@ -95,9 +95,9 @@ export default function Settings() {
     }, [theme])
 
     useEffect(() => {
-        document.documentElement.classList.remove("bg-white-custom", "bg-dark-custom", "bg-bg-dark", "bg-bg-white")
+        document.documentElement.classList.remove("bg-white-custom", "bg-dark-custom", "bg-bg-black", "bg-bg-white")
         document.documentElement.classList.add(bgTheme)
-        if(bgTheme === "bg-dark-custom")document.documentElement.classList.add("bg-bg-dark")
+        if(bgTheme === "bg-dark-custom")document.documentElement.classList.add("bg-bg-black")
         else document.documentElement.classList.add("bg-bg-white")
         localStorage.setItem("BgTheme", bgTheme)
     }, [bgTheme])
