@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeLoader from "./(main)/components/ThemeLoader";
 import BgThemeLoader from "./(main)/components/BgThemeLoader";
+import BgColorLoader from "./(main)/components/BgColorLoader";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -39,14 +40,15 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
     <head>
         <link rel="preload" as="image" href="/white-bg.webp" />
         <link rel="preload" as="image" href="/dark-bg.webp" />
       </head>
+        <BgColorLoader/>
         <ThemeLoader/>
         <BgThemeLoader/>
-      <body className="h-dvh flex flex-col">
+      <body className="">
         <div 
         id="bg-fixed"
         ></div>
