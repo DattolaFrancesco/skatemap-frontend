@@ -9,7 +9,7 @@
     --primary-300: #9bf122;
     --primary-500: #92e100;
     --primary-700: #488a01;
-    --bg-image: url("/white-bg.webp");
+    --bg-image: url("/room-lighter.webp");
     }
     html {
     font-family: monospace;
@@ -24,9 +24,14 @@
         background-position: center;
     }
     .bg-dark-custom{
-        /* --bg-image: url("/dark-bg.webp"); */
-        --bg-image: url("/dark-bg.webp");
+        --bg-image: url("/room-dark-aligned.webp");
         
+    }
+    .bg-bg-white{
+        background-color: #eae8e7;
+    }
+    .bg-bg-black{
+        background-color: #111111;
     }
 
 /* themes ------------------------------------------------------------------------------*/

@@ -35,7 +35,6 @@ export const metadata = {
     "scooter spots",
   ],
 };
-
 export default function RootLayout({ children }) {
   return (
     <html

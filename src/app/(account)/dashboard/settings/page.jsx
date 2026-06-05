@@ -95,8 +95,10 @@ export default function Settings() {
     }, [theme])
 
     useEffect(() => {
-        document.documentElement.classList.remove("bg-white-custom", "bg-dark-custom")
+        document.documentElement.classList.remove("bg-white-custom", "bg-dark-custom", "bg-bg-dark", "bg-bg-white")
         document.documentElement.classList.add(bgTheme)
+        if(bgTheme === "bg-dark-custom")document.documentElement.classList.add("bg-bg-dark")
+        else document.documentElement.classList.add("bg-bg-white")
         localStorage.setItem("BgTheme", bgTheme)
     }, [bgTheme])
 
@@ -136,13 +138,13 @@ export default function Settings() {
         <div ref={containerRef} className="flex flex-col">
             {user?.authorities[0].authority === "super_admin" && (
                 <div className="flex justify-between py-2">
-                    <p className={`bg-transparent text-xl text-primary font-bold ${allowBotLocal ? "" : "opacity-80"}`}>Chat Bot</p>
+                    <p className={`bg-transparent text-xl text-primary-500 font-bold ${allowBotLocal ? "" : "opacity-80"}`}>Chat Bot</p>
                     <input type="checkbox" id="switch" checked={allowBotLocal} onChange={handleBotSwitch} />
                     <label htmlFor="switch">Toggle</label>
                 </div>
             )}
             <div className="flex justify-between py-2">
-                <p className="bg-transparent text-xl text-primary font-bold">Theme</p>
+                <p className="bg-transparent text-xl text-primary-500 font-bold">Theme</p>
                 <select onChange={(e) => setTheme(e.target.value)} className="text-primary-500 font-bold" value={theme}>
                     <option value="theme-green">GREEN</option>
                     <option value="theme-yellow">YELLOW</option>
@@ -153,7 +155,7 @@ export default function Settings() {
                 </select>
             </div>
             <div className="flex justify-between py-2">
-                <p className="bg-transparent text-xl text-primary font-bold">Bg Theme</p>
+                <p className="bg-transparent text-xl text-primary-500 font-bold">Bg Theme</p>
                 <select onChange={(e) => setBgTheme(e.target.value)} className="text-primary-500 font-bold" value={bgTheme}>
                     <option value="bg-white-custom">WHITE</option>
                     <option value="bg-dark-custom">DARK</option>
