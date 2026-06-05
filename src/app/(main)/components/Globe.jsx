@@ -32,6 +32,7 @@ export default function Globe({ searchParams }) {
   const allSpots = useSpotStore((data)=>data.allSpots)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
   const [filteredSpots, setFilteredSpots] = useState([]);
+  const bgTheme = localStorage.getItem("BgTheme")
   
   useEffect(()=>{
       async function getAllSpot(){
@@ -74,14 +75,14 @@ export default function Globe({ searchParams }) {
       if (window.innerWidth < 480) return 0.8   
       if (window.innerWidth < 1024) return 1   
       if (window.innerWidth < 1280) return 1.2   
-      if (window.innerWidth < 1480) return 1.5   
-      return 2
+      if (window.innerWidth < 1480) return 1.3  
+      return 1.6
     }
     if (windowWidthCustom < 480) return 0.8   
     if (windowWidthCustom < 1024) return 1   
     if (windowWidthCustom < 1280) return 1.2   
-    if (windowWidthCustom < 1480) return 1.5   
-    return 2
+    if (windowWidthCustom < 1480) return 1.3  
+    return 1.6
   },[windowWidthCustom])
   useEffect(() => {
   const timer = setTimeout(() => {
@@ -108,16 +109,33 @@ useEffect(() => {
     if (!mapRef.current) return
     mapInstance.current = new maplibregl.Map({
       container: mapRef.current,
-      style: `https://api.maptiler.com/maps/dataviz-dark/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
+      style: `https://api.maptiler.com/maps/dataviz-${bgTheme === "bg-dark-custom" ? "light" : "dark"}/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
       zoom: getZoom(),
       minZoom: 0.8,
       center: [10, 40],
       attributionControl: false,
     })
     mapInstance.current.on('load', () => {
+       console.log(mapInstance.current.getStyle()) 
+    console.log(mapInstance.current.getStyle().layers)
       mapInstance.current.setProjection({ type: 'globe' })
+      if(bgTheme !== "bg-dark-custom"){
       mapInstance.current.setPaintProperty('Background', 'background-color', '#1a1a1a')
+      mapInstance.current.setPaintProperty('Water', 'fill-color', '#232930')
       mapInstance.current.setPaintProperty('Country border', 'line-color', '#2a2a2a')
+    }
+    else{
+    mapInstance.current.removeLayer('Residential', 'fill-color', '#9b9b9b')
+    mapInstance.current.setPaintProperty('Landcover', 'fill-color', '#9b9b9b')
+    mapInstance.current.removeLayer('Forest', 'fill-color', '#f30000')
+    mapInstance.current.removeLayer('Stadium', 'fill-color', '#f30000')
+    mapInstance.current.removeLayer('Cemetery', 'fill-color', '#f30000')
+    mapInstance.current.setPaintProperty('Road network outline', 'line-color', '#9b9b9b')
+    mapInstance.current.setPaintProperty('Road network', 'line-color', '#9b9b9b')
+    mapInstance.current.setPaintProperty('Background', 'background-color', '#2b2b2b')
+    mapInstance.current.setPaintProperty('Water', 'fill-color', '#80a1b5')
+    mapInstance.current.setPaintProperty('Country border', 'line-color', '#909090')
+    }
       setMapReady(true)
     })
     return () => mapInstance.current.remove()

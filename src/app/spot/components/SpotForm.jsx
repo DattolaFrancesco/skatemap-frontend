@@ -79,7 +79,7 @@ export default function SpotForm() {
       return
     }
     const merged = [...videos, ...incoming]
-    if (merged.length > 3) { setError("Max 3 videos"); return }
+    if (merged.length > 1) { setError("Max 1 videos"); return }
     setError(null)
     setVideos(merged)
     e.target.value = ''
@@ -141,7 +141,7 @@ export default function SpotForm() {
   const imagesTotalMB = totalSize(images)
   const videosTotalMB = totalSize(videos)
   const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
-  const videoOverLimit = videosTotalMB > 3 * MAX_VIDEO_SIZE
+  const videoOverLimit = videosTotalMB > 1 * MAX_VIDEO_SIZE
 
   const {contextSafe} = useGSAP(()=>{},{ scope: containerRef })
   useGSAP(()=>{
@@ -312,7 +312,7 @@ export default function SpotForm() {
                       <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-xs text-primary-500 bg-transparent">{videos.length}/3 · max 10MB each</p>
+                      <p className="text-xs text-primary-500 bg-transparent">{videos.length}/1 · max 10MB each</p>
                       <p className={`text-xs font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
                         {formatMB(videosTotalMB)}
                       </p>
