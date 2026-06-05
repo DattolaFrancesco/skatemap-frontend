@@ -32,7 +32,6 @@ export default function SpotDetails(){
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
             setData(data)
-        console.log(data)
         }catch(err){
             console.log(err.message)
         }

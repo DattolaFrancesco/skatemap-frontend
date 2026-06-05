@@ -85,8 +85,8 @@ export default function InfoUser(){
                           </article>
                     </div>
                   <div className="flex flex-col gap-2 justify-center items-center">
-                        <Link href={"/"} className="nav-link w-full text-center text-sm md:text-base">HOME</Link>
-                        <button onClick={()=>{localStorage.removeItem('token') ;router.push("/login")}} className={`nav-link  w-full text-center text-sm md:text-base`}>LOG OUT</button>
+                        <TransitionLink className={`nav-link w-full text-center text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/`}>HOME</TransitionLink>
+                        <TransitionLink className={`nav-link  w-full text-center text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/login`}>LOG OUT</TransitionLink>
                         <TransitionLink className={`block md:hidden ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/spot/registration`}>ADD SPOT</TransitionLink>
                   </div>
                 </div>

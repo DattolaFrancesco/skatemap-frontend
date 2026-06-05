@@ -10,13 +10,16 @@ import useNavigationStore from "@/app/(main)/store/NavigationStore"
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+const PAGE_SIZE = 20;
+
 export default function Request() {
-    const [spot, setSpot] = useState(null)
+    const [allSpots, setAllSpots] = useState(null)
+    const [filteredSpots, setFilteredSpots] = useState([])
+    const [currentPage, setCurrentPage] = useState(0)
     const refresh = useUserStore((data) => data.refresh)
     const setRefresh = useUserStore((data) => data.setRefresh)
     const [askPermissionToUnApprove, setAskPermissionToUnApprove] = useState(false)
     const [askPermissionToApprove, setAskPermissionToApprove] = useState(false)
-    const [message, setMessage] = useState({ message: "", type: "" })
     const [unApprovedSpot, setUnApprovedSpot] = useState(null)
     const [approvedSpot, setApprovedSpot] = useState(null)
     const [loading, setLoading] = useState(false)
@@ -29,96 +32,109 @@ export default function Request() {
     const approveRef = useRef(null)
     const timelineUnApproveRef = useRef(null)
     const timelineApproveRef = useRef(null)
+    const shouldBlockAnimateRef = useRef(false)
     const router = useRouter();
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     const pendingHref = useNavigationStore((state) => state.pendingHref);
 
-    async function getSpots() {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/pending`;
-        try {
-            const res = await fetch(url, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            setSpot(data)
-        } catch (error) {
-            console.log(error.message)
+    useEffect(() => {
+        async function getSpots() {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/all/pending`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    }
+                })
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message);
+                setAllSpots(data)
+                setFilteredSpots(data)
+            } catch (error) {
+                console.log(error.message)
+            }
         }
-    }
-
+        getSpots()
+    }, [])
+    const totalPages = Math.ceil(filteredSpots.length / PAGE_SIZE)
+    const paginatedSpots = filteredSpots.slice(
+        currentPage * PAGE_SIZE,
+        (currentPage + 1) * PAGE_SIZE
+    )
     async function approveSpot(spotId) {
         setLoading(true)
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/status/${spotId.id}?status=approved`;
         try {
-            const res = await fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/spots/status/${spotId.id}?status=approved`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    }
                 }
-            })
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
+            )
+            if (!res.ok) throw new Error("Approve failed")
+            setAllSpots(prev => prev.filter(s => s.id !== spotId.id))
+            setFilteredSpots(prev => prev.filter(s => s.id !== spotId.id))
             setRefresh(!refresh)
-            setAskPermissionToApprove(false)
-            setPendingSpots(!pendingSpots)
-        } catch (error) {
-            setRefresh(!refresh)
-            setAskPermissionToApprove(false)
-            setPendingSpots(!pendingSpots)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    async function unApproveSpot(spotId) {
-        setLoading(true)
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/status/${spotId.id}?status=unapproved`;
-        try {
-            const res = await fetch(url, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
-                }
-            })
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message);
-            setRefresh(!refresh)
-            setAskPermissionToUnApprove(false)
             setPendingSpots(!pendingSpots)
         } catch (error) {
             console.log(error.message)
-            setRefresh(!refresh)
-            setAskPermissionToUnApprove(false)
-            setPendingSpots(!pendingSpots)
         } finally {
             setLoading(false)
+            setAskPermissionToApprove(false)
+        }
+    }
+    async function unApproveSpot(spotId) {
+        setLoading(true)
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/spots/status/${spotId.id}?status=unapproved`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    }
+                }
+            )
+            if (!res.ok) throw new Error("Unapprove failed")
+            setAllSpots(prev => prev.filter(s => s.id !== spotId.id))
+            setFilteredSpots(prev => prev.filter(s => s.id !== spotId.id))
+            setRefresh(!refresh)
+            setPendingSpots(!pendingSpots)
+        } catch (error) {
+            console.log(error.message)
+        } finally {
+            setLoading(false)
+            setAskPermissionToUnApprove(false)
         }
     }
 
     function askConfermationUnApproved(spot) {
+        shouldBlockAnimateRef.current = true
         setAskPermissionToUnApprove(true)
         setUnApprovedSpot(spot)
     }
 
     function askConfermationApproved(spot) {
+        shouldBlockAnimateRef.current = true
         setAskPermissionToApprove(true)
         setApprovedSpot(spot)
     }
-
-    useEffect(() => { getSpots() }, [refresh])
 
     const { contextSafe } = useGSAP(() => {}, { scope: smallContainerRef })
 
     useGSAP(() => {
         if (!smallContainerRef.current) return
+        if (shouldBlockAnimateRef.current) {
+            shouldBlockAnimateRef.current = false
+            return
+        }
+        if (pendingHref) return
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
         if (!els.length) return
         gsap.killTweensOf(els)
@@ -132,39 +148,36 @@ export default function Request() {
             clearProps: "transform,opacity",
             onComplete: () => { setStatusHref(false) }
         })
-    }, { scope: smallContainerRef, dependencies: [spot] })
+    }, { scope: smallContainerRef, dependencies: [paginatedSpots] })
 
     const handleModify = contextSafe((s, e) => {
         if (!smallContainerRef.current) return
-        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
-        gsap.killTweensOf(els)
+        gsap.killTweensOf(gsap.utils.toArray(smallContainerRef?.current?.children))
         const spot = e.getBoundingClientRect()
-        const tl = gsap.timeline()
-        tl.to(e, {
-            scale: 2,
-            x: window.innerWidth / 2 - spot.left - spot.width / 2,
-            y: window.innerHeight / 2 - spot.top - spot.height / 2,
-            zIndex: 99999,
-            ease: "power2.out"
-        })
-        .to(e, {
-            yPercent: 300,
-            duration: 0.5,
-            ease: "power2.out",
-            onComplete: () => {
-                clearPendingHref()
-                router.push(`/spot/modify/${s}`)
-            }
-        })
+        gsap.timeline()
+            .to(e, {
+                scale: 2,
+                x: window.innerWidth / 2 - spot.left - spot.width / 2,
+                y: window.innerHeight / 2 - spot.top - spot.height / 2,
+                zIndex: 99999,
+                ease: "power2.out"
+            })
+            .to(e, {
+                yPercent: 300,
+                duration: 0.5,
+                ease: "power2.out",
+                onComplete: () => {
+                    clearPendingHref()
+                    router.push(`/spot/modify/${s}`)
+                }
+            })
     })
 
     useGSAP(() => {
         if (!containerUnApproveRef.current) return
         timelineUnApproveRef.current = gsap.timeline({
             paused: true,
-            onReverseComplete: () => {
-                gsap.set(containerUnApproveRef.current, { visibility: "hidden" })
-            }
+            onReverseComplete: () => gsap.set(containerUnApproveRef.current, { visibility: "hidden" })
         })
         timelineUnApproveRef.current
             .set(unApproveRef.current, { yPercent: -500 })
@@ -175,9 +188,7 @@ export default function Request() {
         if (!containerApproveRef.current) return
         timelineApproveRef.current = gsap.timeline({
             paused: true,
-            onReverseComplete: () => {
-                gsap.set(containerApproveRef.current, { visibility: "hidden" })
-            }
+            onReverseComplete: () => gsap.set(containerApproveRef.current, { visibility: "hidden" })
         })
         timelineApproveRef.current
             .set(approveRef.current, { yPercent: -500 })
@@ -203,24 +214,23 @@ export default function Request() {
             timelineApproveRef.current.reverse()
         }
     }, [askPermissionToApprove])
-        useEffect(() => {
+
+    useEffect(() => {
         if (!pendingHref) return
         setStatusHref(true)
-        const els = gsap.utils.toArray(smallContainerRef?.current?.children)
-        gsap.killTweensOf(els)
         gsap.killTweensOf(smallContainerRef.current)
         gsap.to(smallContainerRef.current, {
-            yPercent: 250,
-            opacity:0,
+            y: window.innerHeight,
+            opacity: 0,
             duration: 0.75,
             ease: "power3.inOut",
-
             onComplete: () => {
-            clearPendingHref()
-            router.push(pendingHref)
+                clearPendingHref()
+                router.push(pendingHref)
             }
         })
-        }, [pendingHref])
+    }, [pendingHref])
+
     return (
         <div>
             {/* modal unapprove */}
@@ -249,23 +259,13 @@ export default function Request() {
                 </div>
             </div>
 
-            {!spot || spot?.content?.length === 0 ? (
+            {!allSpots || filteredSpots.length === 0 ? (
                 <h1 className="text-2xl text-primary-500">You don't have any spot request to review</h1>
             ) : (
                 <div className="gap-1 py-3">
-                    {message.type === "bad" && (
-                        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-                            <h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1>
-                        </div>
-                    )}
-                    {message.type === "good" && (
-                        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-                            <h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1>
-                        </div>
-                    )}
                     <SpotDetails />
                     <div ref={smallContainerRef} className="grid_custom gap-1 py-3">
-                        {spot.content?.map((s) => (
+                        {paginatedSpots.map((s) => (
                             <div key={s.id} className="relative">
                                 <SpotCard spot={s} />
                                 <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
@@ -276,7 +276,13 @@ export default function Request() {
                             </div>
                         ))}
                     </div>
-                    {spot?.totalPages > 1 && <ArrowPageSelector totalPages={spot?.totalPages} />}
+                    {totalPages > 1 && (
+                        <ArrowPageSelector
+                            totalPages={totalPages}
+                            currentPage={currentPage}
+                            onPageChange={setCurrentPage}
+                        />
+                    )}
                 </div>
             )}
         </div>

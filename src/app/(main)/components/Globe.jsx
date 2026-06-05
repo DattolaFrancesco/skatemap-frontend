@@ -27,45 +27,16 @@ export default function Globe({ searchParams }) {
   const animatedRef = useRef(false)
   const [delay, setDelay] = useState(null)
   const resolvedParams = use(searchParams)
-  const firstRender = useSpotStore((data)=>data.firstRender)
-  const setFirstRender = useSpotStore((data)=>data.setFirstRender)
   const reset = useSpotStore((data)=>data.reset)
   const setReset = useSpotStore((data)=>data.setReset)
-  const spotStore = useSpotStore((data)=>data.spot)
-  const setSpotStore = useSpotStore((data)=>data.setSpot)
-  const firstSpotStore = useSpotStore((data)=>data.firstSpot)
-  const setFirstSpotStore = useSpotStore((data)=>data.setFirstSpot)
+  const allSpots = useSpotStore((data)=>data.allSpots)
+  const setAllSpots = useSpotStore((data)=>data.setAllSpots)
+  const [filteredSpots, setFilteredSpots] = useState([]);
   
-  const getSpot = async (resolvedParams) => {
-    const query = new URLSearchParams(resolvedParams)  
-    const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/globe/approved/all?${query.toString()}`;
-    query.delete('_t')
-    if(query.toString() === "" && firstRender == 1) return
-     setFirstRender(1)
-    try {
-      const res = await fetch(url,{
-        method:"GET",
-        headers: { "Content-Type": "application/json" }
-      })
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      if( firstSpotStore == null && firstRender == 0 && query.toString() !== "") {
-        await getAllSpot()
-        setSpotStore(data.content)
-      }
-      if(!reset && firstRender == 0 && query.toString() === "") {
-        setSpotStore(data.content)
-        setFirstSpotStore(data.content)
-      }
-      else {
-        setSpotStore(data.content)
-      }
-    } catch(error) {
-      console.log(error.message)
-    }
-  }
-  async function getAllSpot(){
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all`;
+  useEffect(()=>{
+      async function getAllSpot(){
+        if(allSpots) return
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all/approved`;
         try {
             const res = await fetch(url, {
                 method: "GET",
@@ -73,14 +44,31 @@ export default function Globe({ searchParams }) {
             })
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
-           setFirstSpotStore(data.content)
+           setAllSpots(data)
         } catch(error) {
             console.log(error.message)
-            errorRef.current = true;
             clearPendingHref()
             setStatusHref(false)
         }
     }
+    getAllSpot()
+  },[])
+  useEffect(()=>{
+    if(!allSpots) return
+      const {risk,type,search,continent} = resolvedParams
+      let result = allSpots
+      if(continent) result = result.filter(s=>s.continent === continent)
+      if(risk) result = result.filter(s=>s.risk === risk)
+      if(type) result = result.filter(s=>s.spotTypes.includes(type))
+      if(search) result = result.filter(s=>
+          s.name.toLowerCase().includes(search.toLowerCase()) ||
+          s.country.toLowerCase().includes(search.toLowerCase()) ||
+          s.continent.toLowerCase().includes(search.toLowerCase()) ||
+          s.city.toLowerCase().includes(search.toLowerCase())
+      )
+        setFilteredSpots(result)
+  },[resolvedParams, allSpots])
+
   const getZoom = useCallback(() => {
     if(!windowWidthCustom){
       if (window.innerWidth < 480) return 0.8   
@@ -110,12 +98,6 @@ useEffect(() => {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-  useEffect(() => {
-    setReset(false)
-    setFirstRender(0)
-    getSpot(resolvedParams)
-  }, [resolvedParams])
-
   useEffect(() => {
     if (!mapInstance.current) return
     if (!mapInstance.current.isStyleLoaded()) return
@@ -148,12 +130,12 @@ useEffect(() => {
   setPrimary(value);
   }, []);
   useEffect(()=>{
-    if(!spotStore || !mapReady) return
+    if(!filteredSpots|| !mapReady) return
     if(reset) return
       if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
           type: 'FeatureCollection',
-          features: spotStore?.map(s => ({
+          features: filteredSpots?.map(s => ({
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
             properties: { spot: s }
@@ -164,7 +146,7 @@ useEffect(() => {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: spotStore?.map(s => ({
+            features: filteredSpots?.map(s => ({
               type: 'Feature',
               geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
               properties: { spot: s }
@@ -188,7 +170,7 @@ useEffect(() => {
           const params = JSON.parse(e.features[0].properties.spot);
           popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
             .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.image?.link}" class="popup-image"/>`)
+            .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
             .addTo(mapInstance.current)
         })
         mapInstance.current.on('mouseleave', 'spots-layer', () => {
@@ -196,14 +178,14 @@ useEffect(() => {
           popUp?.remove()
         })
       }
-  },[mapReady,spotStore])
+  },[mapReady,filteredSpots])
   useEffect(()=>{
-    if(!firstSpotStore || !mapReady) return
+    if(!filteredSpots || !mapReady) return
     if(reset){
       if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
           type: 'FeatureCollection',
-          features: firstSpotStore?.map(s => ({
+          features: filteredSpots?.map(s => ({
             type: 'Feature',
             geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
             properties: { spot: s }
@@ -214,7 +196,7 @@ useEffect(() => {
           type: 'geojson',
           data: {
             type: 'FeatureCollection',
-            features: firstSpotStore?.map(s => ({
+            features: filteredSpots?.map(s => ({
               type: 'Feature',
               geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
               properties: { spot: s }
@@ -238,7 +220,7 @@ useEffect(() => {
           console.log(params)
           popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
             .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.image?.link}" class="popup-image"/>`)
+            .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
             .addTo(mapInstance.current)
         })
         mapInstance.current.on('mouseleave', 'spots-layer', () => {
@@ -288,7 +270,6 @@ useEffect(() => {
 
     onComplete: () => {
       clearPendingHref()
-      setFirstRender(0)
       router.push(pendingHref)
     }
   })

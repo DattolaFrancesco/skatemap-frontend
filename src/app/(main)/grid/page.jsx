@@ -7,7 +7,7 @@ import { useGSAP } from "@gsap/react";
 import useNavigationStore from "../store/NavigationStore";
 import useSpotStore from "../store/SpotStore";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useRef } from "react";
+import { use, useEffect, useRef, useState } from "react";
 
 export default function Grid({ searchParams }) {
     const router = useRouter();
@@ -19,67 +19,52 @@ export default function Grid({ searchParams }) {
     const smallContainerRef = useRef(null)
     const errorRef = useRef(false)
     const reset = useSpotStore((data) => data.reset)
-    const setReset = useSpotStore((data) => data.setReset)
-    const firstRender = useSpotStore((data) => data.firstRenderGrid)
-    const setFirstRender = useSpotStore((data) => data.setFirstRenderGrid)
-    const spotStore = useSpotStore((data) => data.spotGrid)
-    const setSpotStore = useSpotStore((data) => data.setSpotGrid)
-    const firstSpotStore = useSpotStore((data) => data.firstSpotGrid)
-    const setFirstSpotStore = useSpotStore((data) => data.setFirstSpotGrid)
-
-    async function getAllSpot() {
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all`
-        try {
-            const res = await fetch(url, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.message)
-            setFirstSpotStore(data)
-        } catch (error) {
-            console.log(error.message)
-            errorRef.current = true
-            clearPendingHref()
-            setStatusHref(false)
-        }
-    }
-
-    async function getSpot() {
-        const query = new URLSearchParams(resolvedParams)
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/approved/all?${query.toString()}`
-        query.delete('_t')
-        if (query.toString() === "" && firstRender == 1) return
-        setFirstRender(1)
-        try {
-            const res = await fetch(url, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" }
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.message)
-            if (firstRender === 0 && query.toString() !== "" && firstSpotStore == null) {
-                await getAllSpot()
-                setSpotStore(data)
-            } else if (firstRender === 0 && query.toString() === "") {
-                setFirstSpotStore(data)
-                setSpotStore(data)
-            } else {
-                setSpotStore(data)
-                setReset(false)
-            }
-        } catch (error) {
-            console.log(error.message)
-            errorRef.current = true
-            clearPendingHref()
-            setStatusHref(false)
-        }
-    }
-
+    const setAllSpots = useSpotStore((data) => data.setAllSpots)
+    const allSpots = useSpotStore((data) => data.allSpots)
+    const [filteredSpots, setFilteredSpots] = useState([]);
+    const PAGE_SIZE = 50;
+    const [currentPage, setCurrentPage] = useState(0);
     useEffect(() => {
-        getSpot()
-    }, [resolvedParams])
-
+    async function getAllSpot() {
+        if(allSpots) return
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/spots/all/approved`
+        try {
+            const res = await fetch(url, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.message)
+            setAllSpots(data)
+            clearPendingHref()
+            setStatusHref(false)
+        } catch (error) {
+            console.log(error.message)
+            errorRef.current = true
+            clearPendingHref()
+            setStatusHref(false)
+        }
+    }
+    getAllSpot()
+    }, [])
+    useEffect(()=>{
+        if(!allSpots) return
+        const {risk,type,search,continent} = resolvedParams
+        let result = allSpots
+        if(continent) result = result.filter(s=>s.continent === continent)
+        if(risk) result = result.filter(s=>s.risk === risk)
+        if(type) result = result.filter(s=>s.spotTypes.includes(type))
+        if(search) result = result.filter(s=>
+            s.name.toLowerCase().includes(search.toLowerCase()) ||
+            s.country.toLowerCase().includes(search.toLowerCase()) ||
+            s.continent.toLowerCase().includes(search.toLowerCase()) ||
+            s.city.toLowerCase().includes(search.toLowerCase())
+        )
+        setFilteredSpots(result)
+        setCurrentPage(0)
+    },[resolvedParams, allSpots])
+    const totalPages = Math.ceil(filteredSpots.length / PAGE_SIZE);
+    const paginatedSpots = filteredSpots.slice(currentPage * PAGE_SIZE,(currentPage + 1) * PAGE_SIZE)
     useGSAP(() => {
         if (!smallContainerRef.current) return
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
@@ -95,12 +80,12 @@ export default function Grid({ searchParams }) {
             clearProps: "transform,opacity",
             onComplete: () => { setStatusHref(false) }
         })
-    }, { scope: containerRef, dependencies: [spotStore, reset] })
+    }, { scope: containerRef, dependencies: [filteredSpots, reset, currentPage] })
 
     useEffect(() => {
         if (!pendingHref) return
         if (errorRef.current) { clearPendingHref(); router.push(pendingHref); return }
-        if (!firstSpotStore || !smallContainerRef.current) { clearPendingHref();setFirstRender(0); router.push(pendingHref); return }
+        if (!allSpots || !smallContainerRef.current) { clearPendingHref(); router.push(pendingHref); return }
         setStatusHref(true)
         const els = gsap.utils.toArray(smallContainerRef?.current?.children)
         gsap.killTweensOf(els)
@@ -112,25 +97,25 @@ export default function Grid({ searchParams }) {
             ease: "power2.in",
             onComplete: () => {
                 clearPendingHref()
-                setFirstRender(0)
                 router.push(pendingHref)
             }
         })
     }, [pendingHref])
 
-    if (!spotStore) return <h1 className="text-2xl px-2 text-primary-500">Server is not available</h1>
-    if (spotStore?.content?.length === 0 && !reset) return <h1 className="text-2xl px-2 text-primary-500">There aren't spots</h1>
-    const displaySpots = reset ? firstSpotStore : spotStore
+    if (!allSpots) return <h1 className="text-2xl px-2 text-primary-500">There aren't spots</h1>
+    if (filteredSpots?.length === 0 && !reset) return <h1 className="text-2xl px-2 text-primary-500">No available spot for this filters</h1>
 
     return (
         <div ref={containerRef}>
             <SpotDetails />
             <div ref={smallContainerRef} className="grid_custom gap-1 px-2 py-0.5">
-                {displaySpots?.content?.map((s) => (
+                {paginatedSpots.map((s) => (
                     <SpotCard key={s.id} spot={s} />
                 ))}
             </div>
-            {displaySpots?.totalPages > 1 && <ArrowPageSelector totalPages={displaySpots?.totalPages} />}
+            {totalPages > 1 && (
+                <ArrowPageSelector totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage}/>
+            )}
         </div>
     )
 }

@@ -24,7 +24,9 @@
         background-position: center;
     }
     .bg-dark-custom{
+        /* --bg-image: url("/dark-bg.webp"); */
         --bg-image: url("/dark-bg.webp");
+        
     }
 
 /* themes ------------------------------------------------------------------------------*/
