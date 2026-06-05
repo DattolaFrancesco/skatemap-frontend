@@ -175,7 +175,7 @@ export default function SpotForm() {
   })
 
   return (
-<div className="w-full h-full flex justify-center items-center  ">
+<div className="w-full h-full flex justify-center items-center p-3">
       <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""} `}>
         <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
           <section className="flex justify-between py-2">
