@@ -129,35 +129,35 @@ useEffect(() => {
 
   setPrimary(value);
   }, []);
-  useEffect(()=>{
-    if(!filteredSpots|| !mapReady) return
-    if(reset) return
-      if(mapInstance.current.getSource('spots')){
+useEffect(()=>{
+    if(!filteredSpots || !mapReady) return
+    
+    if(mapInstance.current.getSource('spots')){
         mapInstance.current.getSource('spots').setData({
-          type: 'FeatureCollection',
-          features: filteredSpots?.map(s => ({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-            properties: { spot: s }
-          }))
-        })
-      } else {
-        mapInstance.current.addSource('spots', {
-          type: 'geojson',
-          data: {
             type: 'FeatureCollection',
-            features: filteredSpots?.map(s => ({
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-              properties: { spot: s }
+            features: filteredSpots.map(s => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
+                properties: { spot: s }
             }))
-          }
         })
-        mapInstance.current.addLayer({  
-          id: 'spots-layer',
-          type: 'circle',
-          source: 'spots',
-          paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
+    } else {
+        mapInstance.current.addSource('spots', {
+            type: 'geojson',
+            data: {
+                type: 'FeatureCollection',
+                features: filteredSpots.map(s => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
+                    properties: { spot: s }
+                }))
+            }
+        })
+        mapInstance.current.addLayer({
+            id: 'spots-layer',
+            type: 'circle',
+            source: 'spots',
+            paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
         })
         mapInstance.current.on('click', 'spots-layer', (e) => {
             const feature = e.features[0]
@@ -166,73 +166,22 @@ useEffect(() => {
         })
         let popUp;
         mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
-          mapInstance.current.getCanvas().style.cursor = 'pointer'
-          const params = JSON.parse(e.features[0].properties.spot);
-          popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
-            .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
-            .addTo(mapInstance.current)
+            mapInstance.current.getCanvas().style.cursor = 'pointer'
+            const params = JSON.parse(e.features[0].properties.spot);
+            popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
+                .setLngLat([params.longitude, params.latitude])
+                .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
+                .addTo(mapInstance.current)
         })
         mapInstance.current.on('mouseleave', 'spots-layer', () => {
-          mapInstance.current.getCanvas().style.cursor = ''
-          popUp?.remove()
+            mapInstance.current.getCanvas().style.cursor = ''
+            popUp?.remove()
         })
-      }
-  },[mapReady,filteredSpots])
-  useEffect(()=>{
-    if(!filteredSpots || !mapReady) return
-    if(reset){
-      if(mapInstance.current.getSource('spots')){
-        mapInstance.current.getSource('spots').setData({
-          type: 'FeatureCollection',
-          features: filteredSpots?.map(s => ({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-            properties: { spot: s }
-          }))
-        })
-      } else {
-        mapInstance.current.addSource('spots', {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: filteredSpots?.map(s => ({
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-              properties: { spot: s }
-            }))
-          }
-        })
-        mapInstance.current.addLayer({  
-          id: 'spots-layer',
-          type: 'circle',
-          source: 'spots',
-          paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
-        })
-        mapInstance.current.on('click', 'spots-layer', (e) => {
-          const feature = e.features[0]
-          setSpotOpen(JSON.parse(feature.properties.spot))
-        })
-        let popUp;
-        mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
-          mapInstance.current.getCanvas().style.cursor = 'pointer'
-          const params = JSON.parse(e.features[0].properties.spot);
-          console.log(params)
-          popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
-            .setLngLat([params.longitude, params.latitude])
-            .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
-            .addTo(mapInstance.current)
-        })
-        mapInstance.current.on('mouseleave', 'spots-layer', () => {
-          mapInstance.current.getCanvas().style.cursor = ''
-          popUp?.remove()
-        })
-      }
     }
-    else return 
-    setReset(false)
-  },[reset])
 
+    if(reset) setReset(false)  
+
+},[mapReady, filteredSpots])
   useEffect(() => {
 
   if (!mapInstance.current || !mapReady) return;
