@@ -136,13 +136,6 @@ export default function Settings() {
     }, [pendingHref])
     return (
         <div ref={containerRef} className="flex flex-col">
-            {user?.authorities[0].authority === "super_admin" && (
-                <div className="flex justify-between py-2">
-                    <p className={`bg-transparent text-xl text-primary-500 font-bold ${allowBotLocal ? "" : "opacity-80"}`}>Chat Bot</p>
-                    <input type="checkbox" id="switch" checked={allowBotLocal} onChange={handleBotSwitch} />
-                    <label htmlFor="switch">Toggle</label>
-                </div>
-            )}
             <div className="flex justify-between py-2">
                 <p className="bg-transparent text-xl text-primary-500 font-bold">Theme</p>
                 <select onChange={(e) => setTheme(e.target.value)} className="text-primary-500 font-bold" value={theme}>
@@ -161,6 +154,13 @@ export default function Settings() {
                     <option value="bg-dark-custom">DARK</option>
                 </select>
             </div>
+            {user?.authorities[0].authority === "super_admin" && (
+                <div className="flex justify-between py-2">
+                    <p className={`bg-transparent text-xl text-primary-500 font-bold ${allowBotLocal ? "" : "opacity-80"}`}>Chat Bot</p>
+                    <input type="checkbox" id="switch" checked={allowBotLocal} onChange={handleBotSwitch} />
+                    <label htmlFor="switch">Toggle</label>
+                </div>
+            )}
         </div>
     )
 }
