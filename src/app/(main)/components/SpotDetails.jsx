@@ -199,8 +199,8 @@ export default function SpotDetails(){
             setData(null)
             }, 200);
         }}
-        className={` ${spotOpen ? "w-full opacity-100" : "w-0 opacity-0"} fixed inset-0 z-999 min-h-full bg-black/50 flex justify-start items-center transition-all duration-500  overflow-hidden overflow-scroll`}>
-           <main onClick={(e)=>e.stopPropagation()} className="w-full sm:w-2/3 max-w-[800px] h-fit">
+        className={` ${spotOpen ? "w-full opacity-100" : "w-0 opacity-0"} fixed inset-0 z-999 min-h-full bg-black/50 flex justify-center md:justify-start items-center transition-all duration-500  overflow-hidden overflow-scroll`}>
+           <main onClick={(e)=>e.stopPropagation()} className="w-[80%] sm:w-2/3 max-w-[800px] h-fit">
                 <div className="bg-amber-50">
                     <article  className="flex justify-between items-center gap-3 bg-primary-500 px-2 py-1">
                         <h1 className="text-2xl font-bold">SPOT N°{data?.id?.slice(-5)}</h1>

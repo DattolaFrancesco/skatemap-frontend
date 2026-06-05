@@ -77,7 +77,7 @@
     --primary-700: #693a01;
     }
 
-
+    input,
     textarea,
     select {
 	    font-size: 16px;

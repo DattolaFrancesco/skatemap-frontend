@@ -165,7 +165,7 @@ export default function NavBar() {
             <nav className="navbar p-2">
                 <section className="left flex flex-col h-full">
                     <div>
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full  placeholder:ps-1"/>
+                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full   placeholder:text-base"/>
                     </div>
                     <aside className="flex gap-0.5 pt-1">
                         <div>
