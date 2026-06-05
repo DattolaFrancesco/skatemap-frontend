@@ -4,10 +4,12 @@ import NavBar from "./components/NavBar";
 export default function NavLayout({ children }) {
   return (
   <>
-   <div className="flex flex-col h-screen relative">
-      <NavBar/>
+  <div className="flex flex-col h-dvh landscape:h-auto landscape:min-h-dvh relative">
+    <NavBar/>
+    <div className="flex-1 overflow-y-auto overscroll-none landscape:overflow-visible">
       {children}
-   </div>
+    </div>
+  </div>
   </>
   );
 }
