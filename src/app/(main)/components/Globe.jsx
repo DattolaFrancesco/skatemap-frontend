@@ -116,8 +116,6 @@ useEffect(() => {
       attributionControl: false,
     })
     mapInstance.current.on('load', () => {
-       console.log(mapInstance.current.getStyle()) 
-    console.log(mapInstance.current.getStyle().layers)
       mapInstance.current.setProjection({ type: 'globe' })
       if(bgTheme !== "bg-dark-custom"){
       mapInstance.current.setPaintProperty('Background', 'background-color', '#1a1a1a')
@@ -177,24 +175,33 @@ useEffect(()=>{
             source: 'spots',
             paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
         })
-        mapInstance.current.on('click', 'spots-layer', (e) => {
-            const feature = e.features[0]
-            const parsed = JSON.parse(feature.properties.spot)
-            setSpotOpen(parsed.id)
-        })
-        let popUp;
-        mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
-            mapInstance.current.getCanvas().style.cursor = 'pointer'
-            const params = JSON.parse(e.features[0].properties.spot);
-            popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
-                .setLngLat([params.longitude, params.latitude])
-                .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
-                .addTo(mapInstance.current)
-        })
-        mapInstance.current.on('mouseleave', 'spots-layer', () => {
-            mapInstance.current.getCanvas().style.cursor = ''
-            popUp?.remove()
-        })
+        if(windowWidthCustom >= 1024){
+            mapInstance.current.on('click', 'spots-layer', (e) => {
+                const feature = e.features[0]
+                const parsed = JSON.parse(feature.properties.spot)
+                setSpotOpen(parsed.id)
+            })
+            let popUp;
+            mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
+                mapInstance.current.getCanvas().style.cursor = 'pointer'
+                const params = JSON.parse(e.features[0].properties.spot);
+                popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
+                    .setLngLat([params.longitude, params.latitude])
+                    .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
+                    .addTo(mapInstance.current)
+            })
+            mapInstance.current.on('mouseleave', 'spots-layer', () => {
+                mapInstance.current.getCanvas().style.cursor = ''
+                popUp?.remove()
+            })
+        } else{
+           mapInstance.current.on('click', 'spots-layer', (e) => {
+                const feature = e.features[0]
+                const parsed = JSON.parse(feature.properties.spot)
+                setSpotOpen(parsed.id)
+            })
+        }
+
     }
 
     if(reset) setReset(false)  
