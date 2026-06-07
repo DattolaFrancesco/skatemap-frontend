@@ -80,7 +80,7 @@ export default function SearchFilters() {
     },[filterOpen])
   return (
     <div className="flex flex-col gap-0.5 mt-2">
-      <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full md:w-1/2 text-sm md:text-base" />
+      <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full md:w-1/2 text-sm md:text-base placeholder:text-base" />
       <aside ref={containerRef} className="flex gap-0.5">
         <button className={`${!filterOpen ? null : "bg-primary-500"} h-fit text-sm md:text-base`} onClick={() => { setFilterOpen(!filterOpen); setOpenFilter(null) }}>Filters</button>
         <div>

@@ -36,6 +36,7 @@
     .bg-bg-black{
         background-color: #111111;
     }
+    
 
 /* themes ------------------------------------------------------------------------------*/
     .theme-violet {
@@ -100,7 +101,7 @@
 
 /* LOGIN/REGISTER/FORM ------------------------------------------------------------------------------------------------------------*/
 .bg_login{
-background-color: var(--button-color);
+    background-color: var(--button-color);
 }
 .bg_custom_btn{
     background-color: var(--button-color-form);
@@ -119,15 +120,17 @@ background-color: var(--button-color);
         padding-inline: 5px;
         cursor: pointer;
     }
-    button:hover{
+    @media (min-width: 1024px) {
+        button:hover{
+         background-color: var(--primary)
+        }
+        .nav-link:hover{
         background-color: var(--primary)
+    }
     }
     .disabled-btn{
         pointer-events: none;
         opacity: 0.8;
-    }
-    .nav-link:hover{
-        background-color: var(--primary)
     }
     /* nav link  ------------------------------------------------------------------------------------------------------*/
     .nav-link{

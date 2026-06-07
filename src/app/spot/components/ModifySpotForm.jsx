@@ -10,13 +10,17 @@ import useNavigationStore from "@/app/(main)/store/NavigationStore";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
-const options = [
-  { value: 'RAIL' },
-  { value: 'LEDGE' },
-  { value: 'STREET' },
-  { value: 'SKATEPARK' },
-  { value: 'STAIR' },
-]
+const OPTIONS = ['RAIL', 'LEDGE', 'STREET', 'SKATEPARK', 'STAIR']
+const MAX_VIDEO_SIZE = 12 * 1024 * 1024
+const MAX_IMAGE_SIZE = 3 * 1024 * 1024
+
+function formatMB(bytes) {
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+}
+
+function totalSize(files) {
+  return files.reduce((acc, f) => acc + f.size, 0)
+}
 
 export default function ModifySpotForm() {
   const router = useRouter();
@@ -34,8 +38,6 @@ export default function ModifySpotForm() {
   const [existsVideos, setExistsVideos] = useState(null)
   const [eliminatedExistsImages, setEliminatedExistsImages] = useState({ id: [] })
   const [eliminatedExistsVideos, setEliminatedExistsVideos] = useState({ id: [] })
-  let imageRestrictionNumber = 5 - (existsImages?.length - eliminatedExistsImages?.id?.length);
-  let videoRestrictionNumber = 3 - (existsVideos?.length - eliminatedExistsVideos?.id?.length);
   const [images, setImages] = useState([])
   const [videos, setVideos] = useState([])
   const [error, setError] = useState(null)
@@ -49,6 +51,15 @@ export default function ModifySpotForm() {
     city: '', country: '', continent: '', street: ''
   });
 
+  const activeExistingImages = existsImages?.filter(img => !eliminatedExistsImages.id.includes(img.id)) ?? []
+  const activeExistingVideos = existsVideos?.filter(vid => !eliminatedExistsVideos.id.includes(vid.id)) ?? []
+  const totalImages = activeExistingImages.length + images.length
+  const totalVideos = activeExistingVideos.length + videos.length
+  const imagesTotalMB = totalSize(images)
+  const videosTotalMB = totalSize(videos)
+  const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
+  const videoOverLimit = videosTotalMB > 1 * MAX_VIDEO_SIZE
+
   useEffect(() => { getSpot(); setPosition(null) }, [])
   useEffect(() => {
     if (!latLng || !latLng.lat) return
@@ -58,7 +69,7 @@ export default function ModifySpotForm() {
     if (!position || !position.country) return;
     setForm((prev) => ({ ...prev, country: position.country, city: position.city, street: position.street }));
   }, [position])
-  
+
   async function getSpot() {
     const token = localStorage.getItem('token')
     try {
@@ -78,65 +89,78 @@ export default function ModifySpotForm() {
       setExistsVideos(data.video)
     } catch (err) { console.log(err.message) }
   }
+
   function handleChange(e) {
     const { name, value } = e.target;
     if (name === 'description' && value.length > 500) return
     setForm((prev) => ({ ...prev, [name]: value }));
   }
+
   function handleAddImages(e) {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
+    const tooBig = incoming.filter(f => f.size > MAX_IMAGE_SIZE)
+    if (tooBig.length > 0) {
+      setError(`Images must be under 3MB each (${tooBig.map(f => f.name).join(', ')})`)
+      return
+    }
     const merged = [...images, ...incoming]
-    if (merged.length > imageRestrictionNumber) { setError("Max 5 images"); return }
+    if (activeExistingImages.length + merged.length > 5) {
+      setError("Max 5 images")
+      return
+    }
+    setError(null)
     setImages(merged)
     e.target.value = ''
   }
+
   function handleAddVideos(e) {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
+    const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
+    if (tooBig.length > 0) {
+      setError(`Videos must be under 12MB each (${tooBig.map(f => f.name).join(', ')})`)
+      return
+    }
     const merged = [...videos, ...incoming]
-    if (merged.length > videoRestrictionNumber) { setError("Max 3 videos"); return }
+    if (activeExistingVideos.length + merged.length > 1) {
+      setError("Max 1 video")
+      return
+    }
+    setError(null)
     setVideos(merged)
     e.target.value = ''
   }
+
   function removeImage(index) {
     setImages(prev => prev.filter((_, i) => i !== index))
   }
+
   function removeVideo(index) {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
+
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
       return
     }
-    const remainingExisting = (existsImages?.length ?? 0) - eliminatedExistsImages.id.length
-    if (remainingExisting === 0 && images.length === 0) {
+    if (totalImages === 0) {
       setError("At least 1 image required")
       return
     }
-      const eliminatedMedia = [
-        ...eliminatedExistsImages.id,
-        ...eliminatedExistsVideos.id
-      ];
-      const payload = {
-        ...form,
-        eliminatedMedia
-      };
-      const formData = new FormData();
-      formData.append(
-        "spot",
-        new Blob([JSON.stringify(payload)], {
-          type: "application/json"
-        })
-      );
-      const media = [...images, ...videos];
-      media.forEach(f => formData.append("media", f));
-      setLoading(true)
+    const eliminatedMedia = [
+      ...eliminatedExistsImages.id,
+      ...eliminatedExistsVideos.id
+    ];
+    const payload = { ...form, eliminatedMedia };
+    const formData = new FormData();
+    formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+    ;[...images, ...videos].forEach(f => formData.append("media", f));
+    setLoading(true)
     try {
       await handleForm(section, formData)
       setLoading(false)
       handleGoingBack()
-      //router.push('/dashboard')
     } catch (err) {
       setError(err.message)
       setLoading(false)
@@ -151,39 +175,36 @@ export default function ModifySpotForm() {
       body: formData,
     });
     const text = await res.text()
-    if (!res.ok) {
-          throw new Error(text.message+" try again, it could be the media format");
-    }
+    if (!res.ok) throw new Error(text.message + " try again, it could be the media format");
   }
-    const {contextSafe} = useGSAP(()=>{},{ scope: containerRef })
-  useGSAP(()=>{
-    if(!containerRef.current) return
-      const form = containerRef.current
-      gsap.killTweensOf(form)
-      gsap.set(form,{yPercent:200})
-      gsap.to(form,{
-        yPercent:0,
-        duration:1,
-        ease:"power4.inOut",
-        onComplete: ()=>{
-          setStatusHref(false)
-        }
-      })
 
-  },{scope: containerRef})
+  const { contextSafe } = useGSAP(() => {}, { scope: containerRef })
+  useGSAP(() => {
+    if (!containerRef.current) return
+    const form = containerRef.current
+    gsap.killTweensOf(form)
+    gsap.set(form, { yPercent: 200 })
+    gsap.to(form, {
+      yPercent: 0,
+      duration: 1,
+      ease: "power4.inOut",
+      onComplete: () => { setStatusHref(false) }
+    })
+  }, { scope: containerRef })
+
   const handleGoingBack = contextSafe(() => {
-      if(!containerRef.current) return
-      const form = containerRef.current
-      gsap.killTweensOf(form)
-      gsap.to(form,{
-        yPercent:200,
-        duration:1,
-        ease:"power4.inOut",
-        onComplete: ()=>{
-          clearPendingHref()
-          router.push("/dashboard")
-        }
-      })
+    if (!containerRef.current) return
+    const form = containerRef.current
+    gsap.killTweensOf(form)
+    gsap.to(form, {
+      yPercent: 200,
+      duration: 1,
+      ease: "power4.inOut",
+      onComplete: () => {
+        clearPendingHref()
+        router.push("/dashboard")
+      }
+    })
   })
 
   return (
@@ -191,12 +212,11 @@ export default function ModifySpotForm() {
       <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
         <section className="flex justify-between py-2">
           <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">EDIT SPOT</h1>
-          <button onClick={()=>handleGoingBack()} className={`w-fit bg-transparent h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</button>
+          <button onClick={() => handleGoingBack()} className={`w-fit bg-transparent h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</button>
         </section>
 
         <form autoComplete="off" onSubmit={handleSubmit} className="md:h-full flex flex-col gap-1.5 md:gap-2 lg:gap-3">
 
-          {/* 01 / LOCATION */}
           <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">01/LOCATION</h2>
           <div className="flex flex-col md:flex-row h-full gap-1.5 md:gap-2 lg:gap-3">
             <div className="flex flex-col gap-1 w-full md:w-1/2 min-h-[300px] md:min-h-0 md:flex-1 border relative">
@@ -242,7 +262,6 @@ export default function ModifySpotForm() {
             </div>
           </div>
 
-          {/* 02 / IDENTITY */}
           <div>
             <article className="flex items-end justify-between">
               <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">02/IDENTITY</h2>
@@ -263,9 +282,10 @@ export default function ModifySpotForm() {
               <article className="flex flex-col gap-0.5">
                 <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">RISK</label>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setForm((prev) => ({ ...prev, risk: "LOW" }))} className={`w-fit border ${form.risk === "LOW" ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>LOW</button>
-                  <button type="button" onClick={() => setForm((prev) => ({ ...prev, risk: "MEDIUM" }))} className={`w-fit border ${form.risk === "MEDIUM" ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>MEDIUM</button>
-                  <button type="button" onClick={() => setForm((prev) => ({ ...prev, risk: "HIGH" }))} className={`w-fit border ${form.risk === "HIGH" ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>HIGH</button>
+                  {['LOW', 'MEDIUM', 'HIGH'].map(r => (
+                    <button key={r} type="button" onClick={() => setForm(p => ({ ...p, risk: r }))}
+                      className={`w-fit border ${form.risk === r ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>{r}</button>
+                  ))}
                 </div>
               </article>
             </section>
@@ -274,18 +294,17 @@ export default function ModifySpotForm() {
               <div className="flex flex-col gap-2 w-fit">
                 <article className="flex items-end justify-between">
                   <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">TYPES</label>
-                  <p className="text-xs bg-transparent text-primary-500">{form.types.length}/{options.length} selected</p>
+                  <p className="text-xs bg-transparent text-primary-500">{form.types.length}/{OPTIONS.length} selected</p>
                 </article>
                 <div className="flex gap-2">
-                  {options.map((t) => (
-                    <button key={t.value} type="button"
-                      onClick={() => setForm((prev) => ({
-                        ...prev, types: prev.types.includes(t.value)
-                          ? prev.types.filter(x => x !== t.value)
-                          : [...prev.types, t.value],
+                  {OPTIONS.map(t => (
+                    <button key={t} type="button"
+                      onClick={() => setForm(p => ({
+                        ...p, types: p.types.includes(t)
+                          ? p.types.filter(x => x !== t)
+                          : [...p.types, t]
                       }))}
-                      className={`w-fit border ${form.types.includes(t.value) ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}
-                    >{t.value}</button>
+                      className={`w-fit border ${form.types.includes(t) ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>{t}</button>
                   ))}
                 </div>
               </div>
@@ -294,19 +313,24 @@ export default function ModifySpotForm() {
             <section className="flex flex-col md:flex-row w-full py-3 gap-5">
               <div className="flex flex-row md:flex-col justify-between md:justify-start md:w-1/2 gap-2 pt-1">
 
-                {/* IMAGES */}
                 <div className="flex flex-col w-1/2 md:w-full gap-0.5">
                   <div className="flex justify-between items-center">
                     <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">IMAGES</label>
                     <button type="button" onClick={() => imageInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm md:text-base text-primary-500 bg-transparent">{totalImages}/5 · max 3MB each</p>
+                    <p className={`text-sm md:text-base font-mono bg-transparent ${imageOverLimit ? "text-red-800" : "text-primary-500"}`}>
+                      {formatMB(imagesTotalMB)}
+                    </p>
+                  </div>
                   <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {existsImages && existsImages.map((img) => (
-                      <div key={img.id} className={`relative ${eliminatedExistsImages.id.includes(img.id) ? "hidden" : ""}`}>
-                        <img src={img.link} className="w-16 h-16 object-cover rounded" />
+                    {activeExistingImages.map((img) => (
+                      <div key={img.id} className="relative w-16 h-16">
+                        <img src={img.link} className="w-full h-full object-cover rounded" />
                         <button type="button"
-                          disabled={(existsImages?.length ?? 0) - eliminatedExistsImages.id.length + images.length <= 1}
+                          disabled={totalImages <= 1}
                           onClick={() => setEliminatedExistsImages((prev) => ({ id: [...prev.id, img.id] }))}
                           className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">×</button>
                       </div>
@@ -314,29 +338,42 @@ export default function ModifySpotForm() {
                     {images.map((file, i) => (
                       <div key={i} className="relative w-16 h-16">
                         <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
+                        <p className="absolute bottom-0 left-0 right-0 text-center text-white text-[9px] bg-black/50 rounded-b">
+                          {formatMB(file.size)}
+                        </p>
                         <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* VIDEOS */}
                 <div className="flex flex-col w-1/2 md:w-full gap-0.5">
                   <div className="flex justify-between items-center">
                     <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">VIDEOS</label>
                     <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                   </div>
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm md:text-base text-primary-500 bg-transparent">{totalVideos}/1 · max 12MB each</p>
+                    <p className={`text-sm md:text-base font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
+                      {formatMB(videosTotalMB)}
+                    </p>
+                  </div>
                   <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
                   <div className="flex flex-wrap gap-1 mt-1">
-                    {existsVideos && existsVideos.map((vid) => (
-                      <div key={vid.id} className={`relative ${eliminatedExistsVideos.id.includes(vid.id) ? "hidden" : ""}`}>
-                        <img src={vid.thumbnailUrl} className="w-16 h-16 object-cover rounded" />
-                        <button type="button" onClick={() => setEliminatedExistsVideos((prev) => ({ id: [...prev.id, vid.id] }))} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
+                    {activeExistingVideos.map((vid) => (
+                      <div key={vid.id} className="relative w-16 h-16">
+                        <img src={vid.thumbnailUrl} className="w-full h-full object-cover rounded" />
+                        <button type="button"
+                          onClick={() => setEliminatedExistsVideos((prev) => ({ id: [...prev.id, vid.id] }))}
+                          className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
                       </div>
                     ))}
                     {videos.map((file, i) => (
                       <div key={i} className="relative w-16 h-16">
                         <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
+                        <p className="absolute bottom-0 left-0 right-0 text-center text-white text-[9px] bg-black/50 rounded-b">
+                          {formatMB(file.size)}
+                        </p>
                         <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
                       </div>
                     ))}
@@ -344,7 +381,6 @@ export default function ModifySpotForm() {
                 </div>
               </div>
 
-              {/* DESCRIPTION */}
               <div className="flex flex-col w-full md:w-1/2 gap-0.5 md:ps-2 pt-2 md:pt-0 justify-between">
                 <article className="flex flex-col gap-2 mb-1">
                   <div className="flex justify-between">
@@ -353,10 +389,10 @@ export default function ModifySpotForm() {
                   </div>
                   <textarea onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} required className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm w-full" rows={2} name="description" value={form.description} onChange={handleChange} placeholder="Description" />
                 </article>
-                <article className="flex justify-between">
-                  {error && <p className="text-red-800 text-xl py-0.5 bg-transparent">{error}</p>}
+                <article className="flex justify-between items-center">
+                  {error && <p className="text-red-800 text-sm py-0.5 bg-transparent">{error}</p>}
                   {message && <p className="text-green-800 text-xl py-0.5 bg-transparent">{message}</p>}
-                  <button disabled={loading} type="submit" className="hover:bg-primary text-xs md:text-sm lg:text-2xl xl:text-2xl font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                  <button disabled={loading} type="submit" className="hover:bg-primary text-xs md:text-sm lg:text-2xl xl:text-2xl font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ml-auto">
                     SUBMIT
                   </button>
                 </article>

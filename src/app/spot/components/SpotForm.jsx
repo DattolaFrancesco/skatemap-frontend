@@ -10,8 +10,8 @@ import { useGSAP } from "@gsap/react";
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
 const OPTIONS = ['RAIL', 'LEDGE', 'STREET', 'SKATEPARK', 'STAIR']
-const MAX_VIDEO_SIZE = 8 * 1024 * 1024
-const MAX_IMAGE_SIZE = 1.5 * 1024 * 1024
+const MAX_VIDEO_SIZE = 12 * 1024 * 1024
+const MAX_IMAGE_SIZE = 3 * 1024 * 1024
 
 function formatMB(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB"
@@ -61,7 +61,7 @@ export default function SpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
     const tooBig = incoming.filter(f => f.size > MAX_IMAGE_SIZE)
     if (tooBig.length > 0) {
-      setError(`Images must be under 1.5MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Images must be under 3MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...images, ...incoming]
@@ -75,7 +75,7 @@ export default function SpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
-      setError(`Videos must be under 8MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Videos must be under 12MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...videos, ...incoming]
@@ -233,7 +233,7 @@ export default function SpotForm() {
             <div>
               <article className="flex items-end justify-between">
                 <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">02/IDENTITY</h2>
-                <p className="py-1 px-2 text-xs md:text-md w-fit bg-transparent text-primary-500">How locals call it and how it skates</p>
+                <p className="py-1 px-2 font-bold text-xs md:text-xl w-fit bg-transparent text-primary-500">How locals call it and how it skates</p>
               </article>
   
               <section className="flex flex-col md:flex-row gap-2 md:gap-5">
@@ -262,7 +262,7 @@ export default function SpotForm() {
                 <div className="flex flex-col gap-2 w-fit">
                   <article className="flex items-end justify-between">
                     <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">TYPES</label>
-                    <p className="text-xs bg-transparent text-primary-500">{form.types.length}/{OPTIONS.length} selected</p>
+                    <p className="text-base bg-transparent text-primary-500">{form.types.length}/{OPTIONS.length} selected</p>
                   </article>
                   <div className="flex gap-2">
                     {OPTIONS.map(t => (
@@ -287,8 +287,8 @@ export default function SpotForm() {
                       <button type="button" onClick={() => imageInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-xs text-primary-500 bg-transparent">{images.length}/5 · max 1.5MB each</p>
-                      <p className={`text-xs font-mono bg-transparent ${imageOverLimit ? "text-red-800" : "text-primary-500"}`}>
+                      <p className="text-sm md:text-base text-primary-500 bg-transparent">{images.length}/5 · max 3MB each</p>
+                      <p className={`text-sm md:text-base font-mono bg-transparent ${imageOverLimit ? "text-red-800" : "text-primary-500"}`}>
                         {formatMB(imagesTotalMB)}
                       </p>
                     </div>
@@ -312,8 +312,8 @@ export default function SpotForm() {
                       <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-xs text-primary-500 bg-transparent">{videos.length}/1 · max 10MB each</p>
-                      <p className={`text-xs font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
+                      <p className="text-sm md:text-base  text-primary-500 bg-transparent">{videos.length}/1 · max 12MB each</p>
+                      <p className={`text-sm md:text-base  font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
                         {formatMB(videosTotalMB)}
                       </p>
                     </div>

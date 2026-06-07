@@ -214,6 +214,7 @@ export default function NavBar() {
                             inputRef.current.value = ""
                             router.push(``)
                             setReset(true)
+                            setFilterOpen(prev=>!prev)
                         }}>
                             Reset filters
                         </button>

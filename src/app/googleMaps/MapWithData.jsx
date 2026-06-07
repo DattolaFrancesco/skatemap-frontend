@@ -123,7 +123,7 @@ export default function MapWithData({lat, lng}) {
             onKeyDown={(e) => {
               if (e.key === "Enter") e.preventDefault();
             }}
-            placeholder="Search place..."
+            placeholder="Search a place..."
             className="p-2 w-full bg-primary relative"
           />
         </Autocomplete>

@@ -127,9 +127,9 @@ export default function MySpots() {
         const spot = e.getBoundingClientRect()
         gsap.timeline()
             .to(e, {
-                scale: 2,
+                scale: 1.2,
                 x: window.innerWidth / 2 - spot.left - spot.width / 2,
-                y: window.innerHeight / 2 - spot.top - spot.height / 2,
+                y: window.innerHeight / 1.5 - spot.top - spot.height / 2,
                 zIndex: 99999,
                 ease: "power2.out"
             })
