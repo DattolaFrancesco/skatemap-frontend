@@ -28,7 +28,7 @@ export default function ImageCarousel({ media }) {
           if (m.format === "image") {
             return <img key={i} src={m.link} alt="spot media" onClick={() => setMediaOpen(m)} className="w-[90%] h-[150px] md:h-[220px] object-cover shrink-0" />
           }
-          return <img key={i} src={m.thumbnailUrl} onClick={() => setMediaOpen(m)} className="w-full h-[150px] md:h-[220px] object-cover shrink-0" />
+          return <video key={i} src={m.link} onClick={() => setMediaOpen(m)} className="w-full h-[150px] md:h-[220px] object-cover shrink-0" />
         })}
       </div>
     </div>
