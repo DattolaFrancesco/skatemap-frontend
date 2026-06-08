@@ -236,11 +236,11 @@ export default function Request() {
             {/* modal unapprove */}
             <div ref={containerUnApproveRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={unApproveRef} className={`w-2/3 md:full bg-amber-50 border-primary-500 border-dotted border-3 ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-red-800 text-center text-xl md:text-4xl p-5">do you really want to not approve {unApprovedSpot?.name}?</h1>
+                    <div ref={unApproveRef} className={`w-2/3 md:full bg-amber-50  ${loading ? "animate-pulse" : ""}`}>
+                        <h1 className="text-red-800 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO NO APPROVE  {unApprovedSpot?.name}?</h1>
                         <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => unApproveSpot(unApprovedSpot)} className="px-5 text-sm md:text-xl">Yes</button>
-                            <button onClick={() => setAskPermissionToUnApprove(false)} className="px-5 text-sm md:text-xl">No</button>
+                            <button onClick={() => unApproveSpot(unApprovedSpot)} className="px-5 text-sm md:text-xl">YES</button>
+                            <button onClick={() => setAskPermissionToUnApprove(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
                     </div>
                 </div>
@@ -249,11 +249,11 @@ export default function Request() {
             {/* modal approve */}
             <div ref={containerApproveRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={approveRef} className={`w-2/3 md:full bg-amber-50 border-primary-500 border-dotted border-3 ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">do you really want to approve {approvedSpot?.name}?</h1>
+                    <div ref={approveRef} className={`w-2/3 md:full bg-amber-50  ${loading ? "animate-pulse" : ""}`}>
+                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO APPROVE  {approvedSpot?.name}?</h1>
                         <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => approveSpot(approvedSpot)} className="px-5 text-sm md:text-xl">Yes</button>
-                            <button onClick={() => setAskPermissionToApprove(false)} className="px-5 text-sm md:text-xl">No</button>
+                            <button onClick={() => approveSpot(approvedSpot)} className="px-5 text-sm md:text-xl">YES</button>
+                            <button onClick={() => setAskPermissionToApprove(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
                     </div>
                 </div>
@@ -270,7 +270,7 @@ export default function Request() {
                                 <SpotCard spot={s} />
                                 <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
                                     <button onClick={() => askConfermationApproved(s)} className="text-sm md:text-base">APPROVE</button>
-                                    <button onClick={() => askConfermationUnApproved(s)} className="text-sm md:text-base">DELETE</button>
+                                    <button onClick={() => askConfermationUnApproved(s)} className="text-sm md:text-base">UNAPPROVE</button>
                                     <button onClick={(e) => handleModify(s.id, e.currentTarget.closest(".relative"))} className="nav-link text-sm md:text-base">MODIFY</button>
                                 </div>
                             </div>

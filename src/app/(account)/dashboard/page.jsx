@@ -188,11 +188,11 @@ export default function MySpots() {
         <div>
             <div ref={containerPermissionRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={permissionRef} className={`w-2/3 md:full bg-amber-50 border-primary-500 border-dotted border-3 ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-red-800 text-center text-xl md:text-4xl p-5">do you really want to delete {eliminationSpot?.name}?</h1>
+                    <div ref={permissionRef} className={`w-2/3 md:full bg-amber-50 ${loading ? "animate-pulse" : ""}`}>
+                        <h1 className="text-red-800 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO DELETE  {eliminationSpot?.name.toUpperCase()}?</h1>
                         <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => deleteSpotById(eliminationSpot.id)} className="px-5 text-sm md:text-xl">Yes</button>
-                            <button onClick={() => setAskPermission(false)} className="px-5 text-sm md:text-xl">No</button>
+                            <button onClick={() => deleteSpotById(eliminationSpot.id)} className="px-5 text-sm md:text-xl">YES</button>
+                            <button onClick={() => setAskPermission(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
                     </div>
                 </div>
