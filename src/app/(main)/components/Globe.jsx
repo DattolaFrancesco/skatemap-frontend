@@ -32,7 +32,6 @@ export default function Globe({ searchParams }) {
   const allSpots = useSpotStore((data)=>data.allSpots)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
   const [filteredSpots, setFilteredSpots] = useState([]);
-  const bgTheme = localStorage.getItem("BgTheme")
   
   useEffect(()=>{
       async function getAllSpot(){
@@ -107,6 +106,7 @@ useEffect(() => {
 
   useEffect(() => {
     if (!mapRef.current) return
+    const bgTheme = localStorage.getItem("BgTheme")
     mapInstance.current = new maplibregl.Map({
       container: mapRef.current,
       style: `https://api.maptiler.com/maps/dataviz-${bgTheme === "bg-dark-custom" ? "light" : "dark"}/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
