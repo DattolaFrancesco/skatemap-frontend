@@ -176,7 +176,7 @@ export default function SpotForm() {
 
   return (
 <div className="w-full h-full flex justify-center items-center p-3">
-      <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[80%] md:h-[80%] justify-center items-center ${loading ? "animate-pulse" : ""} `}>
+      <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] justify-center items-center ${loading ? "animate-pulse" : ""} `}>
         <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
           <section className="flex justify-between py-2">
             <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">ADD SPOT</h1>
@@ -312,7 +312,7 @@ export default function SpotForm() {
                       <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-sm md:text-base  text-primary-500 bg-transparent">{videos.length}/1 · max 12MB each</p>
+                      <p className="text-sm md:text-base  text-primary-500 bg-transparent">max 12MB</p>
                       <p className={`text-sm md:text-base  font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
                         {formatMB(videosTotalMB)}
                       </p>
