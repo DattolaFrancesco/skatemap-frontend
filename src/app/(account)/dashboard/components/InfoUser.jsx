@@ -41,23 +41,26 @@ export default function InfoUser(){
 
     if(!user)
     return(
-        <div className="w-full flex flex-col md:flex-row justify-between">
-            <div className="flex flex-col gap-3">
-                <div className="h-12 w-52 bg-black/20 animate-pulse" />
-                <div className="flex flex-wrap gap-2">
-                    <div className="flex gap-1 items-end">
-                        <div className="h-8 w-8 bg-black/20 animate-pulse" />
-                        <div className="h-4 w-12 bg-black/20 animate-pulse" />
+        <div className="w-full flex flex-col md:flex-row">
+            <div className="w-full flex flex-col gap-3">
+                <div className="h-14 w-48 bg-black/20 animate-pulse" />
+                <div className="h-7 w-36 bg-black/20 animate-pulse mt-3" />
+                <div className="h-7 w-52 bg-black/20 animate-pulse" />
+            </div>
+            <div className="w-full flex flex-col justify-around">
+                <div className="flex ms-auto">
+                    <div className="nav-link w-16 h-5 bg-black/20 animate-pulse" />
+                </div>
+                <div className="flex justify-end gap-3 py-4">
+                    <div className="flex flex-col justify-center items-center gap-2">
+                        <div className="h-14 w-12 bg-black/20 animate-pulse" />
+                        <div className="h-5 w-14 bg-black/20 animate-pulse" />
                     </div>
-                    <div className="flex gap-1 items-end">
-                        <div className="h-8 w-8 bg-black/20 animate-pulse" />
-                        <div className="h-4 w-20 bg-black/20 animate-pulse" />
+                    <div className="flex flex-col justify-center items-center gap-2">
+                        <div className="h-14 w-12 bg-black/20 animate-pulse" />
+                        <div className="h-5 w-20 bg-black/20 animate-pulse" />
                     </div>
                 </div>
-            </div>
-            <div className="flex flex-col gap-2 justify-center items-center">
-                <div className="nav-link w-24 h-5 bg-black/20 animate-pulse" />
-                <div className="nav-link w-24 h-5 bg-black/20 animate-pulse" />
             </div>
         </div>
     )
