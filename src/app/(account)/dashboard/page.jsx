@@ -40,7 +40,7 @@ export default function MySpots() {
     useEffect(() => {
         async function getSpots() {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/all`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/my`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -49,6 +49,7 @@ export default function MySpots() {
                 })
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.message);
+                console.log(data)
                 setAllMySpots(data)
             } catch (error) {
                 console.log(error.message)
