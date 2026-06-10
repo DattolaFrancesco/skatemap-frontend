@@ -7,6 +7,7 @@ import useNavigationStore from "@/app/(main)/store/NavigationStore"
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import imageCompression from "browser-image-compression";
+import heic2any from "heic2any";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
@@ -93,7 +94,15 @@ export default function SpotForm() {
   function removeVideo(index) {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
-
+  async function normalize(file){
+    const isHeic = /heic|heif/i.test(file.type) || /\.he?i[cf]$/i.test(file.name)
+    if(!isHeic) return file
+    const heic2any = (await import("heic2any")).default // gets the import when it needed
+    let blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 })
+    if (Array.isArray(blob)) blob = blob[0]
+    const nome = file.name.replace(/\.[^.]+$/, ".jpg")
+    return new File([blob], nome, { type: "image/jpeg" })
+  }
   async function comprimi(files){
     const results = []
     const options = {
@@ -103,8 +112,10 @@ export default function SpotForm() {
       fileType: 'image/webp',
     }
     for(let x = 0; x < files.length;x++){
-      const compresso = await imageCompression(files[x], options)
-      results.push(compresso)
+      const normal = await normalize(files[x])
+      const compresso = await imageCompression(normal, options)
+      const nome = normal.name.replace(/\.[^.]+$/, '.webp')
+      results.push(new File([compresso], nome, { type: 'image/webp' }))
     }
     return results
   }
