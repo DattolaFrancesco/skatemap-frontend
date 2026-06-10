@@ -7,7 +7,6 @@ import useNavigationStore from "@/app/(main)/store/NavigationStore"
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import imageCompression from "browser-image-compression";
-import heic2any from "heic2any";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
