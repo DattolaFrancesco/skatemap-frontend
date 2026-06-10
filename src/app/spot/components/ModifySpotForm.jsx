@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import useNavigationStore from "@/app/(main)/store/NavigationStore";
+import imageCompression from "browser-image-compression";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
@@ -137,7 +138,32 @@ export default function ModifySpotForm() {
   function removeVideo(index) {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
+    async function normalize(file){
+    const isHeic = /heic|heif/i.test(file.type) || /\.he?i[cf]$/i.test(file.name)
+    if(!isHeic) return file
+    const heic2any = (await import("heic2any")).default
+    let blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 })
+    if (Array.isArray(blob)) blob = blob[0]
+    const nome = file.name.replace(/\.[^.]+$/, ".jpg")
+    return new File([blob], nome, { type: "image/jpeg" })
+  }
 
+  async function comprimi(files){
+    const results = []
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1280,
+      useWebWorker: true,
+      fileType: 'image/webp',
+    }
+    for(let x = 0; x < files.length; x++){
+      const normal = await normalize(files[x])
+      const compresso = await imageCompression(normal, options)
+      const nome = normal.name.replace(/\.[^.]+$/, '.webp')
+      results.push(new File([compresso], nome, { type: 'image/webp' }))
+    }
+    return results
+  }
   async function handleSubmit(e) {
     e.preventDefault()
     if (!form.latitude || !form.longitude) {
@@ -148,16 +174,17 @@ export default function ModifySpotForm() {
       setError("At least 1 image required")
       return
     }
-    const eliminatedMedia = [
-      ...eliminatedExistsImages.id,
-      ...eliminatedExistsVideos.id
-    ];
-    const payload = { ...form, eliminatedMedia };
-    const formData = new FormData();
-    formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
-    ;[...images, ...videos].forEach(f => formData.append("media", f));
     setLoading(true)
     try {
+      const newImages = await comprimi(images)  
+      const eliminatedMedia = [
+        ...eliminatedExistsImages.id,
+        ...eliminatedExistsVideos.id
+      ];
+      const payload = { ...form, eliminatedMedia };
+      const formData = new FormData();
+      formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
+      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name));  // ⬅️ newImages
       await handleForm(section, formData)
       setLoading(false)
       handleGoingBack()
