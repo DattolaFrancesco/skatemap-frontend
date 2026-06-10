@@ -111,6 +111,11 @@ export default function SpotForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     const newImages = await comprimi(images)
+    newImages.forEach((i)=>{
+      const index = i.name.lastIndexOf('.')
+      const fileName = index === -1 ? i.name : i.name.slice(0,index) + ".webp"
+      i.name = fileName
+    })
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
       return
@@ -124,7 +129,7 @@ export default function SpotForm() {
     try {
       const formData = new FormData()
       formData.append("spot", new Blob([JSON.stringify(form)], { type: "application/json" }))
-      ;[...newImages, ...videos].forEach(f => formData.append("media", f))
+      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name))
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/upload`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` },
