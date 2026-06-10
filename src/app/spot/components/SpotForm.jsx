@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import useNavigationStore from "@/app/(main)/store/NavigationStore"
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import imageCompression from "browser-image-compression";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
@@ -93,8 +94,23 @@ export default function SpotForm() {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
 
+  async function comprimi(files){
+    const results = []
+    const options = {
+      maxSizeMB:1,
+      maxWidthOrHeight: 1280,  
+      useWebWorker: true,   
+      fileType: 'image/webp',
+    }
+    for(let x = 0; x < files.length;x++){
+      const compresso = await imageCompression(files[x], options)
+      results.push(compresso)
+    }
+    return results
+  }
   async function handleSubmit(e) {
     e.preventDefault()
+    const newImages = await comprimi(images)
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
       return
@@ -108,7 +124,7 @@ export default function SpotForm() {
     try {
       const formData = new FormData()
       formData.append("spot", new Blob([JSON.stringify(form)], { type: "application/json" }))
-      ;[...images, ...videos].forEach(f => formData.append("media", f))
+      ;[...newImages, ...videos].forEach(f => formData.append("media", f))
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/upload`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` },
