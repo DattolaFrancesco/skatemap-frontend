@@ -121,11 +121,6 @@ export default function SpotForm() {
   async function handleSubmit(e) {
     e.preventDefault()
     const newImages = await comprimi(images)
-    newImages.forEach((i)=>{
-      const index = i.name.lastIndexOf('.')
-      const fileName = index === -1 ? i.name : i.name.slice(0,index) + ".webp"
-      i.name = fileName
-    })
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
       return
