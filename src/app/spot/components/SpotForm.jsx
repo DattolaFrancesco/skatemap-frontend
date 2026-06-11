@@ -120,6 +120,7 @@ export default function SpotForm() {
   }
   async function handleSubmit(e) {
     e.preventDefault()
+    setLoading(true)
     const newImages = await comprimi(images)
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
@@ -129,7 +130,6 @@ export default function SpotForm() {
       setError("At least 1 image is required")
       return
     }
-    setLoading(true)
     const token = localStorage.getItem('token')
     try {
       const formData = new FormData()

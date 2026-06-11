@@ -166,6 +166,7 @@ export default function ModifySpotForm() {
   }
   async function handleSubmit(e) {
     e.preventDefault()
+    setLoading(true)
     if (!form.latitude || !form.longitude) {
       setError("Click on the map to set the location")
       return
@@ -174,7 +175,6 @@ export default function ModifySpotForm() {
       setError("At least 1 image required")
       return
     }
-    setLoading(true)
     try {
       const newImages = await comprimi(images)  
       const eliminatedMedia = [
@@ -235,7 +235,7 @@ export default function ModifySpotForm() {
   })
 
   return (
-    <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] justify-center items-center ${loading ? "animate-pulse" : ""} p-3`}>
+    <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] justify-center items-center ${loading ? "animate-pulse pointer-events-none" : ""} p-3`}>
       <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
         <section className="flex justify-between py-2">
           <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">EDIT SPOT</h1>
