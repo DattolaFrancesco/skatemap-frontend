@@ -184,7 +184,7 @@ export default function ModifySpotForm() {
       const payload = { ...form, eliminatedMedia };
       const formData = new FormData();
       formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
-      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name));  // ⬅️ newImages
+      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name)); 
       await handleForm(section, formData)
       setLoading(false)
       handleGoingBack()
