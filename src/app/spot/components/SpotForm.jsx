@@ -11,7 +11,7 @@ import imageCompression from "browser-image-compression";
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
 const OPTIONS = ['RAIL', 'LEDGE', 'STREET', 'SKATEPARK', 'STAIR']
-const MAX_VIDEO_SIZE = 12 * 1024 * 1024
+const MAX_VIDEO_SIZE = 30 * 1024 * 1024
 const MAX_IMAGE_SIZE = 3 * 1024 * 1024
 
 function formatMB(bytes) {
@@ -76,7 +76,7 @@ export default function SpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
-      setError(`Videos must be under 12MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Videos must be under 30MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...videos, ...incoming]
@@ -338,7 +338,7 @@ export default function SpotForm() {
                       <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-sm md:text-base  text-primary-500 bg-transparent">max 12MB</p>
+                      <p className="text-sm md:text-base  text-primary-500 bg-transparent">max 30MB</p>
                       <p className={`text-sm md:text-base  font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
                         {formatMB(videosTotalMB)}
                       </p>
