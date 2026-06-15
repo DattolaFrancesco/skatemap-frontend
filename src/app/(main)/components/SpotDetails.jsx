@@ -191,15 +191,15 @@ export default function SpotDetails(){
 
     if(data) return(
         <div 
-        onClick={()=>{
-            setSpotOpen(null)
-            setMediaOpen(null)
-            setLiked(null)
-            setMaps(false)
-            setTimeout(() => {
-            setData(null)
-            }, 200);
-        }}
+        // onClick={()=>{
+        //     setSpotOpen(null)
+        //     setMediaOpen(null)
+        //     setLiked(null)
+        //     setMaps(false)
+        //     setTimeout(() => {
+        //     setData(null)
+        //     }, 200);
+        // }}
         className={` ${spotOpen ? "w-full opacity-100" : "w-0 opacity-0"} fixed inset-0 z-999 min-h-full bg-black/50 flex justify-start items-center transition-all duration-500  overflow-hidden overflow-scroll`}>
            <main onClick={(e)=>e.stopPropagation()} className="w-full sm:w-2/3 max-w-[800px] h-fit">
                 <div className="bg-amber-50">

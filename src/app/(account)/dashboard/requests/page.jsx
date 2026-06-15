@@ -27,6 +27,7 @@ export default function Request() {
     const pendingSpots = useUserStore((data) => data.pendingSpots)
     const smallContainerRef = useRef(null)
     const containerUnApproveRef = useRef(null)
+    const ytLink = useRef(null)
     const unApproveRef = useRef(null)
     const containerApproveRef = useRef(null)
     const approveRef = useRef(null)
@@ -63,6 +64,20 @@ export default function Request() {
         currentPage * PAGE_SIZE,
         (currentPage + 1) * PAGE_SIZE
     )
+    async function getSpot(id){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/single/${id}`,{
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if(!res.ok) throw new Error("Can't connect to the server")
+             return data.video[0].id
+        }catch(err){
+            console.log(err.message)
+        }
+    }
     async function approveSpot(spotId) {
         setLoading(true)
         try {
@@ -86,6 +101,30 @@ export default function Request() {
         } finally {
             setLoading(false)
             setAskPermissionToApprove(false)
+        }
+    }
+    async function uploadYt(id) {
+        const realId = await getSpot(id)
+        console.log(realId)
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/media/addYt/${realId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({link : ytLink.current})
+                }
+            )
+            const data =  await res.text()
+            if (!res.ok) throw new Error("yt change link failed")
+            console.log(data)
+            approveSpot(approvedSpot)
+           
+        } catch (error) {
+            console.log(error.message)
         }
     }
     async function unApproveSpot(spotId) {
@@ -113,21 +152,17 @@ export default function Request() {
             setAskPermissionToUnApprove(false)
         }
     }
-
     function askConfermationUnApproved(spot) {
         shouldBlockAnimateRef.current = true
         setAskPermissionToUnApprove(true)
         setUnApprovedSpot(spot)
     }
-
     function askConfermationApproved(spot) {
         shouldBlockAnimateRef.current = true
         setAskPermissionToApprove(true)
         setApprovedSpot(spot)
     }
-
     const { contextSafe } = useGSAP(() => {}, { scope: smallContainerRef })
-
     useGSAP(() => {
         if (!smallContainerRef.current) return
         if (shouldBlockAnimateRef.current) {
@@ -149,7 +184,6 @@ export default function Request() {
             onComplete: () => { setStatusHref(false) }
         })
     }, { scope: smallContainerRef, dependencies: [paginatedSpots] })
-
     const handleModify = contextSafe((s, e) => {
         if (!smallContainerRef.current) return
         gsap.killTweensOf(gsap.utils.toArray(smallContainerRef?.current?.children))
@@ -172,7 +206,6 @@ export default function Request() {
                 }
             })
     })
-
     useGSAP(() => {
         if (!containerUnApproveRef.current) return
         timelineUnApproveRef.current = gsap.timeline({
@@ -249,10 +282,15 @@ export default function Request() {
             {/* modal approve */}
             <div ref={containerApproveRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={approveRef} className={`w-2/3 md:full bg-amber-50  ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO APPROVE  {approvedSpot?.name}?</h1>
+                    <div ref={approveRef} className={`w-2/3 md:full bg_login  ${loading ? "animate-pulse" : ""}`}>
+                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO APPROVE  {approvedSpot?.id}?</h1>
+                        <p>you need to download the video, check it and post it on yt</p>
+                        <p>make sure that the video exist and it's online</p>
+                        <input type="text" placeholder="add yt link" className="bg-white" onChange={(e)=>ytLink.current = e.currentTarget.value} value={ytLink.current}/>
                         <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => approveSpot(approvedSpot)} className="px-5 text-sm md:text-xl">YES</button>
+                            <button onClick={() => {
+                                uploadYt(approvedSpot?.id)
+                                }} className="px-5 text-sm md:text-xl">YES</button>
                             <button onClick={() => setAskPermissionToApprove(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
                     </div>
