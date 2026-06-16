@@ -46,6 +46,8 @@ export default function Grid({ searchParams }) {
         }
     }
     getAllSpot()
+    clearPendingHref()
+    setStatusHref(false)
     }, [])
     useEffect(()=>{
         if(!allSpots) return

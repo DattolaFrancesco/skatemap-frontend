@@ -38,6 +38,9 @@ export default function Request() {
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     const pendingHref = useNavigationStore((state) => state.pendingHref);
+    const [stage,setStage] = useState(0)
+    const [videos,setVideos] = useState(null)
+    const inputsRef = useRef([])
 
     useEffect(() => {
         async function getSpots() {
@@ -73,7 +76,13 @@ export default function Request() {
             })
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
-             return data.video[0].id
+                setVideos(data.video)
+                const newInputs = data.video.map((v)=>({
+                        id:v.id,
+                        link: ""
+                }))
+                inputsRef.current = newInputs
+
         }catch(err){
             console.log(err.message)
         }
@@ -104,23 +113,22 @@ export default function Request() {
         }
     }
     async function uploadYt(id) {
-        const realId = await getSpot(id)
-        console.log(realId)
+        console.log(inputsRef.current)
         try {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/media/addYt/${realId}`,
+                ///${realId}
+                `${process.env.NEXT_PUBLIC_API_URL}/media/addYt`,
                 {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${localStorage.getItem('token')}`
                     },
-                    body: JSON.stringify({link : ytLink.current})
+                    body: JSON.stringify(inputsRef.current)
                 }
             )
             const data =  await res.text()
             if (!res.ok) throw new Error("yt change link failed")
-            console.log(data)
             approveSpot(approvedSpot)
            
         } catch (error) {
@@ -161,6 +169,7 @@ export default function Request() {
         shouldBlockAnimateRef.current = true
         setAskPermissionToApprove(true)
         setApprovedSpot(spot)
+        getSpot(spot.id)
     }
     const { contextSafe } = useGSAP(() => {}, { scope: smallContainerRef })
     useGSAP(() => {
@@ -283,16 +292,33 @@ export default function Request() {
             <div ref={containerApproveRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
                     <div ref={approveRef} className={`w-2/3 md:full bg_login  ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO APPROVE  {approvedSpot?.id}?</h1>
-                        <p>you need to download the video, check it and post it on yt</p>
-                        <p>make sure that the video exist and it's online</p>
-                        <input type="text" placeholder="add yt link" className="bg-white" onChange={(e)=>ytLink.current = e.currentTarget.value} value={ytLink.current}/>
-                        <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => {
-                                uploadYt(approvedSpot?.id)
-                                }} className="px-5 text-sm md:text-xl">YES</button>
+                        {stage === 0 && videos &&
+                        <div>
+                            <section className="flex flex-col gap-2">
+                                <h1>APPROVING SPOT</h1>
+                                <p>you have to load  {videos.length} video on yt</p>
+                                {videos.map((v, i) => (
+                                  <div key={v.id} className="flex flex-col">
+                                        <label htmlFor={i}>{v.link.split("/").pop()}</label>
+                                        <input
+                                            type="text"
+                                            id={i}
+                                            placeholder="yt video link"
+                                            className="bg-white"
+                                            defaultValue={inputsRef.current[i].link}
+                                            onChange={(e) => {
+                                                const val = e.currentTarget.value
+                                                inputsRef.current[i] = {...inputsRef.current[i], link: val}
+                                            }}
+                                        />
+                                  </div>
+                                ))}
+                            </section>
+                            <button onClick={()=> console.log(inputsRef.current)}>test</button>
+                            <button onClick={() => {uploadYt(approvedSpot?.id)}} className="px-5 text-sm md:text-xl">YES</button>
                             <button onClick={() => setAskPermissionToApprove(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -307,7 +333,9 @@ export default function Request() {
                             <div key={s.id} className="relative">
                                 <SpotCard spot={s} />
                                 <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
-                                    <button onClick={() => askConfermationApproved(s)} className="text-sm md:text-base">APPROVE</button>
+                                    <button onClick={() => {
+                                        askConfermationApproved(s)
+                                        }} className="text-sm md:text-base">APPROVE</button>
                                     <button onClick={() => askConfermationUnApproved(s)} className="text-sm md:text-base">UNAPPROVE</button>
                                     <button onClick={(e) => handleModify(s.id, e.currentTarget.closest(".relative"))} className="nav-link text-sm md:text-base">MODIFY</button>
                                 </div>

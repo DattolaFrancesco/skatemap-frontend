@@ -11,11 +11,16 @@
     --primary-700: #488a01;
     --bg-image: url("/room-lighter.webp");
     }
+    * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    }
    html, body {
     font-family: monospace;
     margin: 0;
     padding: 0;
     overscroll-behavior: none;
+
 }
 
     #bg-fixed {
