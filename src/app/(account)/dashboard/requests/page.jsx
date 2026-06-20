@@ -27,6 +27,7 @@ export default function Request() {
     const pendingSpots = useUserStore((data) => data.pendingSpots)
     const smallContainerRef = useRef(null)
     const containerUnApproveRef = useRef(null)
+    const ytLink = useRef(null)
     const unApproveRef = useRef(null)
     const containerApproveRef = useRef(null)
     const approveRef = useRef(null)
@@ -37,6 +38,9 @@ export default function Request() {
     const setStatusHref = useNavigationStore((state) => state.setStatusHref);
     const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
     const pendingHref = useNavigationStore((state) => state.pendingHref);
+    const [stage,setStage] = useState(0)
+    const [videos,setVideos] = useState(null)
+    const inputsRef = useRef([])
 
     useEffect(() => {
         async function getSpots() {
@@ -63,6 +67,26 @@ export default function Request() {
         currentPage * PAGE_SIZE,
         (currentPage + 1) * PAGE_SIZE
     )
+    async function getSpot(id){
+        const token = localStorage.getItem('token')
+        try{
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/single/${id}`,{
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            const data = await res.json()
+            if(!res.ok) throw new Error("Can't connect to the server")
+                setVideos(data.video)
+                const newInputs = data.video.map((v)=>({
+                        id:v.id,
+                        link: ""
+                }))
+                inputsRef.current = newInputs
+
+        }catch(err){
+            console.log(err.message)
+        }
+    }
     async function approveSpot(spotId) {
         setLoading(true)
         try {
@@ -86,6 +110,29 @@ export default function Request() {
         } finally {
             setLoading(false)
             setAskPermissionToApprove(false)
+        }
+    }
+    async function uploadYt(id) {
+        console.log(inputsRef.current)
+        try {
+            const res = await fetch(
+                ///${realId}
+                `${process.env.NEXT_PUBLIC_API_URL}/media/addYt`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(inputsRef.current)
+                }
+            )
+            const data =  await res.text()
+            if (!res.ok) throw new Error("yt change link failed")
+            approveSpot(approvedSpot)
+           
+        } catch (error) {
+            console.log(error.message)
         }
     }
     async function unApproveSpot(spotId) {
@@ -113,21 +160,18 @@ export default function Request() {
             setAskPermissionToUnApprove(false)
         }
     }
-
     function askConfermationUnApproved(spot) {
         shouldBlockAnimateRef.current = true
         setAskPermissionToUnApprove(true)
         setUnApprovedSpot(spot)
     }
-
     function askConfermationApproved(spot) {
         shouldBlockAnimateRef.current = true
         setAskPermissionToApprove(true)
         setApprovedSpot(spot)
+        getSpot(spot.id)
     }
-
     const { contextSafe } = useGSAP(() => {}, { scope: smallContainerRef })
-
     useGSAP(() => {
         if (!smallContainerRef.current) return
         if (shouldBlockAnimateRef.current) {
@@ -149,7 +193,6 @@ export default function Request() {
             onComplete: () => { setStatusHref(false) }
         })
     }, { scope: smallContainerRef, dependencies: [paginatedSpots] })
-
     const handleModify = contextSafe((s, e) => {
         if (!smallContainerRef.current) return
         gsap.killTweensOf(gsap.utils.toArray(smallContainerRef?.current?.children))
@@ -172,7 +215,6 @@ export default function Request() {
                 }
             })
     })
-
     useGSAP(() => {
         if (!containerUnApproveRef.current) return
         timelineUnApproveRef.current = gsap.timeline({
@@ -249,12 +291,34 @@ export default function Request() {
             {/* modal approve */}
             <div ref={containerApproveRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={approveRef} className={`w-2/3 md:full bg-amber-50  ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-green-500 text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO APPROVE  {approvedSpot?.name}?</h1>
-                        <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => approveSpot(approvedSpot)} className="px-5 text-sm md:text-xl">YES</button>
+                    <div ref={approveRef} className={`w-2/3 md:full bg_login  ${loading ? "animate-pulse" : ""}`}>
+                        {stage === 0 && videos &&
+                        <div>
+                            <section className="flex flex-col gap-2">
+                                <h1>APPROVING SPOT</h1>
+                                <p>you have to load  {videos.length} video on yt</p>
+                                {videos.map((v, i) => (
+                                  <div key={v.id} className="flex flex-col">
+                                        <label htmlFor={i}>{v.link.split("/").pop()}</label>
+                                        <input
+                                            type="text"
+                                            id={i}
+                                            placeholder="yt video link"
+                                            className="bg-white"
+                                            defaultValue={inputsRef.current[i].link}
+                                            onChange={(e) => {
+                                                const val = e.currentTarget.value
+                                                inputsRef.current[i] = {...inputsRef.current[i], link: val}
+                                            }}
+                                        />
+                                  </div>
+                                ))}
+                            </section>
+                            <button onClick={()=> console.log(inputsRef.current)}>test</button>
+                            <button onClick={() => {uploadYt(approvedSpot?.id)}} className="px-5 text-sm md:text-xl">YES</button>
                             <button onClick={() => setAskPermissionToApprove(false)} className="px-5 text-sm md:text-xl">NO</button>
                         </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -269,7 +333,9 @@ export default function Request() {
                             <div key={s.id} className="relative">
                                 <SpotCard spot={s} />
                                 <div className="absolute top-1 right-1 text-sm md:text-base flex flex-col gap-1">
-                                    <button onClick={() => askConfermationApproved(s)} className="text-sm md:text-base">APPROVE</button>
+                                    <button onClick={() => {
+                                        askConfermationApproved(s)
+                                        }} className="text-sm md:text-base">APPROVE</button>
                                     <button onClick={() => askConfermationUnApproved(s)} className="text-sm md:text-base">UNAPPROVE</button>
                                     <button onClick={(e) => handleModify(s.id, e.currentTarget.closest(".relative"))} className="nav-link text-sm md:text-base">MODIFY</button>
                                 </div>
