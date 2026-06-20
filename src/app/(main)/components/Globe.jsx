@@ -18,7 +18,6 @@ export default function Globe({ searchParams }) {
   const containerRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
   const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
-  const [primary, setPrimary] = useState("#ff0000");
   const router = useRouter();
   const pendingHref = useNavigationStore((state) => state.pendingHref);
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
@@ -55,11 +54,17 @@ export default function Globe({ searchParams }) {
   },[])
   useEffect(()=>{
     if(!allSpots) return
-      const {risk,type,search,continent} = resolvedParams
+      const {risk,type,search,structure,continent} = resolvedParams
       let result = allSpots
       if(continent) result = result.filter(s=>s.continent === continent)
       if(risk) result = result.filter(s=>s.risk === risk)
-      if(type) result = result.filter(s=>s.spotTypes.includes(type))
+      if(structure) result = result.filter(s=>s.spotTypes.includes(structure))
+      if (type) {
+        const structureArray = Array.isArray(type) ? type : [type]
+        result = result.filter(s =>
+          structureArray.some(t => s.spotTypes.includes(t))
+        )
+      }
       if(search) result = result.filter(s=>
           s.name.toLowerCase().includes(search.toLowerCase()) ||
           s.country.toLowerCase().includes(search.toLowerCase()) ||
@@ -109,7 +114,7 @@ useEffect(() => {
     const bgTheme = localStorage.getItem("BgTheme")
     mapInstance.current = new maplibregl.Map({
       container: mapRef.current,
-      style: `https://api.maptiler.com/maps/dataviz-${bgTheme === "bg-dark-custom" ? "light" : "dark"}/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
+      style: `https://api.maptiler.com/maps/dataviz-light/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
       zoom: getZoom(),
       minZoom: 0.8,
       center: [10, 40],
@@ -117,34 +122,21 @@ useEffect(() => {
     })
     mapInstance.current.on('load', () => {
       mapInstance.current.setProjection({ type: 'globe' })
-      if(bgTheme !== "bg-dark-custom"){
-      mapInstance.current.setPaintProperty('Background', 'background-color', '#1a1a1a')
-      mapInstance.current.setPaintProperty('Water', 'fill-color', '#232930')
+      mapInstance.current.setPaintProperty('Background', 'background-color', '#1E222A')
+      mapInstance.current.setPaintProperty('Water', 'fill-color', '#9b9da1')
       mapInstance.current.setPaintProperty('Country border', 'line-color', '#2a2a2a')
-    }
-    else{
-    mapInstance.current.removeLayer('Residential', 'fill-color', '#9b9b9b')
-    mapInstance.current.setPaintProperty('Landcover', 'fill-color', '#9b9b9b')
-    mapInstance.current.removeLayer('Forest', 'fill-color', '#f30000')
-    mapInstance.current.removeLayer('Stadium', 'fill-color', '#f30000')
-    mapInstance.current.removeLayer('Cemetery', 'fill-color', '#f30000')
-    mapInstance.current.setPaintProperty('Road network outline', 'line-color', '#9b9b9b')
-    mapInstance.current.setPaintProperty('Road network', 'line-color', '#9b9b9b')
-    mapInstance.current.setPaintProperty('Background', 'background-color', '#2b2b2b')
-    mapInstance.current.setPaintProperty('Water', 'fill-color', '#80a1b5')
-    mapInstance.current.setPaintProperty('Country border', 'line-color', '#909090')
-    }
+      mapInstance.current.removeLayer('Residential', 'fill-color', '#9b9b9b')
+      mapInstance.current.setPaintProperty('Landcover', 'fill-color', '#9b9b9b')
+      mapInstance.current.removeLayer('Forest', 'fill-color', '#f30000')
+      mapInstance.current.removeLayer('Stadium', 'fill-color', '#f30000')
+      mapInstance.current.removeLayer('Cemetery', 'fill-color', '#f30000')
+      mapInstance.current.setPaintProperty('Road network outline', 'line-color', '#9b9b9b')
+      mapInstance.current.setPaintProperty('Road network', 'line-color', '#9b9b9b')
+      mapInstance.current.setPaintProperty('Country border', 'line-color', '#909090')
       setMapReady(true)
     })
     return () => mapInstance.current.remove()
   }, [])
-  useEffect(() => {
-    const value = getComputedStyle(document.documentElement)
-    .getPropertyValue("--primary")
-    .trim();
-
-  setPrimary(value);
-  }, []);
 useEffect(()=>{
     if(!filteredSpots || !mapReady) return
     
@@ -173,7 +165,7 @@ useEffect(()=>{
             id: 'spots-layer',
             type: 'circle',
             source: 'spots',
-            paint: { 'circle-radius': 4, 'circle-color': `${primary}` }
+            paint: { 'circle-radius': 4, 'circle-color': '#d7dbd4' }
         })
         if(windowWidthCustom >= 1024){
             mapInstance.current.on('click', 'spots-layer', (e) => {
@@ -215,18 +207,18 @@ useEffect(()=>{
     mapInstance.current.setPaintProperty(
       "spots-layer",
       "circle-color",
-      primary
+      '#d7dbd4'
     );
   }
 
-}, [primary, mapReady]);
+}, [ mapReady]);
 useEffect(() => {
   if (!pendingHref) return
   setStatusHref(true)
   gsap.killTweensOf(coordsRef.current)
   gsap.killTweensOf(containerRef.current)
   gsap.to(coordsRef.current, {
-    lng: -370,
+    lng: -180,
     duration: 0.75,
     ease: "power1",
     onUpdate: () => {
@@ -258,7 +250,7 @@ useGSAP(() => {
     yPercent: 200
   })
   gsap.to(coordsRef.current, {
-    lng: 720,
+    lng: 360,
     duration: 1.5,
     ease: "power1",
     onUpdate: () => {

@@ -4,31 +4,29 @@ import NavLinks from "./NavLinks"
 import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
+import { X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
 
 export default function NavBar() {
     const filters = {
-        location: ["Africa", "Asia", "Europe", "North America", "Sud America", "Antartide", "Oceania"],
-        type: ["Rail", "Ledge", "Stair", "Skatepark", "Street"],
+        structure: ["Rail", "Ledge", "Stair"],
+        type: ["Street", "Bowl", "Skatepark"],
         risk: ["High", "Medium", "Low"]
     }
-    const [selected, setSelected] = useState({ location: [], type: [], risk: [] })
+    const [selected, setSelected] = useState({ location: [], type: [],structure:[], risk: [] })
     const [params, setParams] = useState(null)
     const [search, setSearch] = useState(null)
     const searchFilter = useRef(null)
-    const [filterOpen, setFilterOpen] = useState(false)
-    const [openFilter, setOpenFilter] = useState(null)
-    const tlRef = useRef(null)
-    const tlChildRef = useRef(null)
+    const typeRef = useRef(null)
+    const structureRef = useRef(null)
+    const [typeOpen, setTypeOpen] = useState(false)
+    const [structureOpen, setStructureOpen] = useState(false)
     const inputRef = useRef(null)
     const router = useRouter()
     const containerRef = useRef(null)
-    const locationBtnRef = useRef(null)
-    const typeBtnRef = useRef(null)
-    const riskBtnRef = useRef(null)
-    const isAnimating = useRef(false)
-    const currentParentY = useRef(0)
     const setReset = useSpotStore((data)=>data.setReset)
     const firstRender = useSpotStore((data)=>data.firstRender)
     const firstRenderGrid = useSpotStore((data)=>data.firstRenderGrid)
@@ -38,6 +36,7 @@ export default function NavBar() {
         selected.location.forEach(f => p.append("continent", f.toUpperCase().replace(/\s/g, "")))
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
+        selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
         if (search !== null) p.append("search", search)
         router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
         setParams(p)
@@ -62,112 +61,78 @@ export default function NavBar() {
             [category]: prev[category].includes(f) ? prev[category].filter(x => x !== f) : [...(prev[category] || []), f]
         }))
     }
-
-    const getRelativeY = (btnRef) => {
-        if (!btnRef.current || !containerRef.current) return 0
-        return btnRef.current.getBoundingClientRect().top - containerRef.current.getBoundingClientRect().top
-    }
-
-    const getRelativeX = (btnRef) => {
-        if (!btnRef.current || !containerRef.current) return 0
-        return btnRef.current.getBoundingClientRect().right - containerRef.current.getBoundingClientRect().left + 2
-    }
-
     useGSAP(() => {
-        gsap.set(".genericFilter", { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".continent-btn", { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".type-btn",      { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".risk-btn",      { x: -300, opacity: 0, pointerEvents: 'none' })
-    }, { scope: containerRef })
-
-    useGSAP(() => {
-        const els = gsap.utils.toArray(".genericFilter", containerRef.current)
-        const continents = gsap.utils.toArray(".continent-btn", containerRef.current)
-        const types = gsap.utils.toArray(".type-btn", containerRef.current)
-        const risks = gsap.utils.toArray(".risk-btn", containerRef.current)
-        const activeChildren = [...continents, ...types, ...risks].filter(el => Number(gsap.getProperty(el, "x")) > -300)
-        tlRef.current?.kill()
-        tlRef.current = gsap.timeline({
-            onStart: () => { isAnimating.current = true },
-            onComplete: () => { isAnimating.current = false; if (!filterOpen) setOpenFilter(null) }
-        })
-        if (filterOpen) {
-            els.forEach((el, i) => {
-                tlRef.current.to(el, { x: 0, y: i * 22, opacity: 1, pointerEvents: 'auto', duration: 0.15 }, i === 0 ? ">" : "<0.05")
+        if(typeOpen && typeRef.current){
+            gsap.to(typeRef.current,{
+                height:"100%"
             })
-        } else {
-            if (activeChildren.length > 0) {
-                tlRef.current
-                    .to(activeChildren, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-                    .to(activeChildren, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
-            }
-            tlRef.current
-                .to(els, { y: 0, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-                .to(els, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
+        }if(!typeOpen && typeRef.current){
+           gsap.to(typeRef.current,{
+                height:"0%"
+            }) 
         }
-    }, { scope: containerRef, dependencies: [filterOpen] })
-
-    useGSAP(() => {
-        const continents = gsap.utils.toArray(".continent-btn", containerRef.current)
-        const types = gsap.utils.toArray(".type-btn", containerRef.current)
-        const risks = gsap.utils.toArray(".risk-btn", containerRef.current)
-        const active = [...continents, ...types, ...risks].filter(el => Number(gsap.getProperty(el, "x")) > -300)
-
-        const openChildren = (els, startX, startY) => {
-            currentParentY.current = startY
-            tlChildRef.current = gsap.timeline({
-                onStart: () => { isAnimating.current = true },
-                onComplete: () => { isAnimating.current = false }
+        if(structureOpen&& structureRef.current){
+            gsap.to(structureRef.current,{
+                height:"100%"
             })
-            tlChildRef.current.to(els[0], { x: startX, y: startY, opacity: 1, pointerEvents: 'auto', duration: 0.15 })
-            if (els.length > 1) {
-                tlChildRef.current.to(els.slice(1), {
-                    x: startX, opacity: 1, pointerEvents: 'auto',
-                    y: (i) => startY + (i + 1) * 22, duration: 0.2, stagger: 0.08
-                }, "<0.05")
-            }
+        }if(!structureOpen&& structureRef.current){
+           gsap.to(structureRef.current,{
+                height:"0%"
+            }) 
         }
+    }, { scope: containerRef, dependencies: [typeOpen, structureOpen] })
 
-        const doOpen = () => {
-            switch (openFilter) {
-                case "Location": openChildren(continents, getRelativeX(locationBtnRef), getRelativeY(locationBtnRef)); break
-                case "Type":     openChildren(types,      getRelativeX(typeBtnRef),     getRelativeY(typeBtnRef));     break
-                case "Risk":     openChildren(risks,      getRelativeX(riskBtnRef),     getRelativeY(riskBtnRef));     break
-            }
-        }
-
-        tlChildRef.current?.kill()
-
-        if (!openFilter) {
-            if (active.length === 0) { isAnimating.current = false; return }
-            gsap.timeline({
-                onStart: () => { isAnimating.current = true },
-                onComplete: () => { isAnimating.current = false }
-            })
-            .to(active, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-            .to(active, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
-            return
-        }
-
-        if (active.length === 0) { doOpen(); return }
-
-        tlChildRef.current = gsap.timeline({
-            onStart: () => { isAnimating.current = true },
-            onComplete: () => { isAnimating.current = false }
-        })
-        tlChildRef.current
-            .to(active, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-            .to(active, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" }, onComplete: doOpen })
-    }, { scope: containerRef, dependencies: [openFilter] })
 
     return (
         <div className="z-10">
-            <nav className="navbar p-2">
-                <section className="left flex flex-col h-full">
-                    <div>
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full   placeholder:text-base"/>
+            <nav className="p-2">
+                <section className="flex gap-2">
+                    <div className="w-1/4 button--glass button p-2 flex h-fit">
+                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full p-0.5 px-1 h-full rounded-s-[5px] placeholder:text-base"/>
+                        <button className="p-0.5 text-black rounded-e-[5px]" onClick={()=>{setSearch(""); inputRef.current.value = ""}}><X size={18}/></button>
                     </div>
-                    <aside className="flex gap-0.5 pt-1">
+                  <div className="flex flex-col gap-2">
+                        <div className="button--glass button p-2 flex">
+                           <div className={`flex flex-col gap-2`}>
+                                <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_login_active"}`}
+                                onClick={()=>setTypeOpen(!typeOpen)}>
+                                {selected.type == "" && <p>Type of spot</p>}
+                                {selected.type != "" && <div className="flex gap-2"><p className="bg_login_active color_login">&#91;{selected.type.length}&#93;</p><p className="bg_login_active color_login"> {selected.type.join(",")}</p></div>}
+                                { typeOpen ? <ChevronUp size={22} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`}/> :<ChevronDown size={22} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`}/>}</button>
+                           </div>
+                        </div>
+                        <div ref={typeRef} className="button--glass button  flex overflow-hidden">
+                           <div className={`flex flex-col gap-2 w-full p-2 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                              {filters.type.map((t)=>(
+                                <button className="rounded-[5px] h-full flex gap-2 items-center"
+                                onClick={() => {  multipleSelection("type", t) }}>
+                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span>{t}</button>
+                            ))}
+                           </div>
+                        </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                        <div className="button--glass button p-2 flex">
+                           <div className={`flex flex-col gap-2`}>
+                                <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_login_active"}`}
+                                onClick={()=>setStructureOpen(!structureOpen)}>
+                                {selected.structure == "" && <p>Structure</p>}
+                                {selected.structure != "" && <div className="flex gap-2"><p className="bg_login_active color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_login_active color_login"> {selected.structure.join(",")}</p></div>}
+                                { structureOpen ? <ChevronUp size={22} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`}/> :<ChevronDown size={22} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`}/>}</button>
+                           </div>
+                        </div>
+                        <div ref={structureRef} className="button--glass button  flex overflow-hidden">
+                           <div className={`flex flex-col gap-2 w-full p-2 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                            {filters.structure.map((s)=>(
+                                    <button className="rounded-[5px] h-full flex gap-2 items-center"
+                                onClick={() => {  multipleSelection("structure", s) }}>
+                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span>{s}</button>
+                            ))}
+                           </div>
+                        </div>
+                  </div> 
+
+                    {/* <aside className="flex gap-0.5 pt-1">
                         <div>
                             <button className={`${filterOpen ? "bg-primary-500" : ""}`} onClick={() => { if (isAnimating.current) return; setFilterOpen(prev => !prev) }}>
                                 Filters
@@ -205,8 +170,8 @@ export default function NavBar() {
                                 </button>
                             ))}
                         </div>
-                    </aside>
-                    <div className="mt-auto flex flex-col gap-1">
+                    </aside> */}
+                    {/* <div className="mt-auto flex flex-col gap-1">
                         <button className="w-fit" onClick={() => {
                             if (isAnimating.current) return
                             setSelected({ location: [], type: [], risk: [] })
@@ -218,10 +183,10 @@ export default function NavBar() {
                         }}>
                             Reset filters
                         </button>
-                        <ChatBot />
-                    </div>
+                        <ChatBot /> 
+                    </div> */}
                 </section>
-                <NavLinks params={params} />
+                {/* <NavLinks params={params} /> */}
             </nav>
         </div>
     )
