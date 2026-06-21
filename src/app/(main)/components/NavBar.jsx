@@ -4,11 +4,10 @@ import NavLinks from "./NavLinks"
 import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
-import { X } from 'lucide-react';
-import { ChevronDown } from 'lucide-react';
-import { ChevronUp } from 'lucide-react';
+import { X, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
+import ListGrid from "./ListGrid"
 
 export default function NavBar() {
     const filters = {
@@ -23,10 +22,12 @@ export default function NavBar() {
     const typeRef = useRef(null)
     const structureRef = useRef(null)
     const [typeOpen, setTypeOpen] = useState(false)
+    const [spotOpen, setSpotOpen] = useState(false)
     const [structureOpen, setStructureOpen] = useState(false)
     const inputRef = useRef(null)
     const router = useRouter()
     const containerRef = useRef(null)
+    const spotContainerRef = useRef(null)
     const setReset = useSpotStore((data)=>data.setReset)
     const firstRender = useSpotStore((data)=>data.firstRender)
     const firstRenderGrid = useSpotStore((data)=>data.firstRenderGrid)
@@ -62,36 +63,58 @@ export default function NavBar() {
         }))
     }
     useGSAP(() => {
+
         if(typeOpen && typeRef.current){
             gsap.to(typeRef.current,{
-                height:"100%"
+                height:"100%",
+                display :"block"
             })
         }if(!typeOpen && typeRef.current){
            gsap.to(typeRef.current,{
-                height:"0%"
+                height:"0%",
+                display :"none"
             }) 
         }
         if(structureOpen&& structureRef.current){
             gsap.to(structureRef.current,{
-                height:"100%"
+                height:"100%",
+                display :"block"
             })
         }if(!structureOpen&& structureRef.current){
            gsap.to(structureRef.current,{
-                height:"0%"
+                height:"0%",
+                display :"none"
             }) 
         }
     }, { scope: containerRef, dependencies: [typeOpen, structureOpen] })
+    useGSAP(() => {
+        if(spotOpen && spotContainerRef.current){
+            gsap.to(spotContainerRef.current,{
+                height:"100%",
+                //display :"block"
+            })
+        }if(!spotOpen && spotContainerRef.current){
+           gsap.to(spotContainerRef.current,{
+                height:"0%",
+                //display :"none"
+            }) 
+        }
+    }, { scope: containerRef, dependencies: [spotOpen] })
 
 
     return (
         <div className="z-10">
             <nav className="p-2">
-                <section className="flex gap-2">
-                    <div className="w-1/4 button--glass button p-2 flex h-fit">
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full p-0.5 px-1 h-full rounded-s-[5px] placeholder:text-base"/>
-                        <button className="p-0.5 text-black rounded-e-[5px]" onClick={()=>{setSearch(""); inputRef.current.value = ""}}><X size={18}/></button>
+                <section ref={containerRef} className="flex gap-2">
+                    <div className="w-1/4 ">
+                        <div className=" button--glass button p-2 flex h-10 ">
+                            <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full py-0.5 px-1 h-full rounded-s-[5px] placeholder:text-base"/>
+                            <button className="h-full text-black rounded-e-[5px]" onClick={()=>{setSearch(""); inputRef.current.value = ""}}>{search !== "" && <X size={18}/>} {search == "" && <Search size={18}/>}</button>
+                        </div>
+                        <button onClick={()=>setSpotOpen(!spotOpen)}>ciao</button>
+                        <div ref={spotContainerRef}  className="overflow-hidden"><ListGrid/></div>
                     </div>
-                  <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2">
                         <div className="button--glass button p-2 flex">
                            <div className={`flex flex-col gap-2`}>
                                 <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_login_active"}`}
@@ -101,7 +124,7 @@ export default function NavBar() {
                                 { typeOpen ? <ChevronUp size={22} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`}/> :<ChevronDown size={22} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`}/>}</button>
                            </div>
                         </div>
-                        <div ref={typeRef} className="button--glass button  flex overflow-hidden">
+                        <div ref={typeRef} className="button--glass button  flex overflow-hidden h-0 hidden">
                            <div className={`flex flex-col gap-2 w-full p-2 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                               {filters.type.map((t)=>(
                                 <button className="rounded-[5px] h-full flex gap-2 items-center"
@@ -111,7 +134,7 @@ export default function NavBar() {
                            </div>
                         </div>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 ">
                         <div className="button--glass button p-2 flex">
                            <div className={`flex flex-col gap-2`}>
                                 <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_login_active"}`}
@@ -121,7 +144,7 @@ export default function NavBar() {
                                 { structureOpen ? <ChevronUp size={22} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`}/> :<ChevronDown size={22} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`}/>}</button>
                            </div>
                         </div>
-                        <div ref={structureRef} className="button--glass button  flex overflow-hidden">
+                        <div ref={structureRef} className="button--glass button  flex overflow-hidden h-0 hidden">
                            <div className={`flex flex-col gap-2 w-full p-2 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                             {filters.structure.map((s)=>(
                                     <button className="rounded-[5px] h-full flex gap-2 items-center"
@@ -131,7 +154,6 @@ export default function NavBar() {
                            </div>
                         </div>
                   </div> 
-
                     {/* <aside className="flex gap-0.5 pt-1">
                         <div>
                             <button className={`${filterOpen ? "bg-primary-500" : ""}`} onClick={() => { if (isAnimating.current) return; setFilterOpen(prev => !prev) }}>

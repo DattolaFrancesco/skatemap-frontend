@@ -41,9 +41,6 @@ export default function RootLayout({ children }) {
     <head>
       </head>
       <body className="">
-        <div 
-        id="bg-fixed"
-        ></div>
         {children}
       </body>
     </html>

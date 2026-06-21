@@ -6,7 +6,6 @@ import useInsetStore from "@/app/(main)/store/InsetStore"
 import useNavigationStore from '../store/NavigationStore'
 import useSpotStore from '../store/SpotStore'
 import { useRouter } from "next/navigation";
-import SpotDetails from './SpotDetails'
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -29,6 +28,7 @@ export default function Globe({ searchParams }) {
   const reset = useSpotStore((data)=>data.reset)
   const setReset = useSpotStore((data)=>data.setReset)
   const allSpots = useSpotStore((data)=>data.allSpots)
+  const setFilteredSpotStore = useSpotStore((data)=>data.setFilteredSpot)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
   const [filteredSpots, setFilteredSpots] = useState([]);
   
@@ -72,21 +72,24 @@ export default function Globe({ searchParams }) {
           s.city.toLowerCase().includes(search.toLowerCase())
       )
         setFilteredSpots(result)
+        setFilteredSpotStore(result)
   },[resolvedParams, allSpots])
 
   const getZoom = useCallback(() => {
     if(!windowWidthCustom){
-      if (window.innerWidth < 480) return 0.8   
-      if (window.innerWidth < 1024) return 1   
-      if (window.innerWidth < 1280) return 1.2   
-      if (window.innerWidth < 1480) return 1.3  
-      return 1.6
+      if (window.innerWidth < 480) return 1.2   
+      if (window.innerWidth < 720) return 1.3  
+      if (window.innerWidth < 1024) return 1.5 
+      if (window.innerWidth < 1280) return 1.8
+      if (window.innerWidth < 1480) return 2
+      return 2.2
     }
-    if (windowWidthCustom < 480) return 0.8   
-    if (windowWidthCustom < 1024) return 1   
-    if (windowWidthCustom < 1280) return 1.2   
-    if (windowWidthCustom < 1480) return 1.3  
-    return 1.6
+    if (windowWidthCustom < 480) return 1.2  
+    if (windowWidthCustom < 720) return 1.3
+    if (windowWidthCustom < 1024) return 1.5 
+    if (windowWidthCustom < 1280) return 1.8 
+    if (windowWidthCustom < 1480) return 2
+    return 2.2
   },[windowWidthCustom])
   useEffect(() => {
   const timer = setTimeout(() => {
@@ -111,7 +114,6 @@ useEffect(() => {
 
   useEffect(() => {
     if (!mapRef.current) return
-    const bgTheme = localStorage.getItem("BgTheme")
     mapInstance.current = new maplibregl.Map({
       container: mapRef.current,
       style: `https://api.maptiler.com/maps/dataviz-light/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
@@ -279,8 +281,7 @@ useGSAP(() => {
 }, { dependencies: [mapReady] })
   return (
     <>
-     <SpotDetails/>
-    <div  className={`${windowWidthCustom>450 && window.innerHeight >500 ?"absolute top-[-50%] translate-y-1/2 bg-image justify-center":"justify-start"} w-full h-full flex flex-col  items-center`}>
+    <div  className={`absolute top-[-50%] translate-y-1/2 bg-image justify-center w-full h-full flex flex-col  items-center`}>
       <div ref={containerRef} className="aspect-square w_custom_globe rounded-full overflow-hidden relative ">
         {!mapReady && (
           <div className={`absolute inset-0 rounded-full bg-[#1a1a1a] flex items-center justify-center z-10 ${delay ? "animate-pulse": "opacity-0" }`}>

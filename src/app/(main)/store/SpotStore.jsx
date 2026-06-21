@@ -9,11 +9,10 @@ const useSpotStore = create((set) => ({
   setFirstSpot: (data) => set({ firstSpot: data }),
   spotGrid: null,
   setSpotGrid: (data) => set({ spotGrid: data }),
+  filteredSpot: null,
+  setFilteredSpot: (data) => set({ filteredSpot: data }),
   reset: false,
   setReset: (data) => set({ reset: data }),
-
-
-
   allSpots: null,
   setAllSpots: (data) => set({ allSpots: data }),
 }));
