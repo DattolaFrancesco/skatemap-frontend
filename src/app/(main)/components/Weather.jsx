@@ -21,11 +21,11 @@ export default function Weather({ city }) {
   useEffect(() => { getWeather() }, [city])
 
   if (loading) return <h1 className=" animate-pulse">Loading...</h1>
-  if (!weather) return <p className='bg-transparent ms-2'>NOT AVAILABLE</p>
+  if (!weather) return <p className='bg-transparent ms-2'></p>
   return (
-     <div className='flex flex-col '>
-        <h1 className='text-3xl md:text-5xl font-bold ms-2'>{ weather.list[0].main.temp + "°"}</h1>
-        <h1 className='text-md md:text-2xl ms-2'>{weather.list[0].weather[0].main.toUpperCase()}</h1>
+     <div className=' flex gap-1 w-fit color_p_gray'>
+        <h1 className='text-sm'>{ weather.list[0].main.temp + "°"}</h1>
+        <h1 className='text-sm'>{weather.list[0].weather[0].main}</h1>
      </div>
   )
 }
