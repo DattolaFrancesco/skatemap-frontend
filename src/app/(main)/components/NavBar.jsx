@@ -4,7 +4,7 @@ import NavLinks from "./NavLinks"
 import { useRouter } from "next/navigation"
 import ChatBot from "./ChatBot"
 import gsap from "gsap"
-import {Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { MoveLeft,X,Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
 import ListGrid from "./ListGrid"
@@ -32,6 +32,8 @@ export default function NavBar() {
     const firstRender = useSpotStore((data) => data.firstRender)
     const firstRenderGrid = useSpotStore((data) => data.firstRenderGrid)
     const setSpot = useSpotStore((data)=>data.setSpot)
+    const activeSpot = useSpotStore((data)=>data.spot)
+    const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
         const p = new URLSearchParams()
@@ -53,7 +55,8 @@ export default function NavBar() {
 
     const handleSearch = (e) => {
         const search = e.currentTarget.value
-            setSearch(search)
+        setSearch(search)
+        if(search != "") setSpot(null)
     }
 
     const multipleSelection = (category, f) => {
@@ -78,71 +81,80 @@ export default function NavBar() {
         }
     }, { scope: containerRef, dependencies: [spotOpen] })
 
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth > 1024)
+        check()
+        window.addEventListener('resize', check)
+        return () => window.removeEventListener('resize', check)
+    }, [])
+    useEffect(()=>{console.log(activeSpot)},[activeSpot])
     return (
         <>
-        <nav className="p-2 w-2/4 lg:w-1/4 z-10 relative">
-                <section ref={containerRef} className="flex items-start gap-2 w-full">
-                    <div className="w-full">
-                        <div className=" button--glass button p-2 flex h-10">
-                            <input ref={inputRef} type="text" placeholder="Search" onClick={()=>setSpotOpen(true)} onChange={handleSearch} className="w-full py-0.5 px-1 h-full rounded-s-[5px] placeholder:text-base" />
-                            <button className={`h-full text-black rounded-e-[5px] ${spotOpen ? "bg_activated_light" : "" }`}  onClick={() => {
+        <nav className="pt-5 px-5 md:w-[40%] lg:w-[30%] xl:w-[25%] z-10 ">
+                <section ref={containerRef} className="flex items-start gap-1 w-full">
+                    <div className="w-full relative">
+                         <Details postion={"absolute"}/>
+                        <div className=" button--glass button p-1.5 flex">
+                            {!isMobile && activeSpot && <button onClick={()=>{setSpot(null); setSearch("")}} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
+                            <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setSpotOpen(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
+                            <button className={` text-black rounded-e-[5px] self-stretch`}  onClick={() => {
                                 if(spotOpen){setSpotOpen(false);setSpot(null)}
-                                }}>{spotOpen && <ChevronUp size={22} className={`pt-0.5`}/>} {!spotOpen && <Search size={18} />}</button>
-                        </div>
-                        <div ref={spotContainerRef} className="grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
-                            <div className="overflow-hidden rounded-[5px]">
-                                <ListGrid />
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                   <div className="z-10 absolute top-[8px] left-[100%] flex gap-2">
-                <div className="flex flex-col gap-2 w-fit">
-                            <div className="button--glass button p-2 flex">
+                                }}>{spotOpen && <X size={12}/>} {!spotOpen && <Search size={12}/>}</button>
+                <div className="z-50 absolute top-0 left-[100%] flex gap-1 ms-1">
+                <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
                                 <div className={`flex flex-col gap-2`}>
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setTypeOpen(!typeOpen)}>
                                         {selected.type == "" && <p>Type of spot</p>}
                                         {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light"> {selected.type.join(",")}</p></div>}
-                                        {typeOpen ? <ChevronUp size={22} className={`pt-0.5`} /> : <ChevronDown size={22} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
+                                        {typeOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
                             <div ref={typeRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
                                 <div className="overflow-hidden">
-                                    <div className={`flex flex-col gap-2 w-full p-2 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                                         {filters.type.map((t) => (
                                             <button className="rounded-[5px] h-full flex gap-2 items-center"
                                                 onClick={() => { multipleSelection("type", t) }}>
-                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span>{t}</button>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span><p>{t}</p></button>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-2 w-fit">
-                            <div className="button--glass button p-2 flex">
+                        <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
                                 <div className={`flex flex-col gap-2`}>
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setStructureOpen(!structureOpen)}>
                                         {selected.structure == "" && <p>Structure</p>}
                                         {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light"> {selected.structure.join(",")}</p></div>}
-                                        {structureOpen ? <ChevronUp size={22} className={`pt-0.5`} /> : <ChevronDown size={22} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
+                                        {structureOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
                             <div ref={structureRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
                                 <div className="overflow-hidden">
-                                    <div className={`flex flex-col gap-2 w-full p-2 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                                         {filters.structure.map((s) => (
                                             <button key={s.id} className="rounded-[5px] h-full flex gap-2 items-center"
                                                 onClick={() => { multipleSelection("structure", s) }}>
-                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span>{s}</button>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <Details postion={"absolute"}/>
+                        </div>
+                        <div ref={spotContainerRef} className="grid overflow-hidden " style={{ gridTemplateRows: "0fr" }}>
+                            <div className="overflow-hidden rounded-[5px] relative">
+                                {!isMobile && !activeSpot && <ListGrid />}
+                                {isMobile &&  <ListGrid />}
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </nav>
 </>
     )

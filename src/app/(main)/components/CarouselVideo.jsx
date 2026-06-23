@@ -28,13 +28,13 @@ export default function CarouselVideo({ media }) {
       </div>
      {media.length > 1 && <button
         onClick={() => emblaApi?.scrollPrev()}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 button--glass w-[40px] h-[40px] rounded-[5px] text-white"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 button--glass w-[30px] h-[30px] rounded-[5px] text-white"
       >
         ‹
       </button>}
       {media.length > 1 &&<button
         onClick={() => emblaApi?.scrollNext()}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 button--glass w-[40px] h-[40px] rounded-[5px] text-white"
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 button--glass w-[30px] h-[30px] rounded-[5px] text-white"
       >
         ›
       </button>}

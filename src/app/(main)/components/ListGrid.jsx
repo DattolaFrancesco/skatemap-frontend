@@ -6,7 +6,7 @@ export default function ListGrid() {
     const filteredSpot = useSpotStore((data)=>data.filteredSpot)
     if(filteredSpot?.length == 0) return null
     return (
-            <div className="button--glass button p-2 mt-2 flex flex-col gap-2 overflow-y-scroll max-h-[calc(100vh-70px)] relative">
+            <div className="z-10 button--glass button p-1.5 mt-1 flex flex-col gap-1.5 overflow-y-scroll max-h-[calc(100vh-70px)] relative">
                 {filteredSpot?.map((s) => (
                     <SpotCard key={s.id} spot={s}/>
                 ))}
