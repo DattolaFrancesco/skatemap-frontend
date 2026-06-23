@@ -8,7 +8,7 @@ const getYoutubeId = (url) => {
 }
 
 export default function CarouselVideo({ media }) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ })
+  const [emblaRef, emblaApi] = useEmblaCarousel()
 
   return (
     <div className="relative w-full">
