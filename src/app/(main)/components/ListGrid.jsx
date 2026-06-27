@@ -34,12 +34,14 @@ export default function ListGrid({position}) {
     if(filteredSpot?.length == 0) return null
     if(position === "absolute"){
     return (
-            <div ref={listRef} className="mx-2 z-10 button--glass button  relative top-[60%] p-1.5 mt-1 flex flex-col gap-1.5 overflow-y-scroll h-[calc(100vh-70px)] ">
+            <div ref={listRef} className=" z-10 button--glass button  absolute top-[70%] left-[50%] -translate-x-1/2 p-1.5 mt-1 flex flex-col h-[calc(100vh-120px)] w-[95%]">
                 <div className="w-[50px] h-[4px] shrink-0 bg-black/20 rounded-2xl my-2"></div>
-                {!activeSpot && filteredSpot?.map((s) => (
-                    <SpotCard key={s.id} spot={s}/>
-                ))}
-                <Details postion={"mobile"}/>
+               <div className="flex flex-col w-full  overflow-y-scroll  gap-1.5 rounded-[5px] mt-2">
+                    {!activeSpot && filteredSpot?.map((s) => (
+                        <SpotCard key={s.id} spot={s}/>
+                    ))}
+                    <Details postion={"mobile"}/>
+               </div>
             </div>
     )}
     else{

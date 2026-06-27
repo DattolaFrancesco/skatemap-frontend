@@ -111,7 +111,7 @@ export default function NavBar() {
     }, [])
     return (
         <>
-        <nav className="pt-5 px-3 md:px-5 w-full md:w-[40%] lg:w-[30%] xl:w-[25%] z-10 ">
+        <nav className="relative z-20 pt-5 px-3 md:px-5 w-full md:w-[40%] lg:w-[30%] xl:w-[25%]">
                 <section ref={containerRef} className="flex items-start gap-1 w-full">
                     <div className="w-full relative">
                          {!isMobile && <Details postion={"absolute"}/>}

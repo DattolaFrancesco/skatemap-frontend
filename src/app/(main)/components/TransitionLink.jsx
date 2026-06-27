@@ -6,8 +6,7 @@ export default function TransitionLink({ href, children, className }) {
   return (
     <button type="button" className={className} onClick={() => {
       if(children === "LOG OUT") localStorage.removeItem('token')
-      setPendingHref(href);
-      console.log(href)}}>
+      setPendingHref(href)}}>
       {children}
     </button>
   );
