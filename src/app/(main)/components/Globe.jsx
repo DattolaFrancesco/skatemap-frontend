@@ -32,6 +32,8 @@ export default function Globe({ searchParams }) {
   const activeSpot = useSpotStore((data)=>data.spot)
   const setFilteredSpotStore = useSpotStore((data)=>data.setFilteredSpot)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
+  const setOpenList = useSpotStore((data) => data.setOpenList)
+  const openList = useSpotStore((data) => data.openList)
   const [filteredSpots, setFilteredSpots] = useState([]);
   
   useEffect(()=>{
@@ -63,8 +65,6 @@ export default function Globe({ searchParams }) {
         
       }
       let result = allSpots
-      // if(continent) result = result.filter(s=>s.continent === continent)
-      // if(risk) result = result.filter(s=>s.risk === risk)
       if (structure) {
         const structureArray = Array.isArray(structure) ? structure : [structure]
         result = result.filter(s =>
@@ -186,26 +186,25 @@ useEffect(()=>{
             mapInstance.current.on('click', 'spots-layer', (e) => {
                 const feature = e.features[0]
                 const parsed = JSON.parse(feature.properties.spot)
-                setSpotOpen(parsed.id)
+                const p = new URLSearchParams(resolvedParams.toString())
+                p.set("selectedSpot",parsed.id)
+                router.push(`?${p.toString()}`, { scroll: false })
+                setOpenList(true)
             })
             let popUp;
-            mapInstance.current.on('mouseenter', 'spots-layer', (e) => {
+            mapInstance.current.on('mouseenter', 'spots-layer', () => {
                 mapInstance.current.getCanvas().style.cursor = 'pointer'
-                const params = JSON.parse(e.features[0].properties.spot);
-                popUp = new maplibregl.Popup({ closeButton: false, closeOnClick: false })
-                    .setLngLat([params.longitude, params.latitude])
-                    .setHTML(`<img src="${params?.thumbnailUrl}" class="popup-image"/>`)
-                    .addTo(mapInstance.current)
             })
             mapInstance.current.on('mouseleave', 'spots-layer', () => {
                 mapInstance.current.getCanvas().style.cursor = ''
-                popUp?.remove()
             })
         } else{
            mapInstance.current.on('click', 'spots-layer', (e) => {
                 const feature = e.features[0]
                 const parsed = JSON.parse(feature.properties.spot)
-                setSpotOpen(parsed.id)
+                const p = new URLSearchParams(resolvedParams.toString())
+                p.set("selectedSpot",parsed.id)
+                router.push(`?${p.toString()}`, { scroll: false })
             })
         }
 

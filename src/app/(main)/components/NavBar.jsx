@@ -23,7 +23,8 @@ export default function NavBar() {
     const typeRef = useRef(null)
     const structureRef = useRef(null)
     const [typeOpen, setTypeOpen] = useState(false)
-    const [spotOpen, setSpotOpen] = useState(false)
+    const setOpenList = useSpotStore((data) => data.setOpenList)
+    const openList = useSpotStore((data) => data.openList)
     const [structureOpen, setStructureOpen] = useState(false)
     const inputRef = useRef(null)
     const router = useRouter()
@@ -49,9 +50,7 @@ export default function NavBar() {
         selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
         if (search !== null) p.append("search", search)
         if(selectedSpot){
-            //setSpot(selectedSpot)
-            //p.set("selectedSpot", selectedSpot)
-            setSpotOpen(true)
+            setOpenList(true)
         }
         setParams(p)
         p.delete("_t")
@@ -95,9 +94,9 @@ export default function NavBar() {
 
     useGSAP(() => {
         if (spotContainerRef.current) {
-            gsap.to(spotContainerRef.current, { gridTemplateRows: spotOpen ? "1fr" : "0fr" })
+            gsap.to(spotContainerRef.current, { gridTemplateRows: openList ? "1fr" : "0fr" })
         }
-    }, { scope: containerRef, dependencies: [spotOpen] })
+    }, { scope: containerRef, dependencies: [openList] })
 
     useEffect(() => {
         const check = () => setIsTablet(window.innerWidth > 1024)
@@ -124,10 +123,10 @@ export default function NavBar() {
                                 urlParams(true)
                                 setSearch("")
                                 }} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
-                            <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setSpotOpen(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
+                            <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setOpenList(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
                             <button className={` text-black rounded-e-[5px] self-stretch`}  onClick={() => {
-                                if(spotOpen){setSpotOpen(false);setSpot(null)}
-                                }}>{spotOpen && <X size={12}/>} {!spotOpen && <Search size={12}/>}</button>
+                                if(openList){setOpenList(false);setSpot(null)}
+                                }}>{openList && <X size={12}/>} {!openList && <Search size={12}/>}</button>
                 {!isMobile && <div className="z-50 absolute top-10 md:top-0 md:left-[100%] flex gap-1 md:ms-1">
                 <div className="flex flex-col gap-1 w-fit">
                             <div className="button--glass button p-1.5 flex">
@@ -230,7 +229,7 @@ export default function NavBar() {
                         </div>
                     </div>}
             </nav>
-            {isMobile && spotOpen && <ListGrid position={"absolute"}/>}
+            {isMobile && openList && <ListGrid position={"absolute"}/>}
 </>
     )
 }

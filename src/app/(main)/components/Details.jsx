@@ -175,27 +175,16 @@ export default function Details({postion}){
             )
         }
     }
-    
-    useGSAP(()=>{
-        if (!data) return;
-        gsap.set(containerRef.current, {
-        opacity: 0
-        });
-        gsap.to(containerRef.current,{
-            opacity:1,
-            ease:"power3.inOut"
-        })
-    },{scope:containerRef, dependencies:[data]})
-
+    useEffect(()=>{if(!spot) setSpotClosed(false)},[spot])
 
     const isSkatepark = data?.spotTypes.includes("SKATEPARK")
     const isStreet = data?.spotTypes.includes("STREET")
     const isBowl = data?.spotTypes.includes("BOWL")
 
      return (
-     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-16" : "w-full"} transition-all duration-300  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
+     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
            {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
-            className="rounded-[5px] text-[12px] px-2">Show</button>}
+            className="rounded-[5px]"><p>Show</p></button>}
           {!spot || !data 
             ?  null
             : ( <div ref={detailsRef} className="w-full"> 
