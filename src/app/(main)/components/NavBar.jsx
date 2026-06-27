@@ -9,6 +9,7 @@ import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
 import ListGrid from "./ListGrid"
 import Details from "./Details"
+import { useSearchParams } from "next/navigation"
 
 export default function NavBar() {
     const filters = {
@@ -33,18 +34,25 @@ export default function NavBar() {
     const firstRenderGrid = useSpotStore((data) => data.firstRenderGrid)
     const setSpot = useSpotStore((data)=>data.setSpot)
     const activeSpot = useSpotStore((data)=>data.spot)
+    const resolvedParams = useSearchParams()
     const [isTablet, setIsTablet] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     
 
-    useEffect(() => {
+    const urlParams = (isReturn)=>{
         const p = new URLSearchParams()
+        const selectedSpot = resolvedParams.get("selectedSpot")
+        if(!selected) console.log("no")
         selected.location.forEach(f => p.append("continent", f.toUpperCase().replace(/\s/g, "")))
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
         selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
         if (search !== null) p.append("search", search)
-        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+        if(selectedSpot){
+            //setSpot(selectedSpot)
+            //p.set("selectedSpot", selectedSpot)
+            setSpotOpen(true)
+        }
         setParams(p)
         p.delete("_t")
         if (p.toString() === "" && firstRender == 1) {
@@ -53,6 +61,14 @@ export default function NavBar() {
         if (p.toString() === "" && firstRenderGrid == 1) {
             setReset(true)
         }
+        if(isReturn){
+            p.delete("selectedSpot")
+            router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+        }
+        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+    }
+    useEffect(() => {
+        urlParams(false)
     }, [selected, router, search])
 
     const handleSearch = (e) => {
@@ -103,7 +119,11 @@ export default function NavBar() {
                     <div className="w-full relative">
                          {!isMobile && <Details postion={"absolute"}/>}
                         <div className=" button--glass button p-1.5 flex">
-                            {!isMobile && activeSpot && <button onClick={()=>{setSpot(null); setSearch("")}} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
+                            {!isMobile && activeSpot && <button onClick={()=>{
+                                setSpot(null)
+                                urlParams(true)
+                                setSearch("")
+                                }} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
                             <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setSpotOpen(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
                             <button className={` text-black rounded-e-[5px] self-stretch`}  onClick={() => {
                                 if(spotOpen){setSpotOpen(false);setSpot(null)}

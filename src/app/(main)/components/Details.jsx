@@ -8,7 +8,8 @@ import useUserStore from "@/app/(account)/dashboard/components/UserStore";
 import useInsetStore from "../store/InsetStore";
 import Image from 'next/image'
 import CarouselVideo from "./CarouselVideo";
-import OpenMedia from "./OpenMedia";
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 
 const structuresName = ["ledge", "rail", "ramp", "stair"]
 
@@ -21,13 +22,13 @@ export default function Details({postion}){
     const [refresh,setRefresh] =useState(null)
     const [liked, setLiked] =useState(null)
     const [token, setToken] = useState(null)
-    const [pendingLike, setPendingLike] = useState(false)
     const likedPending = useRef(false)
     const [expanded, setExpanded] = useState(false)
     const setMediaOpen = useInsetStore((state)=>state.setMediaOpen)
     const [isMobile, setIsMobile] = useState(false)
     const [isTablet, setIsTablet] = useState(false)
-
+    const containerRef = useRef(null)
+    
     async function getSpot(){
         const token = localStorage.getItem('token')
         try{
@@ -59,14 +60,14 @@ export default function Details({postion}){
         }catch(err){
             console.log(err.message)
         } finally {
-            setPendingLike(false)
+            //setPendingLike(false)
             likedPending.current = false
         }
     }
     async function setFav(){
         if(likedPending.current) return
         likedPending.current = true
-        setPendingLike(true)
+        //setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spot}`,{
@@ -82,14 +83,14 @@ export default function Details({postion}){
             setRefresh(!refresh)
             setRefreshy(!refreshy)
         } finally {
-            setPendingLike(false)
+            //setPendingLike(false)
             likedPending.current = false
         }
     }
     async function deleteFav(){
         if(likedPending.current) return
         likedPending.current = true
-        setPendingLike(true)
+        //setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spot}`,{
@@ -105,7 +106,7 @@ export default function Details({postion}){
             setLiked(null)
             setRefreshy(!refreshy)
         }finally {
-            setPendingLike(false)
+            //setPendingLike(false)
             likedPending.current = false
         }
     }
@@ -122,6 +123,15 @@ export default function Details({postion}){
             {expanded ? "See less" : "See more"}
         </button>}
     </div>)
+    }
+    async function handleShare(){
+        try{
+            await navigator.share({
+                title: data.name.slice(0, 1).toUpperCase() + data.name.slice(1),
+                text: "Have a look of this spot",
+                url: `${process.env.NEXT_PUBLIC_API_URL2}/?selectedSpot=${data.id}&_t=${Date.now()}`
+            })
+        }catch(err) {console.log("share error")}
     }
     useEffect(() => {
     setToken(localStorage.getItem('token'))
@@ -145,13 +155,24 @@ export default function Details({postion}){
         window.addEventListener('resize', check)
         return () => window.removeEventListener('resize', check)
     }, [])
+    useGSAP(()=>{
+        if (!data) return;
+        gsap.set(containerRef.current, {
+        opacity: 0
+        });
+        gsap.to(containerRef.current,{
+            opacity:1,
+            ease:"power3.inOut"
+        })
+    },{scope:containerRef, dependencies:[data]})
 
-    if(data && spot){
-        const isSkatepark = data.spotTypes.includes("SKATEPARK")
-        const isStreet = data.spotTypes.includes("STREET")
-        const isBowl = data.spotTypes.includes("BOWL")
-        return(
-       <div className={`${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-3 w-full max-h-[calc(100vh-70px)] overflow-y-scroll`}>
+
+    const isSkatepark = data?.spotTypes.includes("SKATEPARK")
+    const isStreet = data?.spotTypes.includes("STREET")
+    const isBowl = data?.spotTypes.includes("BOWL")
+
+     return (<div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-3 w-full max-h-[calc(100vh-70px)] overflow-y-scroll`}>
+          {!spot || !data ? null : ( <> 
           {isMobile && <div className="flex gap-1 mb-1 items-center">
                 <button onClick={()=>activeSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
                     <MoveLeft size={12}/> <p>Go back</p>
@@ -197,6 +218,12 @@ export default function Details({postion}){
            </div>
            }
             <img src={data.image[0].link} alt="skate spot photo" className="w-full h-[180px] object-cover p-2 rounded-[12px]"/>   
+             {token && !isMobile && 
+            <div>
+                 {liked ?  <button onClick={()=>deleteFav()} className=" absolute top-[12px] right-[12px] button--glass rounded-[10px] backdrop-blur-xs py-2 px-2 text-white"><HeartCrack size={13}/></button>
+                  : <button onClick={()=> setFav()} className=" absolute top-[12px] right-[12px] button--glass rounded-[10px] backdrop-blur-xs py-2 px-2 text-white"><Heart size={13}/></button>}       
+             </div>
+            }
             <button 
             onClick={() => setMediaOpen({  media: data.image, format: "image" })}
             className=" absolute bottom-[12px] left-[12px] button--glass rounded-[5px] px-1 bg-black/10! flex items-center gap-1 text-white"><GalleryVerticalEnd size={13}/> <p>Images</p></button>
@@ -246,11 +273,15 @@ export default function Details({postion}){
              <p className={`text-lg truncate text-black py-2`}>Videos</p>
              <CarouselVideo media={data.video} />
            </div>
-           <button className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-4"><p>Open in Google Maps</p></button>
-           <button className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2"><p>Share</p></button>
-        </div>
+           <button
+           onClick={()=>{
+            window.open(`https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`,"_blank")
+           }}
+            className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-4"><p>Open in Google Maps</p></button>
+           <button onClick={()=>handleShare()} className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2"><p>Share</p></button>
+        </div> </>)}
        </div>
-    )}
+    )
 }
 
                              

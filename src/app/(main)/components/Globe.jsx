@@ -28,6 +28,8 @@ export default function Globe({ searchParams }) {
   const reset = useSpotStore((data)=>data.reset)
   const setReset = useSpotStore((data)=>data.setReset)
   const allSpots = useSpotStore((data)=>data.allSpots)
+  const setActiveSpot = useSpotStore((data)=>data.setSpot)
+  const activeSpot = useSpotStore((data)=>data.spot)
   const setFilteredSpotStore = useSpotStore((data)=>data.setFilteredSpot)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
   const [filteredSpots, setFilteredSpots] = useState([]);
@@ -54,11 +56,21 @@ export default function Globe({ searchParams }) {
   },[])
   useEffect(()=>{
     if(!allSpots) return
-      const {risk,type,search,structure,continent} = resolvedParams
+      const {risk,type,search,structure,continent,selectedSpot} = resolvedParams
+      if(selectedSpot) setActiveSpot(selectedSpot)
+      if(activeSpot == selectedSpot) {
+        setActiveSpot(null)
+        
+      }
       let result = allSpots
-      if(continent) result = result.filter(s=>s.continent === continent)
-      if(risk) result = result.filter(s=>s.risk === risk)
-      if(structure) result = result.filter(s=>s.spotTypes.includes(structure))
+      // if(continent) result = result.filter(s=>s.continent === continent)
+      // if(risk) result = result.filter(s=>s.risk === risk)
+      if (structure) {
+        const structureArray = Array.isArray(structure) ? structure : [structure]
+        result = result.filter(s =>
+          structureArray.every(t => s.spotTypes.includes(t))
+        )
+      }
       if (type) {
         const structureArray = Array.isArray(type) ? type : [type]
         result = result.filter(s =>
@@ -73,6 +85,7 @@ export default function Globe({ searchParams }) {
       )
         setFilteredSpots(result)
         setFilteredSpotStore(result)
+        console.log(activeSpot)
   },[resolvedParams, allSpots])
 
   const getZoom = useCallback(() => {

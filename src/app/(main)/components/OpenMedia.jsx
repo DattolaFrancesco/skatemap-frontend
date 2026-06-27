@@ -15,7 +15,7 @@ export default function OpenMedia() {
     if (!mediaOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 h-full  overflow-hidden bg_openPhotos">
+        <div className="fixed inset-0 z-999999 h-full  overflow-hidden bg_openPhotos">
             <div className="h-full w-full" onClick={close}>
                 <div className="flex h-[90%] w-full flex-col items-center justify-center gap-4 p-3 sm:gap-6 sm:p-6">
                     

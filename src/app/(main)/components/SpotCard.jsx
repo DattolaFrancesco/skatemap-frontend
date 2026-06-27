@@ -1,7 +1,7 @@
 'use client'
-import useInsetStore from "@/app/(main)/store/InsetStore"
 import useSpotStore from "../store/SpotStore"
 import Image from 'next/image'
+import { useRouter, useSearchParams } from "next/navigation"
 
 const structuresName = ["ledge", "rail", "ramp", "stair"]
 
@@ -19,11 +19,14 @@ export default function SpotCard({ spot }) {
     const isSkatepark = spot.spotTypes.includes("SKATEPARK")
     const isStreet = spot.spotTypes.includes("STREET")
     const isBowl = spot.spotTypes.includes("BOWL")
+    const router = useRouter()
+    const resolvedParams = useSearchParams()
     return (
         <div 
         onClick={()=>{
-            setActiveSpot(spot.id); 
-            if(activeSpot == spot.id) setActiveSpot(null)
+            const p = new URLSearchParams(resolvedParams.toString())
+            p.set("selectedSpot",spot.id)
+            router.push(`?${p.toString()}`, { scroll: false })
             }}
         className={`w-full flex justify-between rounded-[5px] ${activeSpot == spot.id ? "bg_activated" : "bg_login" }`}>
             <div className={`flex-1 min-w-0 ps-2 color_p_gray`}>
