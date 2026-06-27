@@ -28,6 +28,8 @@ export default function Details({postion}){
     const [isMobile, setIsMobile] = useState(false)
     const [isTablet, setIsTablet] = useState(false)
     const containerRef = useRef(null)
+    const detailsRef = useRef(null)
+    const [spotClosed,setSpotClosed] = useState(false)
     
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -155,6 +157,25 @@ export default function Details({postion}){
         window.addEventListener('resize', check)
         return () => window.removeEventListener('resize', check)
     }, [])
+
+     const closeSpot = () => {
+        if (!spotClosed) {
+            gsap.to(detailsRef.current, {
+            height: 0,
+            opacity:0,
+            duration: 0.3,
+            onComplete: () => setSpotClosed(true)
+            })
+        } else {
+            setSpotClosed(false)
+            gsap.fromTo(
+            detailsRef.current,
+            { height: 0 },
+            { height: "auto", opacity:1, duration: 0.3 }
+            )
+        }
+    }
+    
     useGSAP(()=>{
         if (!data) return;
         gsap.set(containerRef.current, {
@@ -171,8 +192,13 @@ export default function Details({postion}){
     const isStreet = data?.spotTypes.includes("STREET")
     const isBowl = data?.spotTypes.includes("BOWL")
 
-     return (<div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-3 w-full max-h-[calc(100vh-70px)] overflow-y-scroll`}>
-          {!spot || !data ? null : ( <> 
+     return (
+     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-16" : "w-full"} transition-all duration-300  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
+           {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
+            className="rounded-[5px] text-[12px] px-2">Show</button>}
+          {!spot || !data 
+            ?  null
+            : ( <div ref={detailsRef} className="w-full"> 
           {isMobile && <div className="flex gap-1 mb-1 items-center">
                 <button onClick={()=>activeSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
                     <MoveLeft size={12}/> <p>Go back</p>
@@ -228,7 +254,7 @@ export default function Details({postion}){
             onClick={() => setMediaOpen({  media: data.image, format: "image" })}
             className=" absolute bottom-[12px] left-[12px] button--glass rounded-[5px] px-1 bg-black/10! flex items-center gap-1 text-white"><GalleryVerticalEnd size={13}/> <p>Images</p></button>
         </div>
-        <div className="bg_login rounded-b-[5px] px-3 pb-2">
+        <div className="bg_login rounded-b-[5px] px-3 pb-2 relative">
             {!isMobile && 
            <div>
                 <div className="flex justify-between">
@@ -279,7 +305,9 @@ export default function Details({postion}){
            }}
             className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-4"><p>Open in Google Maps</p></button>
            <button onClick={()=>handleShare()} className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2"><p>Share</p></button>
-        </div> </>)}
+            {!isMobile && !spotClosed && <button onClick={()=>{closeSpot();}} 
+            className="py-0.5  rounded-[15px] color_p_gray w-full mt-2">Hide</button>}
+        </div> </div>)}
        </div>
     )
 }
