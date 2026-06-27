@@ -295,7 +295,7 @@ export default function Details({postion}){
             className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-4"><p>Open in Google Maps</p></button>
            <button onClick={()=>handleShare()} className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2"><p>Share</p></button>
             {!isMobile && !spotClosed && <button onClick={()=>{closeSpot();}} 
-            className="py-0.5  rounded-[15px] color_p_gray w-full mt-2">Hide</button>}
+            className="py-0.5  rounded-[15px] color_p_gray w-full mt-2"><p>Hide</p></button>}
         </div> </div>)}
        </div>
     )

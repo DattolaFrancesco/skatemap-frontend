@@ -43,7 +43,6 @@ export default function NavBar() {
     const urlParams = (isReturn)=>{
         const p = new URLSearchParams()
         const selectedSpot = resolvedParams.get("selectedSpot")
-        if(!selected) console.log("no")
         selected.location.forEach(f => p.append("continent", f.toUpperCase().replace(/\s/g, "")))
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
@@ -110,7 +109,6 @@ export default function NavBar() {
         window.addEventListener('resize', check)
         return () => window.removeEventListener('resize', check)
     }, [])
-    useEffect(()=>{console.log(activeSpot)},[activeSpot])
     return (
         <>
         <nav className="pt-5 px-3 md:px-5 w-full md:w-[40%] lg:w-[30%] xl:w-[25%] z-10 ">
@@ -125,7 +123,7 @@ export default function NavBar() {
                                 }} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
                             <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setOpenList(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
                             <button className={` text-black rounded-e-[5px] self-stretch`}  onClick={() => {
-                                if(openList){setOpenList(false);setSpot(null)}
+                                if(openList){setOpenList(!openList);setSpot(null)}
                                 }}>{openList && <X size={12}/>} {!openList && <Search size={12}/>}</button>
                 {!isMobile && <div className="z-50 absolute top-10 md:top-0 md:left-[100%] flex gap-1 md:ms-1">
                 <div className="flex flex-col gap-1 w-fit">

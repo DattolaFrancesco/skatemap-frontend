@@ -16,7 +16,6 @@ export default function Globe({ searchParams }) {
   const mapRef = useRef(null)
   const containerRef = useRef(null)
   const [mapReady, setMapReady] = useState(false)
-  const setSpotOpen = useInsetStore((state)=>state.setSpotOpen)
   const router = useRouter();
   const pendingHref = useNavigationStore((state) => state.pendingHref);
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
@@ -33,7 +32,6 @@ export default function Globe({ searchParams }) {
   const setFilteredSpotStore = useSpotStore((data)=>data.setFilteredSpot)
   const setAllSpots = useSpotStore((data)=>data.setAllSpots)
   const setOpenList = useSpotStore((data) => data.setOpenList)
-  const openList = useSpotStore((data) => data.openList)
   const [filteredSpots, setFilteredSpots] = useState([]);
   
   useEffect(()=>{
@@ -58,7 +56,7 @@ export default function Globe({ searchParams }) {
   },[])
   useEffect(()=>{
     if(!allSpots) return
-      const {risk,type,search,structure,continent,selectedSpot} = resolvedParams
+      const {type,search,structure,selectedSpot} = resolvedParams
       if(selectedSpot) setActiveSpot(selectedSpot)
       if(activeSpot == selectedSpot) {
         setActiveSpot(null)
@@ -85,7 +83,6 @@ export default function Globe({ searchParams }) {
       )
         setFilteredSpots(result)
         setFilteredSpotStore(result)
-        console.log(activeSpot)
   },[resolvedParams, allSpots])
 
   const getZoom = useCallback(() => {
@@ -124,7 +121,19 @@ useEffect(() => {
     if (!mapInstance.current.isStyleLoaded()) return
     mapInstance.current.jumpTo({ zoom: getZoom() })
   }, [windowWidthCustom])
+  useEffect(() => {
+  if (!mapInstance.current) return;
+  if (!activeSpot) return;
 
+  const spot = filteredSpots.find(s => s.id === activeSpot);
+  if (!spot) return;
+
+  mapInstance.current.flyTo({
+    center: [spot.longitude, spot.latitude],
+    duration: 1200,
+    zoom: getZoom()
+  });
+}, [activeSpot, filteredSpots]);
   useEffect(() => {
     if (!mapRef.current) return
     mapInstance.current = new maplibregl.Map({
@@ -132,7 +141,7 @@ useEffect(() => {
       style: `https://api.maptiler.com/maps/dataviz-light/style.json?key=WvVUBxCG2IWaZflw6QsZ`,
       zoom: getZoom(),
       minZoom: 0.8,
-      center: [10, 40],
+      center: [10,40],
       attributionControl: false,
     })
     mapInstance.current.on('load', () => {
@@ -152,6 +161,20 @@ useEffect(() => {
     })
     return () => mapInstance.current.remove()
   }, [])
+  useEffect(() => {
+  if (!mapReady || !mapInstance.current.getLayer("spots-layer")) return;
+
+    mapInstance.current.setPaintProperty(
+      "spots-layer",
+      "circle-color",
+      [
+        "case",
+        ["==", ["get", "id"], activeSpot],
+        "#5eff00",
+        "#d7dbd4"
+      ]
+    );
+}, [activeSpot, mapReady]);
 useEffect(()=>{
     if(!filteredSpots || !mapReady) return
     
@@ -161,7 +184,7 @@ useEffect(()=>{
             features: filteredSpots.map(s => ({
                 type: 'Feature',
                 geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-                properties: { spot: s }
+                properties: { spot: s, id:s.id }
             }))
         })
     } else {
@@ -172,7 +195,7 @@ useEffect(()=>{
                 features: filteredSpots.map(s => ({
                     type: 'Feature',
                     geometry: { type: 'Point', coordinates: [s.longitude, s.latitude] },
-                    properties: { spot: s }
+                    properties: { spot: s, id:s.id  }
                 }))
             }
         })
@@ -180,13 +203,21 @@ useEffect(()=>{
             id: 'spots-layer',
             type: 'circle',
             source: 'spots',
-            paint: { 'circle-radius': 4, 'circle-color': '#d7dbd4' }
+            paint: {
+            "circle-radius": 5,
+            "circle-color": [
+              "case",
+              ["==", ["get", "id"], activeSpot],
+              "#ff0000",
+              "#d7dbd4"
+            ]
+        }
         })
         if(windowWidthCustom >= 1024){
             mapInstance.current.on('click', 'spots-layer', (e) => {
                 const feature = e.features[0]
                 const parsed = JSON.parse(feature.properties.spot)
-                const p = new URLSearchParams(resolvedParams.toString())
+                const p = new URLSearchParams(window.location.search)
                 p.set("selectedSpot",parsed.id)
                 router.push(`?${p.toString()}`, { scroll: false })
                 setOpenList(true)
@@ -202,7 +233,7 @@ useEffect(()=>{
            mapInstance.current.on('click', 'spots-layer', (e) => {
                 const feature = e.features[0]
                 const parsed = JSON.parse(feature.properties.spot)
-                const p = new URLSearchParams(resolvedParams.toString())
+                const p = new URLSearchParams(window.location.search)
                 p.set("selectedSpot",parsed.id)
                 router.push(`?${p.toString()}`, { scroll: false })
             })
