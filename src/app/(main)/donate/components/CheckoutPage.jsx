@@ -14,7 +14,7 @@ import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
-       <button type='submit' className="bg-primary-500 w-full py-3 text-2xl md:text-3xl font-bold mt-3">PAY €{amount}</button>
+       <button type='submit' className="button--glass button w-full py-3 text-2xl md:text-3xl font-bold mt-3">PAY €{amount}</button>
     </form>
   )
 }

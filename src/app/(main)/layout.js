@@ -11,7 +11,7 @@ export default function NavLayout({ children }) {
     <NavBar/>
     <NavBarRight/>
     <ChatBot/>
-    <div className="flex-1 overflow-y-auto overscroll-none landscape:overflow-visible">
+    <div className="flex-1 overflow-y-auto overscroll-none landscape:overflow-visible flex flex-col">
       {children}
     </div>
     <OpenMedia/>
