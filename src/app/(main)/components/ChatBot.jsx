@@ -1,5 +1,5 @@
 'use client'
-import { ChevronDown, ChevronUp, Send } from 'lucide-react';
+import { ChevronDown, ChevronUp, Send, Dot } from 'lucide-react';
 import { useState, useRef, useEffect } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import useChatStore from '../store/ChatStore';
@@ -104,8 +104,9 @@ export default function ChatBot() {
             <div className="relative">
                 <button
                     onClick={() => setOpenChat(!openChat)}
-                    className="w-full text-start flex items-center rounded-[5px] px-1 gap-2"
+                    className="w-full text-start flex items-center rounded-[5px] px-1 gap-1"
                 >
+                    <p className='animate-pulse'><Dot  size={12} strokeWidth={8}/></p>
                     <p>AI Chat</p>
                     <span className="ms-auto">
                         {openChat ? <ChevronDown size={12} /> : <ChevronUp size={12} />}

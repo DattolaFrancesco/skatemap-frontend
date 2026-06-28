@@ -1,24 +1,34 @@
 'use client'
-
-import { useEffect} from "react";
+import { useEffect, useRef, useState } from "react";
 import useUserStore from "./UserStore";
-import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import useThemeStore from "./ThemesStore";
 import TransitionLink from "@/app/(main)/components/TransitionLink";
+import { Settings, X } from 'lucide-react';
 import useNavigationStore from "@/app/(main)/store/NavigationStore";
+import { usePathname } from "next/navigation";
+import gsap from "gsap";
 
-export default function InfoUser(){
-    const setUser = useUserStore((data)=> data.setUser)
-    const user = useUserStore((data)=> data.user)
-    const refresh = useUserStore((data)=> data.refresh)
-    const bgTheme = useThemeStore((data)=>data.bgTheme)
-    const statusHref = useNavigationStore((state) => state.statusHref);
+const INIT_H = 32
+const TARGET_W = 100
+
+export default function InfoUser({ searchParams }) {
+    const setUser = useUserStore((data) => data.setUser)
+    const user = useUserStore((data) => data.user)
+    const refresh = useUserStore((data) => data.refresh)
+    const bgTheme = useThemeStore((data) => data.bgTheme)
+    const statusHref = useNavigationStore((state) => state.statusHref)
     const router = useRouter()
+    const pathname = usePathname()
+    const [menuOpen, setMenuOpen] = useState(false)
+    const panelRef = useRef(null)
+    const role = user?.authorities?.[0]
+    const isAdmin = role === "admin" || role === "super_admin"
+    const isSuperAdmin = role === "super_admin"
 
-    async function getUser(){
+    async function getUser() {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/account/minimal`
-        try{
+        try {
             const res = await fetch(url, {
                 method: "GET",
                 headers: {
@@ -29,71 +39,122 @@ export default function InfoUser(){
             const data = await res.json()
             if (!res.ok) throw new Error(data.message)
             setUser(data)
-        }
-        catch(err){
+        } catch (err) {
             router.push("/login")
             console.log(err.message)
         }
     }
 
-    useEffect(()=>{getUser()},[refresh])
-    useEffect(()=>{},[bgTheme])
+    useEffect(() => { getUser() }, [refresh])
+    useEffect(() => {}, [bgTheme])
 
-    if(!user)
-    return(
-        <div className="w-full flex flex-col md:flex-row">
-            <div className="w-full flex flex-col gap-3">
-                <div className="h-14 w-48 bg-black/20 animate-pulse" />
-                <div className="h-7 w-36 bg-black/20 animate-pulse mt-3" />
-                <div className="h-7 w-52 bg-black/20 animate-pulse" />
-            </div>
-            <div className="w-full flex flex-col justify-around">
-                <div className="flex ms-auto">
-                    <div className="nav-link w-16 h-5 bg-black/20 animate-pulse" />
-                </div>
-                <div className="flex justify-end gap-3 py-4">
-                    <div className="flex flex-col justify-center items-center gap-2">
-                        <div className="h-14 w-12 bg-black/20 animate-pulse" />
-                        <div className="h-5 w-14 bg-black/20 animate-pulse" />
-                    </div>
-                    <div className="flex flex-col justify-center items-center gap-2">
-                        <div className="h-14 w-12 bg-black/20 animate-pulse" />
-                        <div className="h-5 w-20 bg-black/20 animate-pulse" />
-                    </div>
-                </div>
-            </div>
+    function open() {
+        setMenuOpen(true)
+        gsap.to(panelRef.current, {
+            width: TARGET_W,
+            duration: 0.35,
+            ease: "power3.out",
+            onComplete: () => {
+                gsap.to(panelRef.current, {
+                    height: panelRef.current.scrollHeight,
+                    duration: 0.4,
+                    ease: "power3.out"
+                })
+            }
+        })
+    }
+
+    function close(cb) {
+        gsap.to(panelRef.current, {
+            height: INIT_H,
+            duration: 0.25,
+            ease: "power3.in",
+            onComplete: () => {
+                gsap.to(panelRef.current, {
+                    width: 0,
+                    duration: 0.3,
+                    ease: "power3.in",
+                    onComplete: () => {
+                        setMenuOpen(false)
+                        cb && cb()
+                    }
+                })
+            }
+        })
+    }
+    useEffect(()=>{close()},[pathname])
+    const links = [
+        { href: "/dashboard", label: "My spots", always: true },
+        { href: "/dashboard/allSpot", label: "All spots", show: isAdmin },
+        { href: "/dashboard/favourites", label: "Fav", always: true },
+        { href: "/dashboard/requests", label: "Requests", show: isAdmin, badge: user?.existPending > 0 },
+        { href: "/dashboard/users", label: "Users", show: isSuperAdmin },
+        { href: "/dashboard/settings", label: "Settings", always: true },
+        { href: "/spot/registration", label: "Add spot", always: true },
+        { href: "/", label: "Home", always: true },
+        { href: "/login", label: "Log out", always: true },
+    ].filter(l => l.always || l.show)
+
+    if (!user) return (
+        <div className="w-full flex items-center gap-2 py-2">
+            <div className="h-4 w-24 bg-black/20 animate-pulse rounded-[5px]" />
+            <div className="h-4 w-12 bg-black/20 animate-pulse rounded-[5px]" />
+            <div className="h-4 w-12 bg-black/20 animate-pulse rounded-[5px]" />
+            <div className="h-[18px] w-8 bg-black/20 animate-pulse rounded-[5px] ms-auto" />
         </div>
     )
 
-    return(
-        <div className="w-full flex flex-col md:flex-row">
-        {user &&
-        <>
-            <div className="w-full">
-                <div className="flex justify-between">
-                    <div className="flex gap-3 flex flex-wrap">
-                        <h1 className="text-6xl text-primary-500 font-bold">{user.username}</h1>
-                          <article className="flex flex-wrap gap-2">
-                                <div className="flex gap-1">
-                                    <p className={`text-3xl md:text-3xl h-fit  bg-transparent ${bgTheme === "bg-dark-custom" ? "text-white" : "text-gray-700"}`}>{user.nOfSpots}</p>
-                                    <p className="text-sm font-bold  bg-transparent text-primary-500">SPOTS</p>
-                                </div>
-                               <div className="flex gap-1">
-                                    <p className={`text-3xl md:text-3xl h-fit  bg-transparent ${bgTheme === "bg-dark-custom" ? "text-white" : "text-gray-700"}`}>{user.nOfFav}</p>
-                                    <p className="text-sm font-bold bg-transparent text-primary-500">FAVOURITES</p>
-                               </div>
-                          </article>
+    return (
+        <div className="w-full flex items-center gap-3 py-1.5 z-999">
+           <div className="button--glass button p-1.5 flex gap-1.5">
+               <div className="bg_login rounded-[5px]">
+                    <p className="font-bold whitespace-nowrap px-1">{user.username}</p>
+               </div>
+               <div className="bg_login rounded-[5px] bg_activated_light color_login">
+                    <p className="whitespace-nowrap px-1">[{user.nOfSpots}] spots</p>
+               </div>
+               <div className="bg_login rounded-[5px] bg_activated_light color_login">
+                    <p className="whitespace-nowrap px-1">[{user.nOfFav}] fav</p>
+               </div>
+           </div>
+
+            <div className="ms-auto relative flex items-center">
+                <div
+                    ref={panelRef}
+                    className="absolute right-0 top-0 overflow-hidden button--glass button rounded-[5px]"
+                    style={{ width: 0, height: INIT_H }}
+                >
+                    <div className="flex flex-col p-1 gap-1.5">
+                        {links.map(l => (
+                            <div key={l.href} className="relative flex items-center">
+                                <TransitionLink
+                                    href={l.href}
+                                    className={` w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150
+                                        ${pathname === l.href ? "bg_activated_light color_login" : "hover:bg-black/10"}`}
+                                >
+                                    <p>{l.label}</p>
+                                </TransitionLink>
+                                {l.badge && <div className="absolute w-2 h-2 rounded-full bg-red-500 top-0 right-0 animate-pulse" />}
+                            </div>
+                        ))}
+                        <button
+                            onClick={() => close()}
+                            className="w-fit rounded-[5px] text-[12px] whitespace-nowrap text-left hover:bg-black/10 transition-colors duration-150"
+                        >
+                            <p>Close</p>
+                        </button>
                     </div>
-                  <div className="flex flex-col gap-2 justify-center items-center">
-                        <TransitionLink className={`nav-link w-full text-center text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/`}>HOME</TransitionLink>
-                        <TransitionLink className={`nav-link  w-full text-center text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/login`}>LOG OUT</TransitionLink>
-                        <TransitionLink className={`block md:hidden ms-auto nav-link w-fit text-center whitespace-nowrap text-sm md:text-base ${statusHref?" disabled-btn":""}`} href={`/spot/registration`}>ADD SPOT</TransitionLink>
-                  </div>
                 </div>
 
+                <div className={`relative z-10 p-1.5  ${menuOpen ? "" : "button--glass button"} bg-transparent rounded-[5px] flex flex-col gap-[5px] justify-center items-center`}>
+                    <button
+                        onClick={() => menuOpen ? close() : open()}
+                        className={`  ${menuOpen ? "invisible" : "bg_login"} aspect-square rounded-[5px]`}
+                    >
+                        {!menuOpen ? <Settings size={10}/> : <X size={10}/>}
+                    </button>
+                </div>
             </div>
-        </>
-        }
         </div>
     )
 }
