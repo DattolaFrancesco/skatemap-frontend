@@ -54,6 +54,9 @@ export default function Globe() {
           getAllSpot()
       }
   }, [])
+  useEffect(() => {
+    console.log("allSpots changed:", allSpots?.length)
+}, [allSpots])
     useEffect(() => {
         if (!Array.isArray(allSpots)) return
         const type = searchParams.getAll('type')

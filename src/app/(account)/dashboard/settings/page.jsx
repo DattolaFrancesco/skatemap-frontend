@@ -1,4 +1,3 @@
-
 'use client'
 import useThemeStore from "../components/ThemesStore"
 import { useEffect, useRef, useState } from "react"
@@ -27,55 +26,38 @@ export default function Settings() {
         try {
             const res = await fetch(`${API}/account`, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
-                }
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('token')}` }
             })
             const data = await res.json();
             if (!res.ok) throw new Error(data.message);
             setUser(data)
-        } catch (err) {
-            console.log(err.message)
-        }
+        } catch (err) { console.log(err.message) }
     }
 
     async function getBotStatus() {
         const url = `${process.env.NEXT_PUBLIC_API_URL}/bot/get/status`;
         try {
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
+            const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } })
             const data = await res.json()
             if (!res.ok) throw new Error("the bot is skating right now!, try later")
             setAllowBotLocal(data.status)
-        } catch (err) {
-            console.log(err.message)
-        }
+        } catch (err) { console.log(err.message) }
     }
 
     async function setBotStatus() {
         try {
             const res = await fetch(`${API}/bot/status`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
-                }
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('token')}` }
             })
             if (!res.ok) throw new Error("error")
-        } catch (err) {
-            console.log(err.message)
-        }
+        } catch (err) { console.log(err.message) }
     }
 
     const handleBotSwitch = () => {
         setAllowBotLocal(!allowBotLocal)
         clearInterval(swicthStatusRef.current)
-        swicthStatusRef.current = setTimeout(() => {
-            setBotStatus()
-        }, 500);
+        swicthStatusRef.current = setTimeout(() => { setBotStatus() }, 500)
     }
 
     useEffect(() => {
@@ -86,10 +68,7 @@ export default function Settings() {
     }, [])
 
     useEffect(() => {
-        document.documentElement.classList.remove(
-            "theme-yellow", "theme-red", "theme-blue",
-            "theme-green", "theme-violet", "theme-orange"
-        )
+        document.documentElement.classList.remove("theme-yellow", "theme-red", "theme-blue", "theme-green", "theme-violet", "theme-orange")
         document.documentElement.classList.add(theme)
         localStorage.setItem("theme", theme)
     }, [theme])
@@ -97,7 +76,7 @@ export default function Settings() {
     useEffect(() => {
         document.documentElement.classList.remove("bg-white-custom", "bg-dark-custom", "bg-bg-black", "bg-bg-white")
         document.documentElement.classList.add(bgTheme)
-        if(bgTheme === "bg-dark-custom")document.documentElement.classList.add("bg-bg-black")
+        if (bgTheme === "bg-dark-custom") document.documentElement.classList.add("bg-bg-black")
         else document.documentElement.classList.add("bg-bg-white")
         localStorage.setItem("BgTheme", bgTheme)
     }, [bgTheme])
@@ -109,56 +88,40 @@ export default function Settings() {
         const els = gsap.utils.toArray(containerRef.current.children)
         if (!els.length) return
         gsap.set(els, { yPercent: 200, opacity: 0 })
-        gsap.to(els, {
-            yPercent: 0,
-            opacity: 1,
-            duration: 0.2,
-            stagger: 0.1,
-            ease: "power2.out",
-            clearProps: "transform,opacity"
-        })
+        gsap.to(els, { yPercent: 0, opacity: 1, duration: 0.2, stagger: 0.1, ease: "power2.out", clearProps: "transform,opacity" })
     }, { scope: containerRef, dependencies: [user] })
 
-        useEffect(() => {
+    useEffect(() => {
         if (!pendingHref) return
         setStatusHref(true)
         const els = gsap.utils.toArray(containerRef.current.children)
         gsap.to(els, {
-            yPercent: 200,
-            opacity: 0,
-            duration: 0.75,
-            ease: "power3.inOut",
-            onComplete: () => {
-                clearPendingHref()
-                router.push(pendingHref)
-            }
+            yPercent: 200, opacity: 0, duration: 0.75, ease: "power3.inOut",
+            onComplete: () => { clearPendingHref(); router.push(pendingHref) }
         })
     }, [pendingHref])
+
     return (
-        <div ref={containerRef} className="flex flex-col">
-            <div className="flex justify-between py-2">
-                <p className="bg-transparent text-xl text-primary-500 font-bold">Theme</p>
-                <select onChange={(e) => setTheme(e.target.value)} className="text-primary-500 font-bold" value={theme}>
-                    <option value="theme-green">GREEN</option>
-                    <option value="theme-yellow">YELLOW</option>
-                    <option value="theme-red">RED</option>
-                    <option value="theme-violet">VIOLET</option>
-                    <option value="theme-blue">BLUE</option>
-                    <option value="theme-orange">ORANGE</option>
-                </select>
-            </div>
-            <div className="flex justify-between py-2">
-                <p className="bg-transparent text-xl text-primary-500 font-bold">Bg Theme</p>
-                <select onChange={(e) => setBgTheme(e.target.value)} className="text-primary-500 font-bold" value={bgTheme}>
-                    <option value="bg-white-custom">WHITE</option>
-                    <option value="bg-dark-custom">DARK</option>
-                </select>
-            </div>
+        <div ref={containerRef} className="flex flex-col gap-2">
             {user?.authorities[0].authority === "super_admin" && (
-                <div className="flex justify-between py-2">
-                    <p className={`bg-transparent text-xl text-primary-500 font-bold ${allowBotLocal ? "" : "opacity-80"}`}>Chat Bot</p>
-                    <input type="checkbox" id="switch" checked={allowBotLocal} onChange={handleBotSwitch} />
-                    <label htmlFor="switch">Toggle</label>
+                <div className="button--glass button p-2 rounded-[5px] flex justify-between items-center gap-4">
+                    <div className="bg_login rounded-[5px] px-2 py-1">
+                        <p className="text-xs font-bold tracking-widest">CHAT BOT</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <p className="text-[10px] tracking-widest text-black/40">
+                            {allowBotLocal ? "ON" : "OFF"}
+                        </p>
+                            <div
+                                onClick={handleBotSwitch}
+                                style={{ backgroundColor: allowBotLocal ? 'rgba(34,197,94)' : '' }}
+                                className="relative w-10 h-5 rounded-full cursor-pointer transition-all duration-300 button--glass button"
+                            >
+                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg_login transition-all duration-300
+                                ${allowBotLocal ? "left-5" : "left-0.5"}`}
+                            />
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

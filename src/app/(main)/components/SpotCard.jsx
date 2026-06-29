@@ -12,6 +12,10 @@ export default function SpotCard({ spot }) {
     const setEliminationSpot = useSpotStore((s) => s.setEliminationSpot)
     const setAskPermission = useSpotStore((s) => s.setAskPermission)
     const setAskPermissionPending = useSpotStore((s) => s.setAskPermissionPending)
+    const setApproveSpotData = useSpotStore((s) => s.setApproveSpotData)
+    const setUnApproveSpotData = useSpotStore((s) => s.setUnApproveSpotData)
+    const setAskPermissionToApprove = useSpotStore((s) => s.setAskPermissionToApprove)
+    const setAskPermissionToUnApprove = useSpotStore((s) => s.setAskPermissionToUnApprove)
     const nameMaiusc = spot.name?.slice(0, 1).toUpperCase()
     const nameMinusc = spot.name?.slice(1)?.toLowerCase()
     const cityMaiusc = spot.city?.slice(0, 1)
@@ -26,7 +30,8 @@ export default function SpotCard({ spot }) {
     const router = useRouter()
     const resolvedParams = useSearchParams()
     const isDashboard = pathname.includes("/dashboard")
-    const isDashboardAll = pathname == "/dashboard/allSpot"
+    const isDashboardAll = pathname === "/dashboard/allSpot"
+    const isRequests = pathname === "/dashboard/requests"
 
     function handleCardClick() {
         const p = new URLSearchParams(resolvedParams.toString())
@@ -39,10 +44,23 @@ export default function SpotCard({ spot }) {
         setEliminationSpot(spot)
         setAskPermission(true)
     }
+
     function handlePending(e) {
         e.stopPropagation()
         setPendingSpot(spot)
         setAskPermissionPending(true)
+    }
+
+    function handleApprove(e) {
+        e.stopPropagation()
+        setApproveSpotData(spot)
+        setAskPermissionToApprove(true)
+    }
+
+    function handleUnApprove(e) {
+        e.stopPropagation()
+        setUnApproveSpotData(spot)
+        setAskPermissionToUnApprove(true)
     }
 
     function handleModify(e) {
@@ -88,11 +106,18 @@ export default function SpotCard({ spot }) {
                 alt="skate spot image"
                 className="shrink-0 rounded-xl w-[100px] h-[100px] p-2 object-cover"
             />
-            {isDashboard && (
+            {isDashboard && !isRequests && (
                 <div className="absolute top-1 right-1 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={handleDelete} className="text-xs px-1 bg-red-100 rounded">Delete</button>
-                    <button onClick={handleModify} className="text-xs px-1 bg-blue-100 rounded">Modify</button>
-                    { isDashboardAll && <button onClick={handlePending} className="text-xs px-1 bg-blue-100 rounded">Pending</button>}
+                    <button onClick={handleDelete} className="text-xs px-1 rounded">Delete</button>
+                    <button onClick={handleModify} className="text-xs px-1 rounded">Modify</button>
+                    {spot.status !== "PENDING" && isDashboardAll && <button onClick={handlePending} className="text-xs px-1  rounded">Pending</button>}
+                </div>
+            )}
+            {isRequests && (
+                <div className="absolute top-1 right-1 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button onClick={handleApprove} className="text-xs px-1  rounded">Approve</button>
+                    <button onClick={handleUnApprove} className="text-xs px-1 rounded">Unapprove</button>
+                    <button onClick={handleModify} className="text-xs px-1 rounded">Modify</button>
                 </div>
             )}
         </div>
