@@ -54,7 +54,6 @@ export default function Globe() {
           getAllSpot()
       }
   }, [])
-
     useEffect(() => {
         if (!Array.isArray(allSpots)) return
         const type = searchParams.getAll('type')
@@ -62,25 +61,25 @@ export default function Globe() {
         const search = searchParams.get('search')
         const selectedSpot = searchParams.get('selectedSpot')
         const status = searchParams.getAll('status')
-        if (selectedSpot) setActiveSpot(selectedSpot)
+
         let result = [...allSpots]
-        if (status.length > 0) {
-            result = result.filter(s => status.some(t => s.status.includes(t)))
+        if (status.length > 0) result = result.filter(s => status.some(t => s.status.includes(t)))
+        if (structure.length > 0) result = result.filter(s => structure.every(t => s.spotTypes.includes(t)))
+        if (type.length > 0) result = result.filter(s => type.some(t => s.spotTypes.includes(t)))
+        if (search) result = result.filter(s =>
+            s.name.toLowerCase().includes(search.toLowerCase()) ||
+            s.country.toLowerCase().includes(search.toLowerCase()) ||
+            s.continent.toLowerCase().includes(search.toLowerCase()) ||
+            s.city.toLowerCase().includes(search.toLowerCase())
+        )
+
+        // ← solo se lo spot esiste nella lista filtrata
+        if (selectedSpot) {
+            const exists = result.some(s => String(s.id) === String(selectedSpot))
+            if (exists) setActiveSpot(selectedSpot)
+            else setActiveSpot(null)
         }
-        if (structure.length > 0) {
-            result = result.filter(s => structure.every(t => s.spotTypes.includes(t)))
-        }
-        if (type.length > 0) {
-            result = result.filter(s => type.some(t => s.spotTypes.includes(t)))
-        }
-        if (search) {
-            result = result.filter(s =>
-                s.name.toLowerCase().includes(search.toLowerCase()) ||
-                s.country.toLowerCase().includes(search.toLowerCase()) ||
-                s.continent.toLowerCase().includes(search.toLowerCase()) ||
-                s.city.toLowerCase().includes(search.toLowerCase())
-            )
-        }
+
         setFilteredSpots(result)
         setFilteredSpotStore(result)
     }, [searchParams, allSpots])

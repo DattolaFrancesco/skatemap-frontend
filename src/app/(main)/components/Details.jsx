@@ -10,15 +10,16 @@ import Image from 'next/image'
 import CarouselVideo from "./CarouselVideo";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 const structuresName = ["ledge", "rail", "ramp", "stair"]
 
 export default function Details({postion}){
     const pathname = usePathname()
+    const router = useRouter()
     const setRefreshy = useUserStore((state)=>state.setRefresh)
     const spot = useSpotStore((data)=>data.spot)
-    const activeSpot = useSpotStore((data)=>data.setSpot)
+    const setSpot = useSpotStore((data)=>data.setSpot)
     const refreshy = useUserStore((data)=>data.refresh)
     const [data, setData] = useState(null)
     const [refresh,setRefresh] =useState(null)
@@ -32,6 +33,7 @@ export default function Details({postion}){
     const containerRef = useRef(null)
     const detailsRef = useRef(null)
     const [spotClosed,setSpotClosed] = useState(false)
+    const [activeSpotClosed,setActiveSpotClosed] = useState(false)
     
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -42,7 +44,7 @@ export default function Details({postion}){
             })
             const data = await res.json()
             if(!res.ok) throw new Error("Can't connect to the server")
-                console.log(data)
+                console.log(data,"getSpot")
             setData(data)
         }catch(err){
             console.log(err.message)
@@ -91,10 +93,9 @@ export default function Details({postion}){
             likedPending.current = false
         }
     }
-    async function deleteFav(){
+        async function deleteFav(){
         if(likedPending.current) return
         likedPending.current = true
-        //setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spot}`,{
@@ -102,15 +103,18 @@ export default function Details({postion}){
                 headers: { "Authorization": `Bearer ${token}` }
             })
             if(!res.ok) throw new Error("Can't delete fav")
-            setRefresh(!refresh)
+            if(pathname === "/dashboard/favourites") {
+                setData(null)       
+                setSpot(null)  
+                const p = new URLSearchParams(window.location.search)
+                p.delete("selectedSpot")
+                router.push(`?${p.toString()}`, { scroll: false })
+            }
+        } catch(err){
+            console.log(err.message)
+        } finally {
             setLiked(null)
-            setRefreshy(!refreshy)
-        }catch(err){
-            setRefresh(!refresh)
-            setLiked(null)
-            setRefreshy(!refreshy)
-        }finally {
-            //setPendingLike(false)
+            setRefreshy(!refreshy) 
             likedPending.current = false
         }
     }
@@ -140,13 +144,13 @@ export default function Details({postion}){
     useEffect(() => {
     setToken(localStorage.getItem('token'))
     }, [])
-    useEffect(()=>{
-        if(!spot) return
-        setLiked(null)
-        setExpanded(false)
-        getSpot()
-        getFav(); 
-    },[spot,refresh])
+   useEffect(()=>{
+    if(!spot) return
+    setLiked(null)
+    setExpanded(false)
+    getSpot()
+    getFav()
+},[spot, refresh])
     useEffect(() => {
         const check = () => setIsTablet(window.innerWidth > 1024)
         check()
@@ -178,7 +182,8 @@ export default function Details({postion}){
         }
     }
     useEffect(()=>{if(!spot) setSpotClosed(false)},[spot])
-    useEffect(() => {activeSpot(null)}, [pathname])
+    useEffect(() => {setSpot(null)}, [pathname])
+    useEffect(() => console.log(spot), [])
 
 
     const isSkatepark = data?.spotTypes.includes("SKATEPARK")
@@ -193,7 +198,7 @@ export default function Details({postion}){
             ?  null
             : ( <div ref={detailsRef} className="w-full"> 
           {isMobile && <div className="flex gap-1 mb-1 items-center">
-                <button onClick={()=>activeSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
+                <button onClick={()=>setSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
                     <MoveLeft size={12}/> <p>Go back</p>
                 </button>
                 {token &&

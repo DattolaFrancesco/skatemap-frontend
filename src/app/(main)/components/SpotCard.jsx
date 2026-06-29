@@ -8,8 +8,10 @@ const structuresName = ["ledge", "rail", "ramp", "stair"]
 export default function SpotCard({ spot }) {
     const pathname = usePathname()
     const activeSpot = useSpotStore((data) => data.spot)
+    const setPendingSpot = useSpotStore((s) => s.setPendingSpot)
     const setEliminationSpot = useSpotStore((s) => s.setEliminationSpot)
     const setAskPermission = useSpotStore((s) => s.setAskPermission)
+    const setAskPermissionPending = useSpotStore((s) => s.setAskPermissionPending)
     const nameMaiusc = spot.name?.slice(0, 1).toUpperCase()
     const nameMinusc = spot.name?.slice(1)?.toLowerCase()
     const cityMaiusc = spot.city?.slice(0, 1)
@@ -24,6 +26,7 @@ export default function SpotCard({ spot }) {
     const router = useRouter()
     const resolvedParams = useSearchParams()
     const isDashboard = pathname.includes("/dashboard")
+    const isDashboardAll = pathname == "/dashboard/allSpot"
 
     function handleCardClick() {
         const p = new URLSearchParams(resolvedParams.toString())
@@ -35,6 +38,11 @@ export default function SpotCard({ spot }) {
         e.stopPropagation()
         setEliminationSpot(spot)
         setAskPermission(true)
+    }
+    function handlePending(e) {
+        e.stopPropagation()
+        setPendingSpot(spot)
+        setAskPermissionPending(true)
     }
 
     function handleModify(e) {
@@ -82,8 +90,9 @@ export default function SpotCard({ spot }) {
             />
             {isDashboard && (
                 <div className="absolute top-1 right-1 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
-                    <button onClick={handleDelete} className="text-xs px-1 bg-red-100 rounded">DELETE</button>
-                    <button onClick={handleModify} className="text-xs px-1 bg-blue-100 rounded">MODIFY</button>
+                    <button onClick={handleDelete} className="text-xs px-1 bg-red-100 rounded">Delete</button>
+                    <button onClick={handleModify} className="text-xs px-1 bg-blue-100 rounded">Modify</button>
+                    { isDashboardAll && <button onClick={handlePending} className="text-xs px-1 bg-blue-100 rounded">Pending</button>}
                 </div>
             )}
         </div>
