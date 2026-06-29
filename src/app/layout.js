@@ -33,13 +33,16 @@ export const metadata = {
     "scooter spots",
   ],
 };
+export const viewport = {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+}
 export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} antialiased bg-gradient-custom`}>
-    <head>
-      </head>
       <body className="">
         {children}
       </body>
