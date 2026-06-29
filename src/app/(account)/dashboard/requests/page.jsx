@@ -66,7 +66,7 @@ export default function Requests() {
         const spotToApprove = approveSpotData
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/media/addYt`, {
-                method: "PUT",
+                method: "PATCH",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(inputsRef.current)
             })
