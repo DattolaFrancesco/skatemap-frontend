@@ -55,20 +55,18 @@ export default function Globe() {
       }
   }, [])
 
-  useEffect(() => {
-      if (!pathname.includes("/dashboard")) return
-      if (!filteredSpotStore) return
-      setAllSpots(filteredSpotStore)
-  }, [filteredSpotStore])
-
     useEffect(() => {
-        if (!allSpots) return
+        if (!Array.isArray(allSpots)) return
         const type = searchParams.getAll('type')
         const structure = searchParams.getAll('structure')
         const search = searchParams.get('search')
         const selectedSpot = searchParams.get('selectedSpot')
+        const status = searchParams.getAll('status')
         if (selectedSpot) setActiveSpot(selectedSpot)
-        let result = allSpots
+        let result = [...allSpots]
+        if (status.length > 0) {
+            result = result.filter(s => status.some(t => s.status.includes(t)))
+        }
         if (structure.length > 0) {
             result = result.filter(s => structure.every(t => s.spotTypes.includes(t)))
         }

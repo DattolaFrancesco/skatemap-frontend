@@ -12,18 +12,21 @@ export default function NavBar() {
     const filters = {
         structure: ["Rail", "Ledge", "Stair"],
         type: ["Street", "Bowl", "Skatepark"],
-        risk: ["High", "Medium", "Low"]
+        risk: ["High", "Medium", "Low"],
+        status:["Approved","Unapproved","Pending"]
     }
     const pathname = usePathname()
-    const [selected, setSelected] = useState({ location: [], type: [], structure: [], risk: [] })
+    const [selected, setSelected] = useState({ location: [], type: [], structure: [], risk: [], status:[] })
     const [params, setParams] = useState(null)
     const [search, setSearch] = useState("")
     const typeRef = useRef(null)
     const structureRef = useRef(null)
+    const statusRef = useRef(null)
     const [typeOpen, setTypeOpen] = useState(false)
     const setOpenList = useSpotStore((data) => data.setOpenList)
     const openList = useSpotStore((data) => data.openList)
     const [structureOpen, setStructureOpen] = useState(false)
+    const [statusOpen, setStatusOpen] = useState(false)
     const inputRef = useRef(null)
     const router = useRouter()
     const containerRef = useRef(null)
@@ -35,7 +38,8 @@ export default function NavBar() {
     const activeSpot = useSpotStore((data)=>data.spot)
     const resolvedParams = useSearchParams()
     const [isTablet, setIsTablet] = useState(false)
-    const [isMobile, setIsMobile] = useState(false)  
+    const [isMobile, setIsMobile] = useState(false)
+
     const urlParams = (isReturn)=>{
         const p = new URLSearchParams()
         const selectedSpot = resolvedParams.get("selectedSpot")
@@ -43,6 +47,7 @@ export default function NavBar() {
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
         selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
+        selected.status.forEach(f => p.append("status", f.toUpperCase()))
         if (search !== null) p.append("search", search)
         if(selectedSpot){
             setOpenList(true)
@@ -85,7 +90,10 @@ export default function NavBar() {
         if (structureRef.current) {
             gsap.to(structureRef.current, { gridTemplateRows: structureOpen ? "1fr" : "0fr" })
         }
-    }, { scope: containerRef, dependencies: [typeOpen, structureOpen] })
+        if (statusRef.current) {
+            gsap.to(statusRef.current, { gridTemplateRows: statusOpen ? "1fr" : "0fr" })
+        }
+    }, { scope: containerRef, dependencies: [typeOpen, structureOpen, statusOpen] })
 
     useGSAP(() => {
         if (spotContainerRef.current) {
@@ -129,7 +137,7 @@ export default function NavBar() {
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setTypeOpen(!typeOpen)}>
                                         {selected.type == "" && <p>Type of spot</p>}
-                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light"> {selected.type.join(",")}</p></div>}
+                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light">{selected.type[0]}{selected.type.length>1 ? "..." : ""}</p></div>}
                                         {typeOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
@@ -151,7 +159,7 @@ export default function NavBar() {
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setStructureOpen(!structureOpen)}>
                                         {selected.structure == "" && <p>Structure</p>}
-                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light"> {selected.structure.join(",")}</p></div>}
+                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light"> {selected.structure[0]}{selected.structure.length>1 ? "..." : ""}</p></div>}
                                         {structureOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
@@ -167,6 +175,28 @@ export default function NavBar() {
                                 </div>
                             </div>
                         </div>
+                        {pathname == "/dashboard" && <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2 w-full`}>
+                                    <button className={` rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStatusOpen(!statusOpen)}>
+                                        {selected.status == "" && <p>Status</p>}
+                                        {selected.status != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p><p className="bg_activated_light"> {selected.status[0]}{selected.status.length>1 ? "..." : ""}</p></div>}
+                                        {statusOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.status.map((s) => (
+                                            <button key={s} className="rounded-[5px]  h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("status", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>}
                     </div>}
                         </div>
                         {!isMobile && <div ref={spotContainerRef} className="grid overflow-hidden " style={{ gridTemplateRows: "0fr" }}>
@@ -184,7 +214,7 @@ export default function NavBar() {
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setTypeOpen(!typeOpen)}>
                                         {selected.type == "" && <p>Type of spot</p>}
-                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light"> {selected.type.join(",")}</p></div>}
+                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light">{selected.type[0]}{selected.type.length>1 ? "..." : ""}</p></div>}
                                         {typeOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
@@ -206,7 +236,7 @@ export default function NavBar() {
                                     <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
                                         onClick={() => setStructureOpen(!structureOpen)}>
                                         {selected.structure == "" && <p>Structure</p>}
-                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light"> {selected.structure.join(",")}</p></div>}
+                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light">{selected.structure[0]}{selected.structure.length>1 ? "..." : ""}</p></div>}
                                         {structureOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
                                 </div>
                             </div>
@@ -222,6 +252,28 @@ export default function NavBar() {
                                 </div>
                             </div>
                         </div>
+                        {pathname == "/dashboard" && <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2 w-full`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStatusOpen(!statusOpen)}>
+                                        {selected.status == "" && <p>Status</p>}
+                                        {selected.status != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p><p className="bg_activated_light"> {selected.status[0]}{selected.status.length>1 ? "..." : ""}</p></div>}
+                                        {statusOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.status.map((s) => (
+                                            <button key={s} className="rounded-[5px]  h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("status", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>}
                     </div>}
             </nav>
             {isMobile && openList && <ListGrid position={"absolute"} />}

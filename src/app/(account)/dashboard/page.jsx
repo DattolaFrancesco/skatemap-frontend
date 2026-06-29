@@ -26,6 +26,7 @@ export default function MySpots() {
     const askPermission = useSpotStore((s) => s.askPermission)
     const setAskPermission = useSpotStore((s) => s.setAskPermission)
     const setEliminationSpot = useSpotStore((s) => s.setEliminationSpot)
+    const setAllSpots = useSpotStore((data) => data.setAllSpots)
 
     useEffect(() => {
         setStatusHref(false)
@@ -51,7 +52,7 @@ export default function MySpots() {
                 const data = await res.json()
                 if (!res.ok) throw new Error(data.message)
                 setAllMySpots(data)
-                setFilteredSpotStore(data)
+                setAllSpots(data)
             } catch (error) {
                 console.log(error.message)
             }
@@ -136,7 +137,7 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
-            <NavBar />
+                <NavBar />
             <div className="flex-1 overflow-y-auto overscroll-none landscape:overflow-visible flex flex-col">
                 <Globe />
             </div>
