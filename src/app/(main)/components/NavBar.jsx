@@ -1,15 +1,12 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
-import NavLinks from "./NavLinks"
-import { useRouter } from "next/navigation"
-import ChatBot from "./ChatBot"
+import { useRouter,useSearchParams,usePathname } from "next/navigation"
 import gsap from "gsap"
 import { MoveLeft,X,Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
 import ListGrid from "./ListGrid"
 import Details from "./Details"
-import { useSearchParams } from "next/navigation"
 
 export default function NavBar() {
     const filters = {
@@ -17,6 +14,7 @@ export default function NavBar() {
         type: ["Street", "Bowl", "Skatepark"],
         risk: ["High", "Medium", "Low"]
     }
+    const pathname = usePathname()
     const [selected, setSelected] = useState({ location: [], type: [], structure: [], risk: [] })
     const [params, setParams] = useState(null)
     const [search, setSearch] = useState("")
@@ -37,9 +35,7 @@ export default function NavBar() {
     const activeSpot = useSpotStore((data)=>data.spot)
     const resolvedParams = useSearchParams()
     const [isTablet, setIsTablet] = useState(false)
-    const [isMobile, setIsMobile] = useState(false)
-    
-
+    const [isMobile, setIsMobile] = useState(false)  
     const urlParams = (isReturn)=>{
         const p = new URLSearchParams()
         const selectedSpot = resolvedParams.get("selectedSpot")
@@ -109,9 +105,10 @@ export default function NavBar() {
         window.addEventListener('resize', check)
         return () => window.removeEventListener('resize', check)
     }, [])
+    useEffect(()=>{setOpenList(false)},[])
     return (
         <>
-        <nav className="relative z-20 pt-5 px-3 md:px-5 w-full md:w-[40%] lg:w-[30%] xl:w-[25%]">
+        <nav className={`relative z-20 ${pathname.includes("/dashboard") ? "" : "pt-5 px-3 md:px-5 "} w-full md:w-[40%] lg:w-[30%] xl:w-[25%]`}>
                 <section ref={containerRef} className="flex items-start gap-1 w-full">
                     <div className="w-full relative">
                          {!isMobile && <Details postion={"absolute"}/>}
@@ -227,7 +224,7 @@ export default function NavBar() {
                         </div>
                     </div>}
             </nav>
-            {isMobile && openList && <ListGrid position={"absolute"}/>}
+            {isMobile && openList && <ListGrid position={"absolute"} />}
 </>
     )
 }

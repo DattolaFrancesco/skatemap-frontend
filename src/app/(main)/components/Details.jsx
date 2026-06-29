@@ -10,10 +10,12 @@ import Image from 'next/image'
 import CarouselVideo from "./CarouselVideo";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+import { usePathname } from "next/navigation"
 
 const structuresName = ["ledge", "rail", "ramp", "stair"]
 
 export default function Details({postion}){
+    const pathname = usePathname()
     const setRefreshy = useUserStore((state)=>state.setRefresh)
     const spot = useSpotStore((data)=>data.spot)
     const activeSpot = useSpotStore((data)=>data.setSpot)
@@ -176,6 +178,8 @@ export default function Details({postion}){
         }
     }
     useEffect(()=>{if(!spot) setSpotClosed(false)},[spot])
+    useEffect(() => {activeSpot(null)}, [pathname])
+
 
     const isSkatepark = data?.spotTypes.includes("SKATEPARK")
     const isStreet = data?.spotTypes.includes("STREET")

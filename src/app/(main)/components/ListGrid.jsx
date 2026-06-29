@@ -30,7 +30,7 @@ export default function ListGrid({position}) {
             window.addEventListener('resize', check)
             return () => window.removeEventListener('resize', check)
     }, [])
-
+    useEffect(()=>{},[])
     if(filteredSpot?.length == 0) return null
     if(position === "absolute"){
     return (

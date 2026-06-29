@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from "react";
 import useUserStore from "./UserStore";
+import useSpotStore from "@/app/(main)/store/SpotStore";
 import { useRouter } from 'next/navigation';
 import useThemeStore from "./ThemesStore";
 import TransitionLink from "@/app/(main)/components/TransitionLink";
@@ -18,6 +19,9 @@ export default function InfoUser({ searchParams }) {
     const refresh = useUserStore((data) => data.refresh)
     const bgTheme = useThemeStore((data) => data.bgTheme)
     const statusHref = useNavigationStore((state) => state.statusHref)
+    const setAllSpots = useSpotStore((s) => s.setAllSpots)
+    const setFilteredSpot = useSpotStore((s) => s.setFilteredSpot)
+    const setSpot = useSpotStore((s) => s.setSpot)
     const router = useRouter()
     const pathname = usePathname()
     const [menuOpen, setMenuOpen] = useState(false)
@@ -27,13 +31,14 @@ export default function InfoUser({ searchParams }) {
     const isSuperAdmin = role === "super_admin"
 
     async function getUser() {
+        const token = localStorage.getItem('token')
         const url = `${process.env.NEXT_PUBLIC_API_URL}/account/minimal`
         try {
             const res = await fetch(url, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                    "Authorization": `Bearer ${token}`
                 }
             })
             const data = await res.json()
@@ -47,6 +52,11 @@ export default function InfoUser({ searchParams }) {
 
     useEffect(() => { getUser() }, [refresh])
     useEffect(() => {}, [bgTheme])
+
+    useEffect(() => {
+        if (!panelRef.current) return
+        close()
+    }, [pathname])
 
     function open() {
         setMenuOpen(true)
@@ -65,6 +75,7 @@ export default function InfoUser({ searchParams }) {
     }
 
     function close(cb) {
+        if (!panelRef.current) return
         gsap.to(panelRef.current, {
             height: INIT_H,
             duration: 0.25,
@@ -82,7 +93,7 @@ export default function InfoUser({ searchParams }) {
             }
         })
     }
-    useEffect(()=>{close()},[pathname])
+
     const links = [
         { href: "/dashboard", label: "My spots", always: true },
         { href: "/dashboard/allSpot", label: "All spots", show: isAdmin },
@@ -92,7 +103,6 @@ export default function InfoUser({ searchParams }) {
         { href: "/dashboard/settings", label: "Settings", always: true },
         { href: "/spot/registration", label: "Add spot", always: true },
         { href: "/", label: "Home", always: true },
-        { href: "/login", label: "Log out", always: true },
     ].filter(l => l.always || l.show)
 
     if (!user) return (
@@ -106,17 +116,17 @@ export default function InfoUser({ searchParams }) {
 
     return (
         <div className="w-full flex items-center gap-3 py-1.5 z-999">
-           <div className="button--glass button p-1.5 flex gap-1.5">
-               <div className="bg_login rounded-[5px]">
+            <div className="button--glass button p-1.5 flex gap-1.5">
+                <div className="bg_login rounded-[5px]">
                     <p className="font-bold whitespace-nowrap px-1">{user.username}</p>
-               </div>
-               <div className="bg_login rounded-[5px] bg_activated_light color_login">
+                </div>
+                <div className="bg_login rounded-[5px] bg_activated_light color_login">
                     <p className="whitespace-nowrap px-1">[{user.nOfSpots}] spots</p>
-               </div>
-               <div className="bg_login rounded-[5px] bg_activated_light color_login">
+                </div>
+                <div className="bg_login rounded-[5px] bg_activated_light color_login">
                     <p className="whitespace-nowrap px-1">[{user.nOfFav}] fav</p>
-               </div>
-           </div>
+                </div>
+            </div>
 
             <div className="ms-auto relative flex items-center">
                 <div
@@ -129,14 +139,20 @@ export default function InfoUser({ searchParams }) {
                             <div key={l.href} className="relative flex items-center">
                                 <TransitionLink
                                     href={l.href}
-                                    className={` w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150
+                                    className={`w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150
                                         ${pathname === l.href ? "bg_activated_light color_login" : "hover:bg-black/10"}`}
                                 >
-                                    <p>{l.label}</p>
+                                    {l.label}
                                 </TransitionLink>
                                 {l.badge && <div className="absolute w-2 h-2 rounded-full bg-red-500 top-0 right-0 animate-pulse" />}
                             </div>
                         ))}
+                        <TransitionLink
+                            href="/login"
+                            className="w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150 hover:bg-black/10"
+                        >
+                            Log out
+                        </TransitionLink>
                         <button
                             onClick={() => close()}
                             className="w-fit rounded-[5px] text-[12px] whitespace-nowrap text-left hover:bg-black/10 transition-colors duration-150"
@@ -146,12 +162,12 @@ export default function InfoUser({ searchParams }) {
                     </div>
                 </div>
 
-                <div className={`relative z-10 p-1.5  ${menuOpen ? "" : "button--glass button"} bg-transparent rounded-[5px] flex flex-col gap-[5px] justify-center items-center`}>
+                <div className={`relative z-10 p-1.5 ${menuOpen ? "" : "button--glass button"} bg-transparent rounded-[5px] flex flex-col gap-[5px] justify-center items-center`}>
                     <button
                         onClick={() => menuOpen ? close() : open()}
-                        className={`  ${menuOpen ? "invisible" : "bg_login"} aspect-square rounded-[5px]`}
+                        className={`${menuOpen ? "invisible" : "bg_login"} aspect-square rounded-[5px]`}
                     >
-                        {!menuOpen ? <Settings size={10}/> : <X size={10}/>}
+                        {!menuOpen ? <Settings size={10} /> : <X size={10} />}
                     </button>
                 </div>
             </div>
