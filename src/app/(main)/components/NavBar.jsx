@@ -1,61 +1,81 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
-import NavLinks from "./NavLinks"
-import { useRouter } from "next/navigation"
-import ChatBot from "./ChatBot"
+import { useRouter,useSearchParams,usePathname } from "next/navigation"
 import gsap from "gsap"
+import { MoveLeft,X,Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { useGSAP } from "@gsap/react"
 import useSpotStore from "../store/SpotStore"
+import ListGrid from "./ListGrid"
+import Details from "./Details"
 
 export default function NavBar() {
     const filters = {
-        location: ["Africa", "Asia", "Europe", "North America", "Sud America", "Antartide", "Oceania"],
-        type: ["Rail", "Ledge", "Stair", "Skatepark", "Street"],
-        risk: ["High", "Medium", "Low"]
+        structure: ["Rail", "Ledge", "Stair"],
+        type: ["Street", "Bowl", "Skatepark"],
+        risk: ["High", "Medium", "Low"],
+        status:["Approved","Unapproved","Pending"]
     }
-    const [selected, setSelected] = useState({ location: [], type: [], risk: [] })
+    const pathname = usePathname()
+    const [selected, setSelected] = useState({ location: [], type: [], structure: [], risk: [], status:[] })
     const [params, setParams] = useState(null)
-    const [search, setSearch] = useState(null)
-    const searchFilter = useRef(null)
-    const [filterOpen, setFilterOpen] = useState(false)
-    const [openFilter, setOpenFilter] = useState(null)
-    const tlRef = useRef(null)
-    const tlChildRef = useRef(null)
+    const [search, setSearch] = useState("")
+    const typeRef = useRef(null)
+    const structureRef = useRef(null)
+    const statusRef = useRef(null)
+    const [typeOpen, setTypeOpen] = useState(false)
+    const setOpenList = useSpotStore((data) => data.setOpenList)
+    const openList = useSpotStore((data) => data.openList)
+    const [structureOpen, setStructureOpen] = useState(false)
+    const [statusOpen, setStatusOpen] = useState(false)
     const inputRef = useRef(null)
     const router = useRouter()
     const containerRef = useRef(null)
-    const locationBtnRef = useRef(null)
-    const typeBtnRef = useRef(null)
-    const riskBtnRef = useRef(null)
-    const isAnimating = useRef(false)
-    const currentParentY = useRef(0)
-    const setReset = useSpotStore((data)=>data.setReset)
-    const firstRender = useSpotStore((data)=>data.firstRender)
-    const firstRenderGrid = useSpotStore((data)=>data.firstRenderGrid)
+    const spotContainerRef = useRef(null)
+    const setReset = useSpotStore((data) => data.setReset)
+    const firstRender = useSpotStore((data) => data.firstRender)
+    const firstRenderGrid = useSpotStore((data) => data.firstRenderGrid)
+    const setSpot = useSpotStore((data)=>data.setSpot)
+    const activeSpot = useSpotStore((data)=>data.spot)
+    const resolvedParams = useSearchParams()
+    const [isTablet, setIsTablet] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
 
-    useEffect(() => {
+    const urlParams = (isReturn)=>{
         const p = new URLSearchParams()
+        const selectedSpot = resolvedParams.get("selectedSpot")
         selected.location.forEach(f => p.append("continent", f.toUpperCase().replace(/\s/g, "")))
         selected.type.forEach(f => p.append("type", f.toUpperCase()))
         selected.risk.forEach(f => p.append("risk", f.toUpperCase()))
+        selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
+        selected.status.forEach(f => p.append("status", f.toUpperCase()))
         if (search !== null) p.append("search", search)
-        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+        if(selectedSpot){
+            setOpenList(true)
+        }
         setParams(p)
         p.delete("_t")
-        if(p.toString() === "" && firstRender == 1) {
-             setReset(true)
-         }
-        if(p.toString() === "" && firstRenderGrid == 1) {
-             setReset(true)
-         }
-    }, [selected, router, search])
-    const handleSearch = (e) =>{
-        const search = e.currentTarget.value
-        clearInterval(searchFilter.current)
-        searchFilter.current = setTimeout(() => { 
-            setSearch(search)
-        }, 600);
+        if (p.toString() === "" && firstRender == 1) {
+            setReset(true)
+        }
+        if (p.toString() === "" && firstRenderGrid == 1) {
+            setReset(true)
+        }
+        if(isReturn){
+            p.delete("selectedSpot")
+            router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+        }
+        router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
     }
+    useEffect(() => {
+        urlParams(false)
+    }, [selected, router, search])
+
+    const handleSearch = (e) => {
+        const search = e.currentTarget.value
+        setSearch(search)
+        if(search != "") setSpot(null)
+    }
+
     const multipleSelection = (category, f) => {
         setSelected(prev => ({
             ...prev,
@@ -63,166 +83,200 @@ export default function NavBar() {
         }))
     }
 
-    const getRelativeY = (btnRef) => {
-        if (!btnRef.current || !containerRef.current) return 0
-        return btnRef.current.getBoundingClientRect().top - containerRef.current.getBoundingClientRect().top
-    }
-
-    const getRelativeX = (btnRef) => {
-        if (!btnRef.current || !containerRef.current) return 0
-        return btnRef.current.getBoundingClientRect().right - containerRef.current.getBoundingClientRect().left + 2
-    }
+    useGSAP(() => {
+        if (typeRef.current) {
+            gsap.to(typeRef.current, { gridTemplateRows: typeOpen ? "1fr" : "0fr" })
+        }
+        if (structureRef.current) {
+            gsap.to(structureRef.current, { gridTemplateRows: structureOpen ? "1fr" : "0fr" })
+        }
+        if (statusRef.current) {
+            gsap.to(statusRef.current, { gridTemplateRows: statusOpen ? "1fr" : "0fr" })
+        }
+    }, { scope: containerRef, dependencies: [typeOpen, structureOpen, statusOpen] })
 
     useGSAP(() => {
-        gsap.set(".genericFilter", { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".continent-btn", { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".type-btn",      { x: -300, opacity: 0, pointerEvents: 'none' })
-        gsap.set(".risk-btn",      { x: -300, opacity: 0, pointerEvents: 'none' })
-    }, { scope: containerRef })
-
-    useGSAP(() => {
-        const els = gsap.utils.toArray(".genericFilter", containerRef.current)
-        const continents = gsap.utils.toArray(".continent-btn", containerRef.current)
-        const types = gsap.utils.toArray(".type-btn", containerRef.current)
-        const risks = gsap.utils.toArray(".risk-btn", containerRef.current)
-        const activeChildren = [...continents, ...types, ...risks].filter(el => Number(gsap.getProperty(el, "x")) > -300)
-        tlRef.current?.kill()
-        tlRef.current = gsap.timeline({
-            onStart: () => { isAnimating.current = true },
-            onComplete: () => { isAnimating.current = false; if (!filterOpen) setOpenFilter(null) }
-        })
-        if (filterOpen) {
-            els.forEach((el, i) => {
-                tlRef.current.to(el, { x: 0, y: i * 22, opacity: 1, pointerEvents: 'auto', duration: 0.15 }, i === 0 ? ">" : "<0.05")
-            })
-        } else {
-            if (activeChildren.length > 0) {
-                tlRef.current
-                    .to(activeChildren, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-                    .to(activeChildren, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
-            }
-            tlRef.current
-                .to(els, { y: 0, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-                .to(els, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
+        if (spotContainerRef.current) {
+            gsap.to(spotContainerRef.current, { gridTemplateRows: openList ? "1fr" : "0fr" })
         }
-    }, { scope: containerRef, dependencies: [filterOpen] })
+    }, { scope: containerRef, dependencies: [openList] })
 
-    useGSAP(() => {
-        const continents = gsap.utils.toArray(".continent-btn", containerRef.current)
-        const types = gsap.utils.toArray(".type-btn", containerRef.current)
-        const risks = gsap.utils.toArray(".risk-btn", containerRef.current)
-        const active = [...continents, ...types, ...risks].filter(el => Number(gsap.getProperty(el, "x")) > -300)
-
-        const openChildren = (els, startX, startY) => {
-            currentParentY.current = startY
-            tlChildRef.current = gsap.timeline({
-                onStart: () => { isAnimating.current = true },
-                onComplete: () => { isAnimating.current = false }
-            })
-            tlChildRef.current.to(els[0], { x: startX, y: startY, opacity: 1, pointerEvents: 'auto', duration: 0.15 })
-            if (els.length > 1) {
-                tlChildRef.current.to(els.slice(1), {
-                    x: startX, opacity: 1, pointerEvents: 'auto',
-                    y: (i) => startY + (i + 1) * 22, duration: 0.2, stagger: 0.08
-                }, "<0.05")
-            }
-        }
-
-        const doOpen = () => {
-            switch (openFilter) {
-                case "Location": openChildren(continents, getRelativeX(locationBtnRef), getRelativeY(locationBtnRef)); break
-                case "Type":     openChildren(types,      getRelativeX(typeBtnRef),     getRelativeY(typeBtnRef));     break
-                case "Risk":     openChildren(risks,      getRelativeX(riskBtnRef),     getRelativeY(riskBtnRef));     break
-            }
-        }
-
-        tlChildRef.current?.kill()
-
-        if (!openFilter) {
-            if (active.length === 0) { isAnimating.current = false; return }
-            gsap.timeline({
-                onStart: () => { isAnimating.current = true },
-                onComplete: () => { isAnimating.current = false }
-            })
-            .to(active, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-            .to(active, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" } })
-            return
-        }
-
-        if (active.length === 0) { doOpen(); return }
-
-        tlChildRef.current = gsap.timeline({
-            onStart: () => { isAnimating.current = true },
-            onComplete: () => { isAnimating.current = false }
-        })
-        tlChildRef.current
-            .to(active, { y: currentParentY.current, opacity: 0, duration: 0.15, stagger: { each: 0.05, from: "end" } })
-            .to(active, { x: -300, pointerEvents: 'none', duration: 0.1, stagger: { each: 0.03, from: "end" }, onComplete: doOpen })
-    }, { scope: containerRef, dependencies: [openFilter] })
-
+    useEffect(() => {
+        const check = () => setIsTablet(window.innerWidth > 1024)
+        check()
+        window.addEventListener('resize', check)
+        return () => window.removeEventListener('resize', check)
+    }, [])
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < 768)
+        check()
+        window.addEventListener('resize', check)
+        return () => window.removeEventListener('resize', check)
+    }, [])
+    useEffect(()=>{setOpenList(false)},[])
     return (
-        <div className="z-10">
-            <nav className="navbar p-2">
-                <section className="left flex flex-col h-full">
-                    <div>
-                        <input ref={inputRef} type="text" placeholder="Search" onChange={handleSearch} className="w-full   placeholder:text-base"/>
-                    </div>
-                    <aside className="flex gap-0.5 pt-1">
-                        <div>
-                            <button className={`${filterOpen ? "bg-primary-500" : ""}`} onClick={() => { if (isAnimating.current) return; setFilterOpen(prev => !prev) }}>
-                                Filters
-                            </button>
+        <>
+        <nav className={`relative z-20 ${pathname.includes("/dashboard") ? "" : "pt-5 px-3 md:px-5 "} w-full md:w-[40%] lg:w-[30%] xl:w-[25%]`}>
+                <section ref={containerRef} className="flex items-start gap-1 w-full">
+                    <div className="w-full relative">
+                         {!isMobile && <Details postion={"absolute"}/>}
+                        <div className=" button--glass button p-1.5 flex">
+                            {!isMobile && activeSpot && <button onClick={()=>{
+                                setSpot(null)
+                                urlParams(true)
+                                setSearch("")
+                                }} className="rounded-s-[5px] self-stretch"><MoveLeft size={12}/></button>}
+                            <input ref={inputRef} type="text" placeholder="Search" value={search} onClick={()=>setOpenList(true)} onChange={handleSearch} className={`w-full  px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`} />
+                            <button className={` text-black rounded-e-[5px] self-stretch`}  onClick={() => {
+                                if(openList){setOpenList(!openList);setSpot(null)}
+                                }}>{openList && <X size={12}/>} {!openList && <Search size={12}/>}</button>
+                {!isMobile && <div className="z-50 absolute top-10 md:top-0 md:left-[100%] flex gap-1 md:ms-1">
+                <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setTypeOpen(!typeOpen)}>
+                                        {selected.type == "" && <p>Type of spot</p>}
+                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light">{selected.type[0]}{selected.type.length>1 ? "..." : ""}</p></div>}
+                                        {typeOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={typeRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.type.map((t) => (
+                                            <button className="rounded-[5px] h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("type", t) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span><p>{t}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div ref={containerRef} className="relative">
-                            <button ref={locationBtnRef} className={`absolute genericFilter ${openFilter === "Location" ? "bg-primary-500" : ""}`}
-                                onClick={() => { if (isAnimating.current) return; setOpenFilter(openFilter === "Location" ? null : "Location") }}>
-                                Location
-                            </button>
-                            <button ref={typeBtnRef} className={`absolute genericFilter ${openFilter === "Type" ? "bg-primary-500" : ""}`}
-                                onClick={() => { if (isAnimating.current) return; setOpenFilter(openFilter === "Type" ? null : "Type") }}>
-                                Type
-                            </button>
-                            <button ref={riskBtnRef} className={`absolute genericFilter ${openFilter === "Risk" ? "bg-primary-500" : ""}`}
-                                onClick={() => { if (isAnimating.current) return; setOpenFilter(openFilter === "Risk" ? null : "Risk") }}>
-                                Risk
-                            </button>
-                            {filters.location.map((f, i) => (
-                                <button key={i} onClick={() => { if (isAnimating.current) return; multipleSelection("location", f) }}
-                                    className={`absolute continent-btn ${selected.location.includes(f) ? "bg-primary-500" : ""}`}>
-                                    {f}
-                                </button>
-                            ))}
-                            {filters.type.map((f, i) => (
-                                <button key={i} onClick={() => { if (isAnimating.current) return; multipleSelection("type", f) }}
-                                    className={`absolute type-btn ${selected.type.includes(f) ? "bg-primary-500" : ""}`}>
-                                    {f}
-                                </button>
-                            ))}
-                            {filters.risk.map((f, i) => (
-                                <button key={i} onClick={() => { if (isAnimating.current) return; multipleSelection("risk", f) }}
-                                    className={`absolute risk-btn ${selected.risk.includes(f) ? "bg-primary-500" : ""}`}>
-                                    {f}
-                                </button>
-                            ))}
+                        <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStructureOpen(!structureOpen)}>
+                                        {selected.structure == "" && <p>Structure</p>}
+                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light"> {selected.structure[0]}{selected.structure.length>1 ? "..." : ""}</p></div>}
+                                        {structureOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={structureRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.structure.map((s) => (
+                                            <button key={s.id} className="rounded-[5px] h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("structure", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </aside>
-                    <div className="mt-auto flex flex-col gap-1">
-                        <button className="w-fit" onClick={() => {
-                            if (isAnimating.current) return
-                            setSelected({ location: [], type: [], risk: [] })
-                            setSearch(null)
-                            inputRef.current.value = ""
-                            router.push(``)
-                            setReset(true)
-                            setFilterOpen(prev=>!prev)
-                        }}>
-                            Reset filters
-                        </button>
-                        <ChatBot />
+                        {pathname == "/dashboard" && <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2 w-full`}>
+                                    <button className={` rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStatusOpen(!statusOpen)}>
+                                        {selected.status == "" && <p>Status</p>}
+                                        {selected.status != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p><p className="bg_activated_light"> {selected.status[0]}{selected.status.length>1 ? "..." : ""}</p></div>}
+                                        {statusOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.status.map((s) => (
+                                            <button key={s} className="rounded-[5px]  h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("status", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>}
+                    </div>}
+                        </div>
+                        {!isMobile && <div ref={spotContainerRef} className="grid overflow-hidden " style={{ gridTemplateRows: "0fr" }}>
+                            <div className="overflow-hidden rounded-[5px] relative">
+                                {!isTablet && !activeSpot && <ListGrid position={"static"}/>}
+                                {isTablet &&  <ListGrid position={"static"}/>}
+                            </div>
+                        </div>}
                     </div>
                 </section>
-                <NavLinks params={params} />
+                {isMobile && <div className="z-50 my-1 flex gap-1 md:ms-1">
+                <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setTypeOpen(!typeOpen)}>
+                                        {selected.type == "" && <p>Type of spot</p>}
+                                        {selected.type != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p><p className="bg_activated_light">{selected.type[0]}{selected.type.length>1 ? "..." : ""}</p></div>}
+                                        {typeOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={typeRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.type.map((t) => (
+                                            <button className="rounded-[5px] h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("type", t) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span><p>{t}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStructureOpen(!structureOpen)}>
+                                        {selected.structure == "" && <p>Structure</p>}
+                                        {selected.structure != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p><p className="bg_activated_light">{selected.structure[0]}{selected.structure.length>1 ? "..." : ""}</p></div>}
+                                        {structureOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={structureRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.structure.map((s) => (
+                                            <button key={s.id} className="rounded-[5px] h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("structure", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {pathname == "/dashboard" && <div className="flex flex-col gap-1 w-fit">
+                            <div className="button--glass button p-1.5 flex">
+                                <div className={`flex flex-col gap-2 w-full`}>
+                                    <button className={`rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
+                                        onClick={() => setStatusOpen(!statusOpen)}>
+                                        {selected.status == "" && <p>Status</p>}
+                                        {selected.status != "" && <div className="flex gap-2"><p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p><p className="bg_activated_light"> {selected.status[0]}{selected.status.length>1 ? "..." : ""}</p></div>}
+                                        {statusOpen ? <ChevronUp size={12} className={`pt-0.5`} /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}</button>
+                                </div>
+                            </div>
+                            <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
+                                <div className="overflow-hidden">
+                                    <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                        {filters.status.map((s) => (
+                                            <button key={s} className="rounded-[5px]  h-full flex gap-2 items-center"
+                                                onClick={() => { multipleSelection("status", s) }}>
+                                                <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span><p>{s}</p></button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>}
+                    </div>}
             </nav>
-        </div>
+            {isMobile && openList && <ListGrid position={"absolute"} />}
+</>
     )
 }

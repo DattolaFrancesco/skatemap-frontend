@@ -1,4 +1,3 @@
-
 'use client'
 import { useEffect, useState, useRef } from "react";
 import { getAllUserandAdmin, deleteUser, changeRole } from "@/app/(account)/dashboard/components/user";
@@ -37,9 +36,7 @@ export default function User() {
             await deleteUser(id);
             await fetchAllUsers();
             setAskPermission(false)
-        } catch (err) {
-            setAskPermission(false)
-        }
+        } catch (err) { setAskPermission(false) }
     }
 
     async function fetchChangeRole(id, value) {
@@ -111,62 +108,74 @@ export default function User() {
     }, [pendingHref])
 
     return (
-        <div>
-            <div ref={containerPermissionRef} className="invisible fixed h-full inset-0 z-50 bg-black/40 overflow-hidden">
+        <div className="">
+            <div ref={containerPermissionRef} className="invisible fixed inset-0 z-[99999] bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
-                    <div ref={permissionRef} className={` w-2/3 md:full bg-amber-50  ${loading ? "animate-pulse" : ""}`}>
-                        <h1 className="text-red-800  text-center text-xl md:text-4xl p-5">DO YOU REALLY WANT TO DELETE {eliminationUser?.name}?</h1>
-                        <div className="flex justify-center gap-3 p-3">
-                            <button onClick={() => fetchDeleteUser(eliminationUser.id)} className="px-5 text-sm md:text-xl">YES</button>
-                            <button onClick={() => setAskPermission(false)} className="px-5 text-sm md:text-xl">NO</button>
+                    <div ref={permissionRef} className={`w-2/3 md:w-1/2 p-2 button--glass button rounded-[5px] ${loading ? "animate-pulse" : ""}`}>
+                        <div className="w-full bg_login rounded-[5px] p-4">
+                            <h1 className="text-red-800 text-center text-xl md:text-2xl font-bold p-5">
+                                Delete {eliminationUser?.name}?
+                            </h1>
+                            <div className="flex justify-center gap-3 p-3">
+                                <button onClick={() => fetchDeleteUser(eliminationUser.id)} className="px-5 button--glass button">Yes</button>
+                                <button onClick={() => setAskPermission(false)} className="px-5 button--glass button">No</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {loadingUsers ? (
-                <h1 className="text-2xl animate-pulse mt-2">Loading users...</h1>
+                <div className="flex gap-2 mt-2">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-4 bg-black/10 animate-pulse rounded-[5px]" style={{ width: `${60 + i * 20}px` }} />
+                    ))}
+                </div>
             ) : !users || users.length === 0 ? (
-                <h1 className="text-2xl mt-2">No users found</h1>
+                <p className="text-xs tracking-widest text-black/40 mt-2">No users found</p>
             ) : (
-                <div ref={smallContainerRef} className="w-full flex flex-col overflow-x-hidden">
+                <div ref={smallContainerRef} className="w-full flex flex-col gap-1 overflow-x-hidden">
                     {message.type === "bad" && (
-                        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-                            <h1 className="text-red-500 text-2xl px-3 py-1">{message.message}</h1>
+                        <div className="absolute bottom-10 right-10 button--glass button px-3 py-1 rounded-[5px] animate-bounce">
+                            <p className="text-red-500 text-xs">{message.message}</p>
                         </div>
                     )}
                     {message.type === "good" && (
-                        <div className="absolute bottom-10 right-10 bg-black/20 animate-bounce">
-                            <h1 className="bg-green-600 text-2xl px-3 py-1 text-white">{message.message}</h1>
+                        <div className="absolute bottom-10 right-10 button--glass button px-3 py-1 rounded-[5px] animate-bounce">
+                            <p className="text-green-600 text-xs">{message.message}</p>
                         </div>
                     )}
-                    <div className="grid-cols-[1fr_1fr_1fr_1fr_100px_100px] gap-2 items-center py-2 hidden md:grid border-b border-dashed border-primary-500">
-                        <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Username</p>
-                        <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Name</p>
-                        <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Surname</p>
-                        <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Email</p>
-                        <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">Role</p>
+
+                    <div className="hidden md:grid grid-cols-[1fr_1fr_1fr_1fr_100px_80px] gap-2 items-center px-2 py-1">
+                        {["Username", "Name", "Surname", "Email", "Role", ""].map((h) => (
+                            <p key={h} className="text-[10px] tracking-widest text-white font-bold">{h}</p>
+                        ))}
                     </div>
+
                     {users.map((u) => (
-                        <div key={u.user.id} className="grid grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_100px] gap-2 items-center py-2 users">
-                            <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">{u.user.username}</p>
-                            <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">{u.user.name}</p>
-                            <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">{u.user.surname}</p>
-                            <p className="px-3 w-fit text-primary-500 bg-transparent text-sm lg:text-lg">{u.user.email}</p>
-                            <select
-                                className="text-primary-500 text-sm! lg:text-lg! px-2 w-fit col-start-1 md:col-start-5"
-                                defaultValue={u.user.authorities[0]?.authority}
-                                onChange={async (e) => await fetchChangeRole(u.user.id, e.target.value)}
-                            >
-                                <option value="user">user</option>
-                                <option value="admin">admin</option>
-                            </select>
-                            <button
-                                onClick={() => askConfermation(u.user)}
-                                className="flex items-center justify-center md:ms-auto w-full md:w-fit bg-primary-500 cursor-pointer col-span-2 md:col-span-1"
-                            >
-                                DELETE
-                            </button>
+                        <div
+                            key={u.user.id}
+                            className="users button--glass button p-1.5 rounded-[5px]">
+                           <div className="users bg_login grid grid-cols-3 md:grid-cols-[1fr_1fr_1fr_1fr_100px_80px] gap-2 items-center px-2 py-2 rounded-[5px]">
+                                <p className="text-xs font-bold truncate">{u.user.username}</p>
+                                <p className="text-xs truncate text-black/60">{u.user.name}</p>
+                                <p className="text-xs truncate text-black/60">{u.user.surname}</p>
+                                <p className="text-xs truncate text-black/40">{u.user.email}</p>
+                                <select
+                                    className="button--glass button text-xs px-2 py-1 rounded-[5px] w-fit col-start-1 md:col-start-5 focus:outline-none"
+                                    defaultValue={u.user.authorities[0]?.authority}
+                                    onChange={async (e) => await fetchChangeRole(u.user.id, e.target.value)}
+                                >
+                                    <option value="user">user</option>
+                                    <option value="admin">admin</option>
+                                </select>
+                                <button
+                                    onClick={() => askConfermation(u.user)}
+                                    className="button--glass button bg-red-100/60 text-xs px-2 py-1 rounded-[5px] col-span-2 md:col-span-1"
+                                >
+                                    Delete
+                                </button>
+                           </div>
                         </div>
                     ))}
                 </div>

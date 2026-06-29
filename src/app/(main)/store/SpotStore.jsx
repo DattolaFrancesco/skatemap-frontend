@@ -1,21 +1,36 @@
 import { create } from "zustand";
 
 const useSpotStore = create((set) => ({
-  firstRender: 0,
-  setFirstRender: (data) => set({ firstRender: data }),
-  spot: null,
-  setSpot: (data) => set({ spot: data }),
-  firstSpot: null,
-  setFirstSpot: (data) => set({ firstSpot: data }),
-  spotGrid: null,
-  setSpotGrid: (data) => set({ spotGrid: data }),
-  reset: false,
-  setReset: (data) => set({ reset: data }),
-
-
-
-  allSpots: null,
-  setAllSpots: (data) => set({ allSpots: data }),
+    spot: null,
+    setSpot: (data) => set({ spot: data }),
+    openList: null,
+    setOpenList: (data) => set({ openList: data }),
+    filteredSpot: null,
+    setFilteredSpot: (data) => set({ filteredSpot: data }),
+    allSpots: null,
+    setAllSpots: (data) => set({ allSpots: data }),
+    eliminationSpot: null,
+    setEliminationSpot: (data) => set({ eliminationSpot: data }),
+    pendingSpot: null,
+    setPendingSpot: (data) => set({ pendingSpot: data }),
+    askPermission: false,
+    setAskPermission: (data) => set({ askPermission: data }),
+    askPermissionPending: false,
+    setAskPermissionPending: (data) => set({ askPermissionPending: data }),
+    approveSpotData: null,
+    setApproveSpotData: (data) => set({ approveSpotData: data }),
+    unApproveSpotData: null,
+    setUnApproveSpotData: (data) => set({ unApproveSpotData: data }),
+    askPermissionToApprove: false,
+    setAskPermissionToApprove: (data) => set({ askPermissionToApprove: data }),
+    askPermissionToUnApprove: false,
+    setAskPermissionToUnApprove: (data) => set({ askPermissionToUnApprove: data }),
+    reset: false,
+    setReset: (data) => set({ reset: data }),
+    firstRender: 0,
+    setFirstRender: (data) => set({ firstRender: data }),
+    firstRenderGrid: 0,
+    setFirstRenderGrid: (data) => set({ firstRenderGrid: data }),
 }));
 
 export default useSpotStore;
