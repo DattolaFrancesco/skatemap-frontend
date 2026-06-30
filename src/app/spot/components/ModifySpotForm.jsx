@@ -77,6 +77,65 @@ function useObjectUrls(files) {
   return urls
 }
 
+// Genera una thumbnail "vera" (immagine) per un file video catturando un
+// frame su un <canvas>. Necessario perche' su molti browser mobile il tag
+// <video> non disegna nessun frame finche' non parte davvero la riproduzione,
+// quindi affidarsi al solo <video> lascia la preview trasparente.
+function generateVideoThumbnail(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.muted = true
+    video.playsInline = true
+    video.src = url
+
+    const cleanupAndResolve = (result) => {
+      URL.revokeObjectURL(url)
+      video.removeAttribute('src')
+      video.load()
+      resolve(result)
+    }
+
+    video.addEventListener('loadeddata', () => {
+      try {
+        video.currentTime = Math.min(0.1, (video.duration || 1) / 2)
+      } catch (_) {
+        cleanupAndResolve(null)
+      }
+    })
+    video.addEventListener('seeked', () => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 1
+        canvas.height = video.videoHeight || 1
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+        cleanupAndResolve(canvas.toDataURL('image/jpeg', 0.7))
+      } catch (_) {
+        cleanupAndResolve(null)
+      }
+    })
+    video.addEventListener('error', () => cleanupAndResolve(null))
+  })
+}
+
+// Hook helper: tiene allineate le thumbnail generate con l'array di file
+// video correnti, rigenerando solo quando la lista cambia.
+function useVideoThumbnails(files) {
+  const [thumbs, setThumbs] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    Promise.all(files.map(generateVideoThumbnail)).then((results) => {
+      if (!cancelled) setThumbs(results)
+    })
+    return () => { cancelled = true }
+  }, [files])
+
+  return thumbs
+}
+
 export default function ModifySpotForm() {
   const router = useRouter();
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
@@ -122,7 +181,7 @@ export default function ModifySpotForm() {
   const selectedStructures = form.types.filter(t => STRUCTURE_OPTIONS.includes(t))
 
   const newImageUrls = useObjectUrls(images)
-  const newVideoUrls = useObjectUrls(videos)
+  const newVideoThumbs = useVideoThumbnails(videos)
 
   useEffect(() => { getSpot(); setPosition(null) }, [])
   useEffect(() => {
@@ -599,14 +658,10 @@ export default function ModifySpotForm() {
                           ))}
                           {videos.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              {newVideoUrls[i] && (
-                                <video
-                                  src={`${newVideoUrls[i]}#t=0.1`}
-                                  muted
-                                  playsInline
-                                  preload="metadata"
-                                  className="w-full h-full object-cover rounded-[5px] pointer-events-none"
-                                />
+                              {newVideoThumbs[i] ? (
+                                <img src={newVideoThumbs[i]} className="w-full h-full object-cover rounded-[5px]" />
+                              ) : (
+                                <div className="w-full h-full rounded-[5px] bg-black/10 animate-pulse" />
                               )}
                               <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
