@@ -228,14 +228,47 @@ export default function Details({postion}){
     const isSkatepark = data?.spotTypes.includes("SKATEPARK")
     const isStreet = data?.spotTypes.includes("STREET")
     const isBowl = data?.spotTypes.includes("BOWL")
+    const isApproved = data?.status === "APPROVED"
+
+    function VideosSection(){
+        if(!data.video?.length) return null
+        if(pathname === "/dashboard/requests"){
+            return (
+                <div className="border_b_gray pb-4">
+                    <p className={`text-lg truncate text-black py-2`}>Videos</p>
+                    <p className="color_p_gray">Download the videos to review and approve this spot.</p>
+                </div>
+            )
+        }
+        if(isApproved){
+            return (
+                <div className="border_b_gray pb-4">
+                    <p className={`text-lg truncate text-black py-2`}>Videos</p>
+                    <CarouselVideo media={data.video} />
+                </div>
+            )
+        }
+        return (
+            <div className="border_b_gray pb-4">
+                <p className={`text-lg truncate text-black py-2`}>Videos</p>
+                <ul className="color_p_gray flex flex-col gap-1">
+                    {data.video.map((v, i) => (
+                        <li key={v.id || v.link || i} className="truncate wrap-break-word">
+                            {(v.name || `Video ${i + 1}`)} — still under review
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
 
      return (
-     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
+     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll overflow-x-hidden flex`}>
            {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
             className="rounded-[5px]"><p>Show</p></button>}
           {!spot || !data 
             ?  null
-            : ( <div ref={detailsRef} className="w-full"> 
+            : ( <div ref={detailsRef} className="w-full overflow-x-hidden"> 
           {isMobile && <div className="flex gap-1 mb-1 items-center">
                 <button onClick={()=>setSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
                     <MoveLeft size={12}/> <p>Go back</p>
@@ -324,7 +357,7 @@ export default function Details({postion}){
            }
            <div className="color_p_gray border_b_gray py-2">
             <p className={`text-lg truncate text-black`}>Structures</p>
-           <article className="flex gap-2 py-1">
+           <article className="flex gap-2 py-1 flex-wrap">
                 {structuresName.map((s) => {
                             if (data.spotTypes.includes(s.toUpperCase()))
                                 return <p key={s} className=" px-3 bg_structure_btn rounded-[15px]">{s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase()}</p>
@@ -332,10 +365,7 @@ export default function Details({postion}){
            </article>
            </div>
            <Description/>
-           <div className="border_b_gray pb-4">
-             <p className={`text-lg truncate text-black py-2`}>Videos</p>
-             <CarouselVideo media={data.video} />
-           </div>
+           <VideosSection/>
            <button
            onClick={()=>{
             window.open(`https://www.google.com/maps/search/?api=1&query=${data.latitude},${data.longitude}`,"_blank")
