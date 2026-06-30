@@ -600,7 +600,13 @@ export default function ModifySpotForm() {
                           {videos.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
                               {newVideoUrls[i] && (
-                                <video src={newVideoUrls[i]} className="w-full h-full object-cover rounded-[5px]" />
+                                <video
+                                  src={`${newVideoUrls[i]}#t=0.1`}
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  className="w-full h-full object-cover rounded-[5px] pointer-events-none"
+                                />
                               )}
                               <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
