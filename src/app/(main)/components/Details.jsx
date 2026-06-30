@@ -11,6 +11,7 @@ import CarouselVideo from "./CarouselVideo";
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
 import { usePathname, useRouter } from "next/navigation"
+import JSZip from 'jszip'
 
 const structuresName = ["ledge", "rail", "ramp", "stair"]
 
@@ -33,6 +34,7 @@ export default function Details({postion}){
     const containerRef = useRef(null)
     const detailsRef = useRef(null)
     const [spotClosed,setSpotClosed] = useState(false)
+    const [downloadingVideos, setDownloadingVideos] = useState(false)
     
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -71,7 +73,6 @@ export default function Details({postion}){
     async function setFav(){
         if(likedPending.current) return
         likedPending.current = true
-        //setPendingLike(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fav/${spot}`,{
@@ -137,6 +138,37 @@ export default function Details({postion}){
                 url: `${process.env.NEXT_PUBLIC_API_URL2}/?selectedSpot=${data.id}&_t=${Date.now()}`
             })
         }catch(err) {console.log("share error")}
+    }
+    async function downloadAllVideos(){
+        if(!data?.video?.length || downloadingVideos) return
+        setDownloadingVideos(true)
+        try{
+            const zip = new JSZip()
+            const folder = zip.folder(`${data.name || 'spot'}-videos`)
+
+            for(let i = 0; i < data.video.length; i++){
+                const vid = data.video[i]
+                try{
+                    const res = await fetch(vid.link)
+                    const blob = await res.blob()
+                    folder.file(`video-${i + 1}.mp4`, blob)
+                }catch(err){
+                    console.log("fetch error", err)
+                }
+            }
+
+            const zipBlob = await zip.generateAsync({ type: "blob" })
+            const url = URL.createObjectURL(zipBlob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `${data.name || 'spot'}-videos.zip`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+        } finally {
+            setDownloadingVideos(false)
+        }
     }
     useEffect(() => {
     setToken(localStorage.getItem('token'))
@@ -300,11 +332,17 @@ export default function Details({postion}){
            }}
             className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-4"><p>Open in Google Maps</p></button>
            <button onClick={()=>handleShare()} className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2"><p>Share</p></button>
+           {pathname === "/dashboard/requests" && data.video?.length > 0 && (
+                <button
+                disabled={downloadingVideos}
+                onClick={()=>downloadAllVideos()}
+                className="py-0.5 bg_structure_btn rounded-[15px] color_p_gray w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <p>{downloadingVideos ? "Zipping..." : "Download All Videos"}</p>
+                </button>
+           )}
             {!isMobile && !spotClosed && <button onClick={()=>{closeSpot();}} 
             className="py-0.5  rounded-[15px] color_p_gray w-full mt-2"><p>Hide</p></button>}
         </div> </div>)}
        </div>
     )
 }
-
-                             

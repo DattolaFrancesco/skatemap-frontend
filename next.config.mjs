@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: false,
   reactCompiler: true,
+  experimental: {
+    proxyClientMaxBodySize: '200mb', 
+  },
   async rewrites() {
     return [
       {
