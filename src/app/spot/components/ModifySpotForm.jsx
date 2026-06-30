@@ -59,6 +59,12 @@ function uploadWithProgress(url, formData, token, onProgress) {
     xhr.send(formData)
   })
 }
+
+// Hook helper: genera gli object URL per le preview in modo SINCRONO
+// (useMemo, calcolato durante il render) cosi' la preview appare subito
+// dopo aver scelto i file, senza dover "toccare" altro per forzare un
+// secondo render. Il cleanup (revokeObjectURL) avviene in un useEffect
+// separato per evitare memory leak.
 function useObjectUrls(files) {
   const urls = useMemo(() => files.map(f => URL.createObjectURL(f)), [files])
 
@@ -71,6 +77,10 @@ function useObjectUrls(files) {
   return urls
 }
 
+// Genera una thumbnail "vera" (immagine) per un file video catturando un
+// frame su un <canvas>. Necessario perche' su molti browser mobile il tag
+// <video> non disegna nessun frame finche' non parte davvero la riproduzione,
+// quindi affidarsi al solo <video> lascia la preview trasparente.
 function generateVideoThumbnail(file) {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file)
@@ -78,16 +88,40 @@ function generateVideoThumbnail(file) {
     video.preload = 'metadata'
     video.muted = true
     video.playsInline = true
+    // Attributi extra richiesti da iOS Safari piu' vecchi per evitare
+    // che il video provi ad aprirsi a schermo intero o non carichi affatto.
+    video.setAttribute('muted', '')
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', '')
+    // Molti browser mobile non decodificano correttamente i frame di un
+    // <video> mai inserito nel DOM: lo appendo invisibile fuori schermo.
+    video.style.position = 'fixed'
+    video.style.top = '-9999px'
+    video.style.left = '-9999px'
+    video.style.width = '1px'
+    video.style.height = '1px'
     video.src = url
+    document.body.appendChild(video)
 
+    let settled = false
     const cleanupAndResolve = (result) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeoutId)
       URL.revokeObjectURL(url)
+      video.pause()
       video.removeAttribute('src')
       video.load()
+      if (video.parentNode) video.parentNode.removeChild(video)
       resolve(result)
     }
 
-    video.addEventListener('loadeddata', () => {
+    // Rete di sicurezza: se per qualche motivo 'seeked' non scatta mai
+    // (capita su alcuni browser mobile), dopo 4s smettiamo di aspettare
+    // cosi' la UI puo' mostrare un fallback invece di restare grigia.
+    const timeoutId = setTimeout(() => cleanupAndResolve(null), 4000)
+
+    video.addEventListener('loadedmetadata', () => {
       try {
         video.currentTime = Math.min(0.1, (video.duration || 1) / 2)
       } catch (_) {
@@ -648,10 +682,12 @@ export default function ModifySpotForm() {
                           ))}
                           {videos.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              {newVideoThumbs[i] ? (
+                              {newVideoThumbs[i] === undefined ? (
+                                <div className="w-full h-full rounded-[5px] bg-black/10 animate-pulse" />
+                              ) : newVideoThumbs[i] ? (
                                 <img src={newVideoThumbs[i]} className="w-full h-full object-cover rounded-[5px]" />
                               ) : (
-                                <div className="w-full h-full rounded-[5px] bg-black/10 animate-pulse" />
+                                <div className="w-full h-full rounded-[5px] bg-black/20 flex items-center justify-center text-white text-[10px] text-center px-1">Video</div>
                               )}
                               <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
