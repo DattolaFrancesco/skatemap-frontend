@@ -12,8 +12,8 @@ import imageCompression from "browser-image-compression";
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
 const TYPE_OPTIONS = ['STREET', 'SKATEPARK', 'BOWL']
-const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR']
-const MAX_VIDEO_SIZE = 12 * 1024 * 1024
+const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR','RAMP']
+const MAX_VIDEO_SIZE = 25 * 1024 * 1024
 const MAX_IMAGE_SIZE = 3 * 1024 * 1024
 const STEPS = [
   { n: 1, label: "Location" },
@@ -142,12 +142,12 @@ export default function ModifySpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
-      setError(`Videos must be under 12MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Videos must be under 25MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...videos, ...incoming]
     if (activeExistingVideos.length + merged.length > 1) {
-      setError("Max 1 video")
+      setError("Max 3 video")
       return
     }
     setError(null)
@@ -226,8 +226,6 @@ export default function ModifySpotForm() {
   }
 
   function handleFormSubmit(e) {
-    // Il form nativo non esegue mai il salvataggio da solo,
-    // anche se viene "submittato" via Enter o altri eventi impliciti.
     e.preventDefault()
   }
 
@@ -493,7 +491,7 @@ export default function ModifySpotForm() {
                           <button type="button" onClick={() => videoInputRef.current.click()} className="button--glass rounded-[5px] text-xs px-3 py-1">+ Add</button>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-xs color_p_gray">{totalVideos}/1 · max 12MB each</p>
+                          <p className="text-xs color_p_gray">{totalVideos}/3 · max 25MB each</p>
                           <p className={`text-xs font-mono ${videoOverLimit ? "text-red-500" : "color_p_gray"}`}>{formatMB(videosTotalMB)}</p>
                         </div>
                         <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />

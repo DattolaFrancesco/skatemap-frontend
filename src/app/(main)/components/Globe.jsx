@@ -205,28 +205,56 @@ export default function Globe() {
                     ]
                 }
             })
-            if (windowWidthCustom >= 1024) {
-                mapInstance.current.on('click', 'spots-layer', (e) => {
-                    const feature = e.features[0]
-                    const parsed = JSON.parse(feature.properties.spot)
-                    const p = new URLSearchParams(window.location.search)
-                    p.set("selectedSpot", parsed.id)
-                    router.push(`?${p.toString()}`, { scroll: false })
-                    setOpenList(true)
-                })
-                mapInstance.current.on('mouseenter', 'spots-layer', () => {
-                    mapInstance.current.getCanvas().style.cursor = 'pointer'
-                })
-                mapInstance.current.on('mouseleave', 'spots-layer', () => {
-                    mapInstance.current.getCanvas().style.cursor = ''
-                })
-            } else {
-                mapInstance.current.on('click', 'spots-layer', (e) => {
-                    const feature = e.features[0]
-                    const parsed = JSON.parse(feature.properties.spot)
-                    const p = new URLSearchParams(window.location.search)
-                    p.set("selectedSpot", parsed.id)
-                    router.push(`?${p.toString()}`, { scroll: false })
+
+            // Tolleranza di ricerca in pixel attorno al tap/click: piu' alta su
+            // mobile (dita imprecise) piu' bassa su desktop (puntatore preciso).
+            // Permette di "perdonare" un tap leggermente fuori dal pallino senza
+            // perdere precisione: tra tutti i candidati nel raggio scegliamo
+            // sempre quello geometricamente piu' vicino al punto toccato.
+            const isDesktop = windowWidthCustom >= 1024
+            const tapTolerance = isDesktop ? 6 : 16
+
+            const handleSpotTap = (e) => {
+                const box = [
+                    [e.point.x - tapTolerance, e.point.y - tapTolerance],
+                    [e.point.x + tapTolerance, e.point.y + tapTolerance]
+                ]
+                const features = mapInstance.current.queryRenderedFeatures(box, { layers: ['spots-layer'] })
+                if (!features.length) return
+
+                let closest = null
+                let closestDist = Infinity
+                for (const f of features) {
+                    const screenPos = mapInstance.current.project(f.geometry.coordinates)
+                    const dx = screenPos.x - e.point.x
+                    const dy = screenPos.y - e.point.y
+                    const dist = dx * dx + dy * dy
+                    if (dist < closestDist) {
+                        closestDist = dist
+                        closest = f
+                    }
+                }
+                if (!closest) return
+
+                const parsed = JSON.parse(closest.properties.spot)
+                const p = new URLSearchParams(window.location.search)
+                p.set("selectedSpot", parsed.id)
+                router.push(`?${p.toString()}`, { scroll: false })
+                if (isDesktop) setOpenList(true)
+            }
+
+            // Click sulla mappa intera (non vincolato al layer) cosi'
+            // possiamo applicare la tolleranza anche a chi tappa "vicino".
+            mapInstance.current.on('click', handleSpotTap)
+
+            if (isDesktop) {
+                mapInstance.current.on('mousemove', (e) => {
+                    const box = [
+                        [e.point.x - tapTolerance, e.point.y - tapTolerance],
+                        [e.point.x + tapTolerance, e.point.y + tapTolerance]
+                    ]
+                    const features = mapInstance.current.queryRenderedFeatures(box, { layers: ['spots-layer'] })
+                    mapInstance.current.getCanvas().style.cursor = features.length ? 'pointer' : ''
                 })
             }
         }

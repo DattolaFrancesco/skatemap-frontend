@@ -8,13 +8,125 @@ import useSpotStore from "../store/SpotStore"
 import ListGrid from "./ListGrid"
 import Details from "./Details"
 
+const FILTERS = {
+    structure: ["Rail", "Ledge", "Stair"],
+    type: ["Street", "Bowl", "Skatepark"],
+    risk: ["High", "Medium", "Low"],
+    status: ["Approved", "Unapproved", "Pending"]
+}
+
+function FilterButtons({
+    pathname,
+    selected,
+    multipleSelection,
+    typeOpen,
+    setTypeOpen,
+    structureOpen,
+    setStructureOpen,
+    statusOpen,
+    setStatusOpen,
+    typeRef,
+    structureRef,
+    statusRef,
+}) {
+    return (
+        <>
+            <div className="flex flex-col gap-1 w-fit">
+                <div className="button--glass button p-1.5 flex">
+                    <div className="flex flex-col gap-2">
+                        <button
+                            className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
+                            onClick={() => setTypeOpen(!typeOpen)}
+                        >
+                            {selected.type == "" && <p>Type of spot</p>}
+                            {selected.type != "" && <div className="flex gap-2">
+                                <p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p>
+                                <p className="bg_activated_light">{selected.type[0]}{selected.type.length > 1 ? "..." : ""}</p>
+                            </div>}
+                            {typeOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}
+                        </button>
+                    </div>
+                </div>
+                <div ref={typeRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                    <div className="overflow-hidden">
+                        <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                            {FILTERS.type.map((t) => (
+                                <button key={t} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("type", t)}>
+                                    <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span>
+                                    <p>{t}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-1 w-fit">
+                <div className="button--glass button p-1.5 flex">
+                    <div className="flex flex-col gap-2">
+                        <button
+                            className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
+                            onClick={() => setStructureOpen(!structureOpen)}
+                        >
+                            {selected.structure == "" && <p>Structure</p>}
+                            {selected.structure != "" && <div className="flex gap-2">
+                                <p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p>
+                                <p className="bg_activated_light">{selected.structure[0]}{selected.structure.length > 1 ? "..." : ""}</p>
+                            </div>}
+                            {structureOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}
+                        </button>
+                    </div>
+                </div>
+                <div ref={structureRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
+                    <div className="overflow-hidden">
+                        <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                            {FILTERS.structure.map((s) => (
+                                <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("structure", s)}>
+                                    <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span>
+                                    <p>{s}</p>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {pathname == "/dashboard" && (
+                <div className="flex flex-col gap-1 w-fit">
+                    <div className="button--glass button p-1.5 flex">
+                        <div className="flex flex-col gap-2 w-full">
+                            <button
+                                className={`rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
+                                onClick={() => setStatusOpen(!statusOpen)}
+                            >
+                                {selected.status == "" && <p>Status</p>}
+                                {selected.status != "" && <div className="flex gap-2">
+                                    <p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p>
+                                    <p className="bg_activated_light">{selected.status[0]}{selected.status.length > 1 ? "..." : ""}</p>
+                                </div>}
+                                {statusOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}
+                            </button>
+                        </div>
+                    </div>
+                    <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
+                        <div className="overflow-hidden">
+                            <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
+                                {FILTERS.status.map((s) => (
+                                    <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("status", s)}>
+                                        <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span>
+                                        <p>{s}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    )
+}
+
 export default function NavBar() {
-    const filters = {
-        structure: ["Rail", "Ledge", "Stair"],
-        type: ["Street", "Bowl", "Skatepark"],
-        risk: ["High", "Medium", "Low"],
-        status: ["Approved", "Unapproved", "Pending"]
-    }
     const pathname = usePathname()
     const [selected, setSelected] = useState({ location: [], type: [], structure: [], risk: [], status: [] })
     const [params, setParams] = useState(null)
@@ -104,101 +216,20 @@ export default function NavBar() {
 
     useEffect(() => { setOpenList(false) }, [])
 
-    const FilterButtons = () => (
-        <>
-            <div className="flex flex-col gap-1 w-fit">
-                <div className="button--glass button p-1.5 flex">
-                    <div className="flex flex-col gap-2">
-                        <button
-                            className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
-                            onClick={() => setTypeOpen(!typeOpen)}
-                        >
-                            {selected.type == "" && <p>Type of spot</p>}
-                            {selected.type != "" && <div className="flex gap-2">
-                                <p className="bg_activated_light color_login">&#91;{selected.type.length}&#93;</p>
-                                <p className="bg_activated_light">{selected.type[0]}{selected.type.length > 1 ? "..." : ""}</p>
-                            </div>}
-                            {typeOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.type.length > 0 ? "color_login" : ""}`} />}
-                        </button>
-                    </div>
-                </div>
-                <div ref={typeRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
-                    <div className="overflow-hidden">
-                        <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
-                            {filters.type.map((t) => (
-                                <button key={t} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("type", t)}>
-                                    <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span>
-                                    <p>{t}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-col gap-1 w-fit">
-                <div className="button--glass button p-1.5 flex">
-                    <div className="flex flex-col gap-2">
-                        <button
-                            className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
-                            onClick={() => setStructureOpen(!structureOpen)}
-                        >
-                            {selected.structure == "" && <p>Structure</p>}
-                            {selected.structure != "" && <div className="flex gap-2">
-                                <p className="bg_activated_light color_login">&#91;{selected.structure.length}&#93;</p>
-                                <p className="bg_activated_light">{selected.structure[0]}{selected.structure.length > 1 ? "..." : ""}</p>
-                            </div>}
-                            {structureOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.structure.length > 0 ? "color_login" : ""}`} />}
-                        </button>
-                    </div>
-                </div>
-                <div ref={structureRef} className="button--glass button grid overflow-hidden" style={{ gridTemplateRows: "0fr" }}>
-                    <div className="overflow-hidden">
-                        <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
-                            {filters.structure.map((s) => (
-                                <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("structure", s)}>
-                                    <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span>
-                                    <p>{s}</p>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {pathname == "/dashboard" && (
-                <div className="flex flex-col gap-1 w-fit">
-                    <div className="button--glass button p-1.5 flex">
-                        <div className="flex flex-col gap-2 w-full">
-                            <button
-                                className={`rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
-                                onClick={() => setStatusOpen(!statusOpen)}
-                            >
-                                {selected.status == "" && <p>Status</p>}
-                                {selected.status != "" && <div className="flex gap-2">
-                                    <p className="bg_activated_light color_login">&#91;{selected.status.length}&#93;</p>
-                                    <p className="bg_activated_light">{selected.status[0]}{selected.status.length > 1 ? "..." : ""}</p>
-                                </div>}
-                                {statusOpen ? <ChevronUp size={12} className="pt-0.5" /> : <ChevronDown size={12} className={`pt-0.5 ${selected.status.length > 0 ? "color_login" : ""}`} />}
-                            </button>
-                        </div>
-                    </div>
-                    <div ref={statusRef} className="button--glass button grid overflow-hidden min-w-max" style={{ gridTemplateRows: "0fr" }}>
-                        <div className="overflow-hidden">
-                            <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
-                                {filters.status.map((s) => (
-                                    <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("status", s)}>
-                                        <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span>
-                                        <p>{s}</p>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    )
+    const filterProps = {
+        pathname,
+        selected,
+        multipleSelection,
+        typeOpen,
+        setTypeOpen,
+        structureOpen,
+        setStructureOpen,
+        statusOpen,
+        setStatusOpen,
+        typeRef,
+        structureRef,
+        statusRef,
+    }
 
     return (
         <>
@@ -234,7 +265,7 @@ export default function NavBar() {
                                 </button>
                                 {!isMobile && (
                                     <div className="z-50 absolute top-10 md:top-0 md:left-[100%] flex gap-1 md:ms-1">
-                                        <FilterButtons />
+                                        <FilterButtons {...filterProps} />
                                     </div>
                                 )}
                             </div>
@@ -264,7 +295,7 @@ export default function NavBar() {
 
                 {isMobile && (
                     <div className="z-50 my-1 flex gap-1 md:ms-1">
-                        <FilterButtons />
+                        <FilterButtons {...filterProps} />
                     </div>
                 )}
             </nav>
