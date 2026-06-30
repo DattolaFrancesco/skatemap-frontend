@@ -86,8 +86,8 @@ export default function ChatBot() {
     }, [])
 
     const panelBase = `
-        absolute bottom-full mb-2
-        ${isMobile ? "left-0" : "right-0"}
+        absolute bottom-full mb-3
+        ${isMobile ? "left-[-6]" : "right-[-6]"}
         min-w-[270px] w-[300px] md:w-[320px]
         flex flex-col justify-between
         overflow-hidden
@@ -121,8 +121,8 @@ export default function ChatBot() {
                                     className={`
                                         break-words p-2  w-4/5 mx-1 rounded-[5px] text-white
                                         ${m.role === "bot"
-                                            ? "me-auto bg-gray-400 border border-white/10"
-                                            : "ms-auto bg-gray-500  backdrop-blur-[80px]"}
+                                            ? "me-auto bg-gray-400! border border-white/10"
+                                            : "ms-auto bg-gray-500!  backdrop-blur-[80px]"}
                                     `}
                                 >
                                     {m.message}
@@ -130,13 +130,13 @@ export default function ChatBot() {
                             ))}
 
                             {lastResponse.length > 0 && (
-                                <p className="break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white bg-primary-500/30 backdrop-blur-xl border border-white/10">
+                                <p className="break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white bg-gray-500! backdrop-blur-xl border border-white/10">
                                     {lastResponse}
                                 </p>
                             )}
 
                             {loadingMessage && (
-                                <p className="break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white bg-primary-500/30 backdrop-blur-xl border border-white/10 animate-pulse">
+                                <p className="break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white bg-gray-400! backdrop-blur-xl border border-white/10 animate-pulse">
                                     ...
                                 </p>
                             )}
@@ -177,7 +177,7 @@ export default function ChatBot() {
                     <div className={`${panelBase} ${openChat ? panelOpen : panelClosed}`}>
 
                         <div className="flex-1 overflow-y-auto py-2">
-                            <p className="button--glass bg-primary-500/60 break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white">
+                            <p className="button--glass bg-gray-400! break-words p-2  w-4/5 mx-1 me-auto rounded-[5px] text-white">
                                 I'm skating right now. Gonna try a 12-stair set. I'll be back... hopefully! Meanwhile, have a look around.
                             </p>
                         </div>

@@ -33,7 +33,6 @@ export default function Details({postion}){
     const containerRef = useRef(null)
     const detailsRef = useRef(null)
     const [spotClosed,setSpotClosed] = useState(false)
-    const [activeSpotClosed,setActiveSpotClosed] = useState(false)
     
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -66,7 +65,6 @@ export default function Details({postion}){
         }catch(err){
             console.log(err.message)
         } finally {
-            //setPendingLike(false)
             likedPending.current = false
         }
     }
@@ -89,7 +87,6 @@ export default function Details({postion}){
             setRefresh(!refresh)
             setRefreshy(!refreshy)
         } finally {
-            //setPendingLike(false)
             likedPending.current = false
         }
     }
@@ -191,7 +188,7 @@ export default function Details({postion}){
     const isBowl = data?.spotTypes.includes("BOWL")
 
      return (
-     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
+     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} ms-1 p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll flex`}>
            {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
             className="rounded-[5px]"><p>Show</p></button>}
           {!spot || !data 
