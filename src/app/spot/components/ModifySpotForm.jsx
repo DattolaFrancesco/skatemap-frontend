@@ -11,9 +11,15 @@ import imageCompression from "browser-image-compression";
 
 const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr: false })
 
-const OPTIONS = ['RAIL', 'LEDGE', 'STREET', 'SKATEPARK', 'STAIR']
+const TYPE_OPTIONS = ['STREET', 'SKATEPARK', 'BOWL']
+const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR']
 const MAX_VIDEO_SIZE = 12 * 1024 * 1024
 const MAX_IMAGE_SIZE = 3 * 1024 * 1024
+const STEPS = [
+  { n: 1, label: "Location" },
+  { n: 2, label: "Details" },
+  { n: 3, label: "Media" },
+]
 
 function formatMB(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB"
@@ -43,6 +49,8 @@ export default function ModifySpotForm() {
   const [videos, setVideos] = useState([])
   const [error, setError] = useState(null)
   const [message, setMessage] = useState(null)
+  const [step, setStep] = useState(1)
+  const [submitted, setSubmitted] = useState(false)
   const imageInputRef = useRef(null)
   const videoInputRef = useRef(null)
   const [loading, setLoading] = useState(false)
@@ -60,6 +68,8 @@ export default function ModifySpotForm() {
   const videosTotalMB = totalSize(videos)
   const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
   const videoOverLimit = videosTotalMB > 1 * MAX_VIDEO_SIZE
+  const selectedType = form.types.find(t => TYPE_OPTIONS.includes(t))
+  const selectedStructures = form.types.filter(t => STRUCTURE_OPTIONS.includes(t))
 
   useEffect(() => { getSpot(); setPosition(null) }, [])
   useEffect(() => {
@@ -95,6 +105,20 @@ export default function ModifySpotForm() {
     const { name, value } = e.target;
     if (name === 'description' && value.length > 500) return
     setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function selectType(t) {
+    setForm(p => ({
+      ...p,
+      types: [...p.types.filter(x => !TYPE_OPTIONS.includes(x)), t]
+    }))
+  }
+
+  function toggleStructure(s) {
+    setForm(p => ({
+      ...p,
+      types: p.types.includes(s) ? p.types.filter(x => x !== s) : [...p.types, s]
+    }))
   }
 
   function handleAddImages(e) {
@@ -138,9 +162,10 @@ export default function ModifySpotForm() {
   function removeVideo(index) {
     setVideos(prev => prev.filter((_, i) => i !== index))
   }
-    async function normalize(file){
+
+  async function normalize(file) {
     const isHeic = /heic|heif/i.test(file.type) || /\.he?i[cf]$/i.test(file.name)
-    if(!isHeic) return file
+    if (!isHeic) return file
     const heic2any = (await import("heic2any")).default
     let blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 })
     if (Array.isArray(blob)) blob = blob[0]
@@ -148,7 +173,7 @@ export default function ModifySpotForm() {
     return new File([blob], nome, { type: "image/jpeg" })
   }
 
-  async function comprimi(files){
+  async function comprimi(files) {
     const results = []
     const options = {
       maxSizeMB: 1,
@@ -156,7 +181,7 @@ export default function ModifySpotForm() {
       useWebWorker: true,
       fileType: 'image/webp',
     }
-    for(let x = 0; x < files.length; x++){
+    for (let x = 0; x < files.length; x++) {
       const normal = await normalize(files[x])
       const compresso = await imageCompression(normal, options)
       const nome = normal.name.replace(/\.[^.]+$/, '.webp')
@@ -164,19 +189,55 @@ export default function ModifySpotForm() {
     }
     return results
   }
-  async function handleSubmit(e) {
+
+  function validateStep(s) {
+    if (s === 1) {
+      if (!form.latitude || !form.longitude) return "Click on the map to set the location"
+      if (!form.name.trim()) return "Name is required"
+      if (!form.continent.trim()) return "Continent is required"
+      if (!form.country.trim()) return "Country is required"
+      if (!form.city.trim()) return "City is required"
+      if (!form.street.trim()) return "Street is required"
+      return null
+    }
+    if (s === 2) {
+      const hasType = form.types.some(t => TYPE_OPTIONS.includes(t))
+      if (!hasType) return "Select exactly one Type (Street, Skatepark or Bowl)"
+      if (!form.description.trim()) return "Description is required"
+      return null
+    }
+    if (s === 3) {
+      if (totalImages === 0) return "At least 1 image is required"
+      return null
+    }
+    return null
+  }
+
+  function goNext() {
+    const err = validateStep(step)
+    if (err) { setError(err); return }
+    setError(null)
+    setStep(s => Math.min(s + 1, STEPS.length))
+  }
+
+  function goBack() {
+    setError(null)
+    setStep(s => Math.max(s - 1, 1))
+  }
+
+  function handleFormSubmit(e) {
+    // Il form nativo non esegue mai il salvataggio da solo,
+    // anche se viene "submittato" via Enter o altri eventi impliciti.
     e.preventDefault()
+  }
+
+  async function saveSpot() {
+    const err = validateStep(3)
+    if (err) { setError(err); return }
+
     setLoading(true)
-    if (!form.latitude || !form.longitude) {
-      setError("Click on the map to set the location")
-      return
-    }
-    if (totalImages === 0) {
-      setError("At least 1 image required")
-      return
-    }
     try {
-      const newImages = await comprimi(images)  
+      const newImages = await comprimi(images)
       const eliminatedMedia = [
         ...eliminatedExistsImages.id,
         ...eliminatedExistsVideos.id
@@ -184,12 +245,13 @@ export default function ModifySpotForm() {
       const payload = { ...form, eliminatedMedia };
       const formData = new FormData();
       formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
-      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name)); 
+      ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name));
       await handleForm(section, formData)
-      setLoading(false)
-      handleGoingBack()
+      setError(null)
+      setSubmitted(true)
     } catch (err) {
       setError(err.message)
+    } finally {
       setLoading(false)
     }
   }
@@ -235,198 +297,270 @@ export default function ModifySpotForm() {
   })
 
   return (
-    <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] justify-center items-center ${loading ? "animate-pulse pointer-events-none" : ""} p-3`}>
-      <div className="w-full h-full bg-black/30 px-2 py-1.5 md:px-3 md:py-2 flex flex-col overflow-y-auto">
-        <section className="flex justify-between py-2">
-          <h1 className="text-lg md:text-xl lg:text-2xl xl:text-4xl font-bold text-primary-500">EDIT SPOT</h1>
-          <button onClick={() => handleGoingBack()} className={`w-fit bg-transparent h-fit text-primary-500 ${loading ? "invisible" : ""}`}>BACK</button>
-        </section>
+    <div className="w-full h-full flex justify-center items-center p-3">
+      <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] lg:w-[70%] justify-center items-center ${loading ? "animate-pulse pointer-events-none" : ""}`}>
 
-        <form autoComplete="off" onSubmit={handleSubmit} className="md:h-full flex flex-col gap-1.5 md:gap-2 lg:gap-3">
+        <div className="button--glass button w-full h-full rounded-[10px] p-1.5 flex flex-col">
+          <div className="bg_login w-full rounded-[8px] flex flex-col flex-1 overflow-hidden">
 
-          <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">01/LOCATION</h2>
-          <div className="flex flex-col md:flex-row h-full gap-1.5 md:gap-2 lg:gap-3">
-            <div className="flex flex-col gap-1 w-full md:w-1/2 min-h-[300px] md:min-h-0 md:flex-1 border relative">
-              <MapWithData lat={form.latitude} lng={form.longitude} />
-              <div className="absolute flex gap-1 bottom-1 left-1">
-                <div className="flex flex-col gap-0.5 w-[30%]">
-                  <label className="text-sm font-semibold text-primary-700">LATITUDE</label>
-                  <input autoComplete="new-password" className="bg-white text-sm w-full" readOnly name="latitude" value={form.latitude} placeholder="Click on map" />
+            {submitted ? (
+              /* ---------- SUCCESS SCREEN ---------- */
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4 text-center">
+                <div className="button--glass rounded-full w-16 h-16 flex items-center justify-center text-3xl">
+                  ✓
                 </div>
-                <div className="flex flex-col gap-0.5 w-[30%]">
-                  <label className="text-sm font-semibold text-primary-700">LONGITUDE</label>
-                  <input autoComplete="new-password" className="bg-white text-sm w-full" readOnly name="longitude" value={form.longitude} placeholder="Click on map" />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1 w-full md:w-1/2 md:justify-between">
-              <div className="flex flex-col gap-0.5 mb-2">
-                <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">CONTINENT</label>
-                <select className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="continent" value={form.continent} onChange={handleChange}>
-                  <option value="">Select</option>
-                  <option value="AFRICA">AFRICA</option>
-                  <option value="ANTARCTICA">ANTARCTICA</option>
-                  <option value="ASIA">ASIA</option>
-                  <option value="EUROPE">EUROPE</option>
-                  <option value="NORTHAMERICA">N. AMERICA</option>
-                  <option value="OCEANIA">OCEANIA</option>
-                  <option value="SOUTHAMERICA">S. AMERICA</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-0.5 mb-2">
-                <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">COUNTRY</label>
-                <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
-              </div>
-              <div className="flex flex-col gap-0.5 mb-2">
-                <label className="text-sm lg:text-2xl font-semibold w-fit bg-primary">CITY</label>
-                <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="city" value={form.city} onChange={handleChange} placeholder="City" />
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">STREET</label>
-                <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <article className="flex items-end justify-between">
-              <h2 className="py-1 px-2 text-sm md:text-xl font-bold bg-primary-700 w-fit mb-3 text-white">02/IDENTITY</h2>
-              <p className="py-1 px-2 text-xs md:text-md w-fit bg-transparent text-primary-500">How locals call it and how it skates</p>
-            </article>
-
-            <section className="flex flex-col md:flex-row gap-2 md:gap-5">
-              <article className="w-1/2">
-                <div className="flex flex-col gap-0.5 mb-2">
-                  <div className="flex justify-between">
-                    <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">NAME</label>
-                    <p className={`text-xs self-end bg-transparent text-primary-500 ${form.name.length > 30 ? "text-red-800" : ""}`}>{form.name.length}/30</p>
-                  </div>
-                  <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
-                </div>
-              </article>
-
-              <article className="flex flex-col gap-0.5">
-                <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">RISK</label>
-                <div className="flex gap-2">
-                  {['LOW', 'MEDIUM', 'HIGH'].map(r => (
-                    <button key={r} type="button" onClick={() => setForm(p => ({ ...p, risk: r }))}
-                      className={`w-fit border ${form.risk === r ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>{r}</button>
-                  ))}
-                </div>
-              </article>
-            </section>
-
-            <article className="flex flex-col gap-0.5">
-              <div className="flex flex-col gap-2 w-fit">
-                <article className="flex items-end justify-between">
-                  <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">TYPES</label>
-                  <p className="text-xs bg-transparent text-primary-500">{form.types.length}/{OPTIONS.length} selected</p>
-                </article>
-                <div className="flex gap-2">
-                  {OPTIONS.map(t => (
-                    <button key={t} type="button"
-                      onClick={() => setForm(p => ({
-                        ...p, types: p.types.includes(t)
-                          ? p.types.filter(x => x !== t)
-                          : [...p.types, t]
-                      }))}
-                      className={`w-fit border ${form.types.includes(t) ? "bg-primary-500" : ""} py-0.5 md:py-2 px-2 md:px-5`}>{t}</button>
-                  ))}
-                </div>
-              </div>
-            </article>
-
-            <section className="flex flex-col md:flex-row w-full py-3 gap-5">
-              <div className="flex flex-row md:flex-col justify-between md:justify-start md:w-1/2 gap-2 pt-1">
-
-                <div className="flex flex-col w-1/2 md:w-full gap-0.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">IMAGES</label>
-                    <button type="button" onClick={() => imageInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm md:text-base text-primary-500 bg-transparent">{totalImages}/5 · max 3MB each</p>
-                    <p className={`text-sm md:text-base font-mono bg-transparent ${imageOverLimit ? "text-red-800" : "text-primary-500"}`}>
-                      {formatMB(imagesTotalMB)}
-                    </p>
-                  </div>
-                  <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {activeExistingImages.map((img) => (
-                      <div key={img.id} className="relative w-16 h-16">
-                        <img src={img.link} className="w-full h-full object-cover rounded" />
-                        <button type="button"
-                          disabled={totalImages <= 1}
-                          onClick={() => setEliminatedExistsImages((prev) => ({ id: [...prev.id, img.id] }))}
-                          className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">×</button>
-                      </div>
-                    ))}
-                    {images.map((file, i) => (
-                      <div key={i} className="relative w-16 h-16">
-                        <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
-                        <p className="absolute bottom-0 left-0 right-0 text-center text-white text-[9px] bg-black/50 rounded-b">
-                          {formatMB(file.size)}
-                        </p>
-                        <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex flex-col w-1/2 md:w-full gap-0.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">VIDEOS</label>
-                    <button type="button" onClick={() => videoInputRef.current.click()} className="text-sm border px-2 py-0.5">+ Add</button>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm md:text-base text-primary-500 bg-transparent">{totalVideos}/1 · max 12MB each</p>
-                    <p className={`text-sm md:text-base font-mono bg-transparent ${videoOverLimit ? "text-red-800" : "text-primary-500"}`}>
-                      {formatMB(videosTotalMB)}
-                    </p>
-                  </div>
-                  <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {activeExistingVideos.map((vid) => (
-                      <div key={vid.id} className="relative w-16 h-16">
-                        <img src={vid.thumbnailUrl} className="w-full h-full object-cover rounded" />
-                        <button type="button"
-                          onClick={() => setEliminatedExistsVideos((prev) => ({ id: [...prev.id, vid.id] }))}
-                          className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
-                      </div>
-                    ))}
-                    {videos.map((file, i) => (
-                      <div key={i} className="relative w-16 h-16">
-                        <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded" />
-                        <p className="absolute bottom-0 left-0 right-0 text-center text-white text-[9px] bg-black/50 rounded-b">
-                          {formatMB(file.size)}
-                        </p>
-                        <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">×</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col w-full md:w-1/2 gap-0.5 md:ps-2 pt-2 md:pt-0 justify-between">
-                <article className="flex flex-col gap-2 mb-1">
-                  <div className="flex justify-between">
-                    <label className="text-xs md:text-sm lg:text-2xl font-semibold w-fit bg-primary">DESCRIPTION</label>
-                    <p className="text-xs self-end bg-transparent text-primary-500">{form.description.length}/500</p>
-                  </div>
-                  <textarea onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} required className="bg-white py-0.5 md:py-1 lg:py-2 text-xs md:text-sm w-full" rows={2} name="description" value={form.description} onChange={handleChange} placeholder="Description" />
-                </article>
-                <article className="flex justify-between items-center">
-                  {error && <p className="text-red-800 text-sm py-0.5 bg-transparent">{error}</p>}
-                  {message && <p className="text-green-800 text-xl py-0.5 bg-transparent">{message}</p>}
-                  <button disabled={loading} type="submit" className="hover:bg-primary text-xs md:text-sm lg:text-2xl xl:text-2xl font-semibold w-1/3 py-1 md:py-1.5 lg:py-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ml-auto">
-                    SUBMIT
+                <h2 className="text-xl md:text-2xl font-bold">Spot updated!</h2>
+                <p className="text-sm color_p_gray max-w-md">
+                  Your changes have been saved. The spot will now be reviewed by our team and, once approved, the updated version will be visible on the map.
+                </p>
+                <div className="flex gap-2 mt-2 w-full max-w-xs">
+                  <button
+                    type="button"
+                    onClick={() => handleGoingBack()}
+                    className="button--glass rounded-[6px] flex-1 py-2.5 text-sm font-semibold bg_activated_light"
+                  >
+                    Go Back
                   </button>
-                </article>
+                </div>
               </div>
-            </section>
+            ) : (
+              /* ---------- FORM ---------- */
+              <div className="px-2 py-2 flex flex-col gap-4 flex-1 overflow-hidden">
+
+                <section className="flex justify-between items-center shrink-0">
+                  <h1 className="text-lg md:text-2xl font-bold">Edit Spot</h1>
+                  <button type="button" onClick={() => handleGoingBack()} className={`button--glass rounded-[6px] px-3 py-1 text-sm ${loading ? "invisible" : ""}`}>Back</button>
+                </section>
+
+                {/* Step indicator — centrato, non cliccabile */}
+                <div className="flex items-center justify-center gap-2 shrink-0 w-full max-w-md mx-auto">
+                  {STEPS.map((s, i) => (
+                    <div key={s.n} className="flex items-center gap-2 flex-1">
+                      {i > 0 && <div className="flex-1 h-[1px] bg-black/15" />}
+                      <div
+                        className={`button--glass rounded-full w-9 h-9 flex items-center justify-center text-sm font-semibold shrink-0 ${step === s.n ? "bg_activated_light" : ""} ${step > s.n ? "opacity-60" : ""}`}
+                      >
+                        {s.n}
+                      </div>
+                      <p className={`text-xs hidden sm:block whitespace-nowrap ${step === s.n ? "" : "color_p_gray"}`}>{s.label}</p>
+                      {i < STEPS.length - 1 && <div className="flex-1 h-[1px] bg-black/15" />}
+                    </div>
+                  ))}
+                </div>
+
+                <form autoComplete="off" onSubmit={handleFormSubmit} className="flex-1 flex flex-col overflow-hidden">
+
+                  {/* STEP 1 — Location, mappa sopra sempre */}
+                  {step === 1 && (
+                    <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
+                      <div className="button--glass rounded-[8px] overflow-hidden relative w-full flex-1 min-h-[200px]">
+                        <MapWithData lat={form.latitude} lng={form.longitude} />
+                        <div className="absolute flex gap-1 bottom-2 left-2 right-2">
+                          <input autoComplete="new-password" className="button--glass rounded-[5px] text-xs w-1/2 px-2 py-1.5" readOnly name="latitude" value={form.latitude} placeholder="Latitude" />
+                          <input autoComplete="new-password" className="button--glass rounded-[5px] text-xs w-1/2 px-2 py-1.5" readOnly name="longitude" value={form.longitude} placeholder="Longitude" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 shrink-0">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex justify-between items-end">
+                            <label className="text-xs font-semibold color_p_gray">Name</label>
+                            <p className={`text-xs color_p_gray ${form.name.length > 30 ? "text-red-500" : ""}`}>{form.name.length}/30</p>
+                          </div>
+                          <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-xs font-semibold color_p_gray">Continent</label>
+                          <select className="button--glass rounded-[5px] text-sm px-2 py-2" name="continent" value={form.continent} onChange={handleChange}>
+                            <option value="">Select</option>
+                            <option value="AFRICA">Africa</option>
+                            <option value="ANTARCTICA">Antarctica</option>
+                            <option value="ASIA">Asia</option>
+                            <option value="EUROPE">Europe</option>
+                            <option value="NORTHAMERICA">N. America</option>
+                            <option value="OCEANIA">Oceania</option>
+                            <option value="SOUTHAMERICA">S. America</option>
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-xs font-semibold color_p_gray">Country</label>
+                          <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          <label className="text-xs font-semibold color_p_gray">City</label>
+                          <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="city" value={form.city} onChange={handleChange} placeholder="City" />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-0.5 shrink-0">
+                        <label className="text-xs font-semibold color_p_gray">Street</label>
+                        <input autoComplete="new-password" onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 2 — Type & Description */}
+                  {step === 2 && (
+                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-semibold color_p_gray">Risk</label>
+                        <div className="flex gap-2">
+                          {['Low', 'Medium', 'High'].map(r => (
+                            <button key={r} type="button" onClick={() => setForm(p => ({ ...p, risk: r }))}
+                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${form.risk === r ? "bg_activated_light" : ""}`}>{r}</button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-semibold color_p_gray">Type <span className="opacity-60">(choose one)</span></label>
+                        <div className="flex gap-2">
+                          {TYPE_OPTIONS.map(t => (
+                            <button key={t} type="button" onClick={() => selectType(t)}
+                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${selectedType === t ? "bg_activated_light" : ""}`}>
+                              {t.charAt(0) + t.slice(1).toLowerCase()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-end">
+                          <label className="text-xs font-semibold color_p_gray">Structure</label>
+                          <p className="text-xs color_p_gray">{selectedStructures.length}/{STRUCTURE_OPTIONS.length}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {STRUCTURE_OPTIONS.map(s => (
+                            <button key={s} type="button" onClick={() => toggleStructure(s)}
+                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${selectedStructures.includes(s) ? "bg_activated_light" : ""}`}>
+                              {s.charAt(0) + s.slice(1).toLowerCase()}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 flex-1">
+                        <div className="flex justify-between items-end">
+                          <label className="text-xs font-semibold color_p_gray">Description</label>
+                          <p className="text-xs color_p_gray">{form.description.length}/500</p>
+                        </div>
+                        <textarea onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} required className="button--glass rounded-[5px] text-sm px-3 py-2.5 w-full resize-none flex-1 min-h-[160px]" name="description" value={form.description} onChange={handleChange} placeholder="Description" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 3 — Media */}
+                  {step === 3 && (
+                    <div className="flex-1 flex flex-col md:flex-row gap-4 overflow-y-auto">
+                      <div className="flex flex-col gap-2 w-full md:w-1/2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-sm font-semibold color_p_gray">Images</label>
+                          <button type="button" onClick={() => imageInputRef.current.click()} className="button--glass rounded-[5px] text-xs px-3 py-1">+ Add</button>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs color_p_gray">{totalImages}/5 · max 3MB each</p>
+                          <p className={`text-xs font-mono ${imageOverLimit ? "text-red-500" : "color_p_gray"}`}>{formatMB(imagesTotalMB)}</p>
+                        </div>
+                        <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
+                        <div className="button--glass rounded-[8px] flex-1 min-h-[180px] p-2 flex flex-wrap gap-2 content-start">
+                          {totalImages === 0 && (
+                            <p className="text-xs color_p_gray w-full text-center self-center mt-8">No images yet</p>
+                          )}
+                          {activeExistingImages.map((img) => (
+                            <div key={img.id} className="relative w-20 h-20">
+                              <img src={img.link} className="w-full h-full object-cover rounded-[5px]" />
+                              <button type="button"
+                                disabled={totalImages <= 1}
+                                onClick={() => setEliminatedExistsImages((prev) => ({ id: [...prev.id, img.id] }))}
+                                className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">×</button>
+                            </div>
+                          ))}
+                          {images.map((file, i) => (
+                            <div key={i} className="relative w-20 h-20">
+                              <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 w-full md:w-1/2">
+                        <div className="flex justify-between items-center">
+                          <label className="text-sm font-semibold color_p_gray">Videos</label>
+                          <button type="button" onClick={() => videoInputRef.current.click()} className="button--glass rounded-[5px] text-xs px-3 py-1">+ Add</button>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs color_p_gray">{totalVideos}/1 · max 12MB each</p>
+                          <p className={`text-xs font-mono ${videoOverLimit ? "text-red-500" : "color_p_gray"}`}>{formatMB(videosTotalMB)}</p>
+                        </div>
+                        <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />
+                        <div className="button--glass rounded-[8px] flex-1 min-h-[180px] p-2 flex flex-wrap gap-2 content-start">
+                          {totalVideos === 0 && (
+                            <p className="text-xs color_p_gray w-full text-center self-center mt-8">No videos yet</p>
+                          )}
+                          {activeExistingVideos.map((vid) => (
+                            <div key={vid.id} className="relative w-20 h-20">
+                              <img src={vid.thumbnailUrl} className="w-full h-full object-cover rounded-[5px]" />
+                              <button type="button"
+                                onClick={() => setEliminatedExistsVideos((prev) => ({ id: [...prev.id, vid.id] }))}
+                                className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                            </div>
+                          ))}
+                          {videos.map((file, i) => (
+                            <div key={i} className="relative w-20 h-20">
+                              <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Nav buttons + submit */}
+                  <div className="flex flex-col gap-2 shrink-0 mt-4">
+                    {error && <p className="text-red-500 text-xs">{error}</p>}
+                    {message && <p className="text-green-500 text-xs">{message}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={step === 1}
+                        onClick={goBack}
+                        className="button--glass rounded-[6px] px-5 py-2.5 text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        Back
+                      </button>
+
+                      {step < STEPS.length ? (
+                        <button
+                          type="button"
+                          onClick={goNext}
+                          className="button--glass rounded-[6px] flex-1 py-2.5 text-sm font-semibold bg_activated_light"
+                        >
+                          Next
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={loading}
+                          onClick={saveSpot}
+                          className="button--glass rounded-[6px] flex-1 py-2.5 text-sm font-semibold bg_activated_light disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          SUBMIT
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                </form>
+              </div>
+            )}
+
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
