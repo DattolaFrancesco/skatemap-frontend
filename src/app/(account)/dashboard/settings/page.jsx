@@ -102,7 +102,7 @@ export default function Settings() {
     }, [pendingHref])
 
     return (
-        <div ref={containerRef} className="flex flex-col gap-2">
+        <div ref={containerRef} className="flex flex-col gap-2 p-3">
             {user?.authorities[0].authority === "super_admin" && (
                 <div className="button--glass button p-2 rounded-[5px] flex justify-between items-center gap-4">
                     <div className="bg_login rounded-[5px] px-2 py-1">

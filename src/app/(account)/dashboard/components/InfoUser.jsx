@@ -115,7 +115,7 @@ export default function InfoUser({ searchParams }) {
     )
 
     return (
-        <div className="w-full flex items-center gap-3 py-1.5 z-999">
+        <div className="w-full flex items-center gap-3 pt-1.5 z-999">
             <div className="button--glass button p-1.5 flex gap-1.5">
                 <div className="bg_login rounded-[5px]">
                     <p className="font-bold whitespace-nowrap px-1">{user.username}</p>

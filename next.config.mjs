@@ -2,6 +2,14 @@
 const nextConfig = {
   reactStrictMode: false,
   reactCompiler: true,
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3003/:path*',
+      },
+    ]
+  },
 };
 
 export default nextConfig;

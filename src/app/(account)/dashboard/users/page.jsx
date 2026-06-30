@@ -108,7 +108,7 @@ export default function User() {
     }, [pendingHref])
 
     return (
-        <div className="">
+        <div className="p-3">
             <div ref={containerPermissionRef} className="invisible fixed inset-0 z-[99999] bg-black/40 overflow-hidden">
                 <div className="w-full h-full flex justify-center items-center">
                     <div ref={permissionRef} className={`w-2/3 md:w-1/2 p-2 button--glass button rounded-[5px] ${loading ? "animate-pulse" : ""}`}>
