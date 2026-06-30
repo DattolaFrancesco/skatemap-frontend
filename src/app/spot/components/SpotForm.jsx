@@ -208,9 +208,17 @@ export default function SpotForm() {
     if (err) { setError(err); return }
 
     setLoading(true)
-    const newImages = await comprimi(images)
-    const token = localStorage.getItem('token')
+
+    // FIX: tutto il flusso di submit (compressione immagini inclusa)
+    // e' ora dentro lo stesso try/catch/finally. Prima, comprimi()
+    // veniva chiamato FUORI dal try: se la compressione/conversione
+    // HEIC falliva (file corrotto, formato non decodificabile dal
+    // browser, ecc.) l'eccezione non veniva mai catturata e il
+    // "finally" che fa setLoading(false) non veniva mai raggiunto:
+    // il form restava bloccato in stato di loading per sempre.
     try {
+      const newImages = await comprimi(images)
+      const token = localStorage.getItem('token')
       const formData = new FormData()
       formData.append("spot", new Blob([JSON.stringify(form)], { type: "application/json" }))
       ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name))
@@ -226,7 +234,7 @@ export default function SpotForm() {
       resetForm()
       setSubmitted(true)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || "Something went wrong while uploading the spot")
       setMessage(null)
     } finally {
       setLoading(false)
