@@ -51,18 +51,11 @@ export default function ListGrid({ position, openList }) {
 
     useEffect(() => {
         if (position !== "absolute" || !listRef.current) return
+        console.log("LISTGRID ANIM -> openList:", openList, "listRef exists:", !!listRef.current)
         if (openList) {
-            gsap.to(listRef.current, {
-                y: savedY.current,
-                duration: 0.45,
-                ease: "power3.out"
-            })
+            gsap.to(listRef.current, { y: savedY.current, duration: 0.45, ease: "power3.out" })
         } else {
-            gsap.to(listRef.current, {
-                y: window.innerHeight,
-                duration: 0.3,
-                ease: "power3.in"
-            })
+            gsap.to(listRef.current, { y: window.innerHeight, duration: 0.3, ease: "power3.in" })
         }
     }, [openList])
 

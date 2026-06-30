@@ -161,7 +161,10 @@ export default function NavBar() {
         selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
         selected.status.forEach(f => p.append("status", f.toUpperCase()))
         if (search !== null) p.append("search", search)
-        if (selectedSpot) setOpenList(true)
+        if (selectedSpot) {
+            setOpenList(true)
+            if (!isReturn) p.set("selectedSpot", selectedSpot)   // <-- AGGIUNTO
+        }
         setParams(p)
         p.delete("_t")
         if (p.toString() === "" && firstRender == 1) setReset(true)
@@ -169,6 +172,7 @@ export default function NavBar() {
         if (isReturn) {
             p.delete("selectedSpot")
             router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
+            return  // <-- consiglio: aggiungi return qui, vedi nota sotto
         }
         router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
     }

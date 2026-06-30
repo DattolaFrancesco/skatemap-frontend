@@ -35,6 +35,7 @@ export default function Details({postion}){
     const detailsRef = useRef(null)
     const [spotClosed,setSpotClosed] = useState(false)
     const [downloadingVideos, setDownloadingVideos] = useState(false)
+    const isFirstPathnameMount = useRef(true)
     
     async function getSpot(){
         const token = localStorage.getItem('token')
@@ -211,7 +212,16 @@ export default function Details({postion}){
         }
     }
     useEffect(()=>{if(!spot) setSpotClosed(false)},[spot])
-    useEffect(() => {setSpot(null)}, [pathname])
+    // FIX: non resettare lo spot al primo mount (su mobile Details rimonta
+    // più volte a causa del cambio isMobile), solo quando pathname cambia
+    // davvero dopo che il componente è già montato.
+    useEffect(() => {
+        if (isFirstPathnameMount.current) {
+            isFirstPathnameMount.current = false
+            return
+        }
+        setSpot(null)
+    }, [pathname])
     useEffect(() => console.log(spot), [])
 
 
@@ -317,7 +327,7 @@ export default function Details({postion}){
            <article className="flex gap-2 py-1">
                 {structuresName.map((s) => {
                             if (data.spotTypes.includes(s.toUpperCase()))
-                                return <p className=" px-3 bg_structure_btn rounded-[15px]">{s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase()}</p>
+                                return <p key={s} className=" px-3 bg_structure_btn rounded-[15px]">{s.slice(0, 1).toUpperCase() + s.slice(1).toLowerCase()}</p>
                         })}
            </article>
            </div>

@@ -76,7 +76,6 @@ export default function Globe() {
             s.city.toLowerCase().includes(search.toLowerCase())
         )
 
-        // ← solo se lo spot esiste nella lista filtrata
         if (selectedSpot) {
             const exists = result.some(s => String(s.id) === String(selectedSpot))
             if (exists) setActiveSpot(selectedSpot)
@@ -205,12 +204,6 @@ export default function Globe() {
                     ]
                 }
             })
-
-            // Tolleranza di ricerca in pixel attorno al tap/click: piu' alta su
-            // mobile (dita imprecise) piu' bassa su desktop (puntatore preciso).
-            // Permette di "perdonare" un tap leggermente fuori dal pallino senza
-            // perdere precisione: tra tutti i candidati nel raggio scegliamo
-            // sempre quello geometricamente piu' vicino al punto toccato.
             const isDesktop = windowWidthCustom >= 1024
             const tapTolerance = isDesktop ? 6 : 16
 
@@ -243,8 +236,6 @@ export default function Globe() {
                 setOpenList(true)
             }
 
-            // Click sulla mappa intera (non vincolato al layer) cosi'
-            // possiamo applicare la tolleranza anche a chi tappa "vicino".
             mapInstance.current.on('click', handleSpotTap)
 
             if (isDesktop) {
