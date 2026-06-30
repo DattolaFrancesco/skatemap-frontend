@@ -13,13 +13,15 @@ const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr:
 
 const TYPE_OPTIONS = ['STREET', 'SKATEPARK', 'BOWL']
 const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR','RAMP']
-const MAX_VIDEO_SIZE = 25 * 1024 * 1024
-const MAX_IMAGE_SIZE = 3 * 1024 * 1024
+const MAX_VIDEO_SIZE = 40 * 1024 * 1024
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const STEPS = [
   { n: 1, label: "Location" },
   { n: 2, label: "Details" },
   { n: 3, label: "Media" },
 ]
+
+const COMPRESSION_WEIGHT = 30
 
 function formatMB(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB"
@@ -27,6 +29,34 @@ function formatMB(bytes) {
 
 function totalSize(files) {
   return files.reduce((acc, f) => acc + f.size, 0)
+}
+
+function uploadWithProgress(url, formData, token, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open("POST", url)
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`)
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(e.loaded / e.total)
+      }
+    }
+
+    xhr.onload = () => {
+      let data = {}
+      try { data = JSON.parse(xhr.responseText) } catch (_) {}
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data)
+      } else {
+        reject(new Error(data.message || "Upload failed, it could be the media format"))
+      }
+    }
+
+    xhr.onerror = () => reject(new Error("Network error during upload"))
+
+    xhr.send(formData)
+  })
 }
 
 export default function ModifySpotForm() {
@@ -54,6 +84,8 @@ export default function ModifySpotForm() {
   const imageInputRef = useRef(null)
   const videoInputRef = useRef(null)
   const [loading, setLoading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [loadingPhase, setLoadingPhase] = useState(null) // 'compressing' | 'uploading'
   const [form, setForm] = useState({
     name: '', latitude: '', longitude: '',
     description: '', risk: 'LOW', types: [],
@@ -67,7 +99,10 @@ export default function ModifySpotForm() {
   const imagesTotalMB = totalSize(images)
   const videosTotalMB = totalSize(videos)
   const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
-  const videoOverLimit = videosTotalMB > 1 * MAX_VIDEO_SIZE
+  // FIX: il limite di conteggio video era 1 (vedi handleAddVideos sotto)
+  // ma qui si moltiplicava per 1 invece che per 3, disallineando la soglia
+  // "over limit" mostrata in rosso dal vero tetto massimo di 3 video.
+  const videoOverLimit = videosTotalMB > 3 * MAX_VIDEO_SIZE
   const selectedType = form.types.find(t => TYPE_OPTIONS.includes(t))
   const selectedStructures = form.types.filter(t => STRUCTURE_OPTIONS.includes(t))
 
@@ -125,7 +160,7 @@ export default function ModifySpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
     const tooBig = incoming.filter(f => f.size > MAX_IMAGE_SIZE)
     if (tooBig.length > 0) {
-      setError(`Images must be under 3MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Images must be under 10MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...images, ...incoming]
@@ -142,12 +177,16 @@ export default function ModifySpotForm() {
     const incoming = Array.from(e.target.files).filter(f => f.type.startsWith('video/'))
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
-      setError(`Videos must be under 25MB each (${tooBig.map(f => f.name).join(', ')})`)
+      setError(`Videos must be under 40MB each (${tooBig.map(f => f.name).join(', ')})`)
       return
     }
     const merged = [...videos, ...incoming]
-    if (activeExistingVideos.length + merged.length > 1) {
-      setError("Max 3 video")
+    // FIX: prima il controllo era "> 1" (quindi in pratica si potava
+    // caricare un video soltanto) mentre il messaggio diceva "Max 3
+    // video" — limite e messaggio non corrispondevano. Ora entrambi
+    // sono coerenti con il vero tetto di 3, allineato a SpotForm.
+    if (activeExistingVideos.length + merged.length > 3) {
+      setError("Max 3 videos")
       return
     }
     setError(null)
@@ -173,7 +212,7 @@ export default function ModifySpotForm() {
     return new File([blob], nome, { type: "image/jpeg" })
   }
 
-  async function comprimi(files) {
+  async function comprimi(files, onProgress) {
     const results = []
     const options = {
       maxSizeMB: 1,
@@ -186,6 +225,7 @@ export default function ModifySpotForm() {
       const compresso = await imageCompression(normal, options)
       const nome = normal.name.replace(/\.[^.]+$/, '.webp')
       results.push(new File([compresso], nome, { type: 'image/webp' }))
+      if (onProgress) onProgress((x + 1) / files.length)
     }
     return results
   }
@@ -234,8 +274,15 @@ export default function ModifySpotForm() {
     if (err) { setError(err); return }
 
     setLoading(true)
+    setProgress(0)
+    setLoadingPhase('compressing')
+
     try {
-      const newImages = await comprimi(images)
+      const newImages = await comprimi(images, (frac) => {
+        setProgress(Math.round(frac * COMPRESSION_WEIGHT))
+      })
+
+      setLoadingPhase('uploading')
       const eliminatedMedia = [
         ...eliminatedExistsImages.id,
         ...eliminatedExistsVideos.id
@@ -244,25 +291,26 @@ export default function ModifySpotForm() {
       const formData = new FormData();
       formData.append("spot", new Blob([JSON.stringify(payload)], { type: "application/json" }));
       ;[...newImages, ...videos].forEach(f => formData.append("media", f, f.name));
-      await handleForm(section, formData)
+
+      const token = localStorage.getItem('token')
+      await uploadWithProgress(
+        `${process.env.NEXT_PUBLIC_API_URL}/spots/modify/${section}`,
+        formData,
+        token,
+        (frac) => {
+          setProgress(COMPRESSION_WEIGHT + Math.round(frac * (100 - COMPRESSION_WEIGHT)))
+        }
+      )
+
       setError(null)
       setSubmitted(true)
     } catch (err) {
-      setError(err.message)
+      setError(err.message || "Something went wrong while saving the spot")
     } finally {
       setLoading(false)
+      setProgress(0)
+      setLoadingPhase(null)
     }
-  }
-
-  async function handleForm(spotId, formData) {
-    const token = localStorage.getItem('token')
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/modify/${spotId}`, {
-      method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
-      body: formData,
-    });
-    const text = await res.text()
-    if (!res.ok) throw new Error(text.message + " try again, it could be the media format");
   }
 
   const { contextSafe } = useGSAP(() => {}, { scope: containerRef })
@@ -295,13 +343,35 @@ export default function ModifySpotForm() {
   })
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-3">
-      <div ref={containerRef} className={`flex flex-col w-full h-full md:w-[90%] md:h-[90%] lg:w-[70%] justify-center items-center ${loading ? "animate-pulse pointer-events-none" : ""}`}>
+    // Stesso fix di scroll verticale mobile applicato a SpotForm:
+    // min-h-0 lungo tutta la catena di flex-col cosi' sono gli
+    // overflow-y-auto interni (per step) a scrollare, non l'intera pagina.
+    <div className="w-full h-full flex justify-center items-center p-3 overflow-hidden">
+      <div ref={containerRef} className="flex flex-col w-full h-full min-h-0 md:w-[90%] md:h-[90%] lg:w-[70%] justify-center items-center">
 
-        <div className="button--glass button w-full h-full rounded-[10px] p-1.5 flex flex-col">
-          <div className="bg_login w-full rounded-[8px] flex flex-col flex-1 overflow-hidden">
+        <div className="button--glass button w-full h-full min-h-0 rounded-[10px] p-1.5 flex flex-col">
+          <div className="bg_login w-full rounded-[8px] flex flex-col flex-1 min-h-0 overflow-hidden">
 
-            {submitted ? (
+            {loading ? (
+              /* ---------- LOADER (liquid glass) ---------- */
+              <div className="flex-1 flex flex-col items-center justify-center gap-5 px-6 text-center">
+                <div className="button--glass rounded-full w-20 h-20 flex items-center justify-center text-xl font-bold">
+                  {progress}%
+                </div>
+
+                <div className="w-full max-w-xs flex flex-col gap-2">
+                  <div className="button--glass rounded-full h-3 w-full overflow-hidden p-0.5">
+                    <div
+                      className="h-full rounded-full bg_activated_light transition-[width] duration-300 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <p className="text-xs color_p_gray">
+                    {loadingPhase === 'compressing' ? 'Compressing media…' : 'Saving changes…'}
+                  </p>
+                </div>
+              </div>
+            ) : submitted ? (
               /* ---------- SUCCESS SCREEN ---------- */
               <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4 text-center">
                 <div className="button--glass rounded-full w-16 h-16 flex items-center justify-center text-3xl">
@@ -323,11 +393,11 @@ export default function ModifySpotForm() {
               </div>
             ) : (
               /* ---------- FORM ---------- */
-              <div className="px-2 py-2 flex flex-col gap-4 flex-1 overflow-hidden">
+              <div className="px-2 py-2 flex flex-col gap-4 flex-1 min-h-0 overflow-hidden">
 
                 <section className="flex justify-between items-center shrink-0">
                   <h1 className="text-lg md:text-2xl font-bold">Edit Spot</h1>
-                  <button type="button" onClick={() => handleGoingBack()} className={`button--glass rounded-[6px] px-3 py-1 text-sm ${loading ? "invisible" : ""}`}>Back</button>
+                  <button type="button" onClick={() => handleGoingBack()} className="button--glass rounded-[6px] px-3 py-1 text-sm">Back</button>
                 </section>
 
                 {/* Step indicator — centrato, non cliccabile */}
@@ -346,11 +416,11 @@ export default function ModifySpotForm() {
                   ))}
                 </div>
 
-                <form autoComplete="off" onSubmit={handleFormSubmit} className="flex-1 flex flex-col overflow-hidden">
+                <form autoComplete="off" onSubmit={handleFormSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
 
                   {/* STEP 1 — Location, mappa sopra sempre */}
                   {step === 1 && (
-                    <div className="flex-1 flex flex-col gap-3 overflow-y-auto">
+                    <div className="flex-1 flex flex-col gap-3 min-h-0 overflow-y-auto">
                       <div className="button--glass rounded-[8px] overflow-hidden relative w-full flex-1 min-h-[200px]">
                         <MapWithData lat={form.latitude} lng={form.longitude} />
                         <div className="absolute flex gap-1 bottom-2 left-2 right-2">
@@ -402,7 +472,7 @@ export default function ModifySpotForm() {
 
                   {/* STEP 2 — Type & Description */}
                   {step === 2 && (
-                    <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
+                    <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-y-auto">
                       <div className="flex flex-col gap-2">
                         <label className="text-xs font-semibold color_p_gray">Risk</label>
                         <div className="flex gap-2">
@@ -452,14 +522,14 @@ export default function ModifySpotForm() {
 
                   {/* STEP 3 — Media */}
                   {step === 3 && (
-                    <div className="flex-1 flex flex-col md:flex-row gap-4 overflow-y-auto">
+                    <div className="flex-1 flex flex-col md:flex-row gap-4 min-h-0 overflow-y-auto">
                       <div className="flex flex-col gap-2 w-full md:w-1/2">
                         <div className="flex justify-between items-center">
                           <label className="text-sm font-semibold color_p_gray">Images</label>
                           <button type="button" onClick={() => imageInputRef.current.click()} className="button--glass rounded-[5px] text-xs px-3 py-1">+ Add</button>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-xs color_p_gray">{totalImages}/5 · max 3MB each</p>
+                          <p className="text-xs color_p_gray">{totalImages}/5 · max 10MB each</p>
                           <p className={`text-xs font-mono ${imageOverLimit ? "text-red-500" : "color_p_gray"}`}>{formatMB(imagesTotalMB)}</p>
                         </div>
                         <input ref={imageInputRef} className="hidden" type="file" accept="image/*" multiple onChange={handleAddImages} />
@@ -491,7 +561,7 @@ export default function ModifySpotForm() {
                           <button type="button" onClick={() => videoInputRef.current.click()} className="button--glass rounded-[5px] text-xs px-3 py-1">+ Add</button>
                         </div>
                         <div className="flex justify-between items-center">
-                          <p className="text-xs color_p_gray">{totalVideos}/3 · max 25MB each</p>
+                          <p className="text-xs color_p_gray">{totalVideos}/3 · max 40MB each</p>
                           <p className={`text-xs font-mono ${videoOverLimit ? "text-red-500" : "color_p_gray"}`}>{formatMB(videosTotalMB)}</p>
                         </div>
                         <input ref={videoInputRef} className="hidden" type="file" accept="video/*" multiple onChange={handleAddVideos} />

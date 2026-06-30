@@ -135,18 +135,29 @@ export default function InfoUser({ searchParams }) {
                     style={{ width: 0, height: INIT_H }}
                 >
                     <div className="flex flex-col p-1 gap-1.5">
-                        {links.map(l => (
-                            <div key={l.href} className="relative flex items-center">
-                                <TransitionLink
-                                    href={l.href}
-                                    className={`w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150
-                                        ${pathname === l.href ? "bg_activated_light color_login" : "hover:bg-black/10"}`}
-                                >
-                                    {l.label}
-                                </TransitionLink>
-                                {l.badge && <div className="absolute w-2 h-2 rounded-full bg-red-500 top-0 right-0 animate-pulse" />}
-                            </div>
-                        ))}
+                        {links.map(l => {
+                            const isActive = pathname === l.href
+                            return (
+                                <div key={l.href} className="relative flex items-center">
+                                    {isActive ? (
+                                        <span
+                                            aria-current="page"
+                                            className="w-full rounded-[5px] text-center text-[12px] whitespace-nowrap cursor-default bg_activated_light color_login font-bold"
+                                        >
+                                            {l.label}
+                                        </span>
+                                    ) : (
+                                        <TransitionLink
+                                            href={l.href}
+                                            className="w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150 hover:bg-black/10"
+                                        >
+                                            {l.label}
+                                        </TransitionLink>
+                                    )}
+                                    {l.badge && <div className="absolute w-2 h-2 rounded-full bg-red-500 top-0 right-0 animate-pulse" />}
+                                </div>
+                            )
+                        })}
                         <TransitionLink
                             href="/login"
                             className="w-full rounded-[5px] text-[12px] whitespace-nowrap transition-colors duration-150 hover:bg-black/10"
