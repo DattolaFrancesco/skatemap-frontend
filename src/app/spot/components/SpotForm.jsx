@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useMemo } from "react"
 import useSpotForm from "./SpotFormStore"
 import dynamic from 'next/dynamic'
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr:
 
 const TYPE_OPTIONS = ['STREET', 'SKATEPARK', 'BOWL']
 const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR', 'RAMP']
+const RISK_OPTIONS = ['LOW', 'MEDIUM', 'HIGH']
 const MAX_VIDEO_SIZE = 40 * 1024 * 1024
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const STEPS = [
@@ -57,6 +58,23 @@ function uploadWithProgress(url, formData, token, onProgress) {
   })
 }
 
+// Hook helper: genera gli object URL per le preview in modo SINCRONO
+// (useMemo, calcolato durante il render) cosi' la preview appare subito
+// dopo aver scelto i file, senza dover "toccare" altro per forzare un
+// secondo render. Il cleanup (revokeObjectURL) avviene in un useEffect
+// separato per evitare memory leak.
+function useObjectUrls(files) {
+  const urls = useMemo(() => files.map(f => URL.createObjectURL(f)), [files])
+
+  useEffect(() => {
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u))
+    }
+  }, [urls])
+
+  return urls
+}
+
 export default function SpotForm() {
   const router = useRouter();
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
@@ -70,7 +88,7 @@ export default function SpotForm() {
   const [message, setMessage] = useState(null)
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [loadingPhase, setLoadingPhase] = useState(null) // 'compressing' | 'uploading'
+  const [loadingPhase, setLoadingPhase] = useState(null)
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
   const imageInputRef = useRef(null)
@@ -80,6 +98,9 @@ export default function SpotForm() {
     description: '', risk: 'LOW', types: [],
     city: '', country: '', continent: '', street: '',
   })
+
+  const imageUrls = useObjectUrls(images)
+  const videoUrls = useObjectUrls(videos)
 
   useEffect(() => {
     if (!latLng) return
@@ -116,10 +137,15 @@ export default function SpotForm() {
     const tooBig = incoming.filter(f => f.size > MAX_IMAGE_SIZE)
     if (tooBig.length > 0) {
       setError(`Images must be under 10MB each (${tooBig.map(f => f.name).join(', ')})`)
+      e.target.value = ''
       return
     }
     const merged = [...images, ...incoming]
-    if (merged.length > 5) { setError("Max 5 images"); return }
+    if (merged.length > 5) {
+      setError("Max 5 images")
+      e.target.value = ''
+      return
+    }
     setError(null)
     setImages(merged)
     e.target.value = ''
@@ -130,10 +156,15 @@ export default function SpotForm() {
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
       setError(`Videos must be under 40MB each (${tooBig.map(f => f.name).join(', ')})`)
+      e.target.value = ''
       return
     }
     const merged = [...videos, ...incoming]
-    if (merged.length > 3) { setError("Max 3 videos"); return }
+    if (merged.length > 3) {
+      setError("Max 3 videos")
+      e.target.value = ''
+      return
+    }
     setError(null)
     setVideos(merged)
     e.target.value = ''
@@ -225,13 +256,11 @@ export default function SpotForm() {
     setMessage(null)
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    if (step !== STEPS.length) {
-      goNext()
-      return
-    }
+  // Submit gestito SOLO dal pulsante finale (type="button" + onClick),
+  // non più legato a onSubmit del <form>: niente più submit "automatici"
+  // quando si passa da uno step all'altro o si preme Enter.
+  async function handleSubmit() {
+    if (step !== STEPS.length) return
 
     const err = validateStep(3)
     if (err) { setError(err); return }
@@ -279,6 +308,20 @@ export default function SpotForm() {
     resetForm()
   }
 
+  // Blocca il submit "nativo" del form (es. Enter su una <select> o input)
+  // come ulteriore livello di sicurezza, oltre al bottone type="button".
+  function handleFormKeyDown(e) {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault()
+    }
+  }
+
+  function handleFormSubmit(e) {
+    // Difesa extra: anche se qualcosa scatenasse un submit nativo,
+    // non facciamo nulla qui. L'unico modo per inviare è il pulsante SUBMIT.
+    e.preventDefault()
+  }
+
   const imagesTotalMB = totalSize(images)
   const videosTotalMB = totalSize(videos)
   const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
@@ -316,17 +359,6 @@ export default function SpotForm() {
   })
 
   return (
-    // FIX scroll verticale mobile:
-    // "h-full" da solo non basta dentro una catena di flex container —
-    // un flex item, per default, ha min-height/min-width: auto, quindi
-    // rifiuta di restringersi sotto la dimensione del proprio contenuto
-    // anche se il genitore ha un'altezza fissa. Risultato: invece di
-    // scrollare DENTRO le aree con overflow-y-auto (gli step), era la
-    // PAGINA INTERA a scrollare su mobile, perche' il contenuto (mappa +
-    // grid 4 colonne + preview media) spingeva oltre l'altezza disponibile.
-    // "min-h-0" lungo tutta la catena di flex-col permette ai contenitori
-    // di rispettare l'altezza del genitore e di lasciare che siano gli
-    // overflow-y-auto interni a fare il loro lavoro.
     <div className="w-full h-full flex justify-center items-center p-3 overflow-hidden">
       <div ref={containerRef} className="flex flex-col w-full h-full min-h-0 md:w-[90%] md:h-[90%] lg:w-[70%] justify-center items-center">
 
@@ -404,7 +436,12 @@ export default function SpotForm() {
                   ))}
                 </div>
 
-                <form autoComplete="off" onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                <form
+                  autoComplete="off"
+                  onSubmit={handleFormSubmit}
+                  onKeyDown={handleFormKeyDown}
+                  className="flex-1 flex flex-col min-h-0 overflow-hidden"
+                >
 
                   {/* STEP 1 — Location, mappa sopra sempre */}
                   {step === 1 && (
@@ -423,7 +460,7 @@ export default function SpotForm() {
                             <label className="text-xs font-semibold color_p_gray">Name</label>
                             <p className={`text-xs color_p_gray ${form.name.length > 30 ? "text-red-500" : ""}`}>{form.name.length}/30</p>
                           </div>
-                          <input onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
+                          <input className="button--glass rounded-[5px] text-sm px-2 py-2" required name="name" value={form.name} onChange={handleChange} placeholder="Name" />
                         </div>
 
                         <div className="flex flex-col gap-0.5">
@@ -442,18 +479,18 @@ export default function SpotForm() {
 
                         <div className="flex flex-col gap-0.5">
                           <label className="text-xs font-semibold color_p_gray">Country</label>
-                          <input onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
+                          <input className="button--glass rounded-[5px] text-sm px-2 py-2" name="country" value={form.country} onChange={handleChange} placeholder="Country" />
                         </div>
 
                         <div className="flex flex-col gap-0.5">
                           <label className="text-xs font-semibold color_p_gray">City</label>
-                          <input onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="city" value={form.city} onChange={handleChange} placeholder="City" />
+                          <input className="button--glass rounded-[5px] text-sm px-2 py-2" name="city" value={form.city} onChange={handleChange} placeholder="City" />
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-0.5 shrink-0">
                         <label className="text-xs font-semibold color_p_gray">Street</label>
-                        <input onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} className="button--glass rounded-[5px] text-sm px-2 py-2" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
+                        <input className="button--glass rounded-[5px] text-sm px-2 py-2" name="street" required value={form.street} onChange={handleChange} placeholder="Street" />
                       </div>
                     </div>
                   )}
@@ -464,9 +501,11 @@ export default function SpotForm() {
                       <div className="flex flex-col gap-2">
                         <label className="text-xs font-semibold color_p_gray">Risk</label>
                         <div className="flex gap-2">
-                          {['Low', 'Medium', 'High'].map(r => (
+                          {RISK_OPTIONS.map(r => (
                             <button key={r} type="button" onClick={() => setForm(p => ({ ...p, risk: r }))}
-                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${form.risk === r ? "bg_activated_light" : ""}`}>{r}</button>
+                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${form.risk === r ? "bg_activated_light" : ""}`}>
+                              {r.charAt(0) + r.slice(1).toLowerCase()}
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -503,7 +542,7 @@ export default function SpotForm() {
                           <label className="text-xs font-semibold color_p_gray">Description</label>
                           <p className="text-xs color_p_gray">{form.description.length}/500</p>
                         </div>
-                        <textarea onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault() }} required className="button--glass rounded-[5px] text-sm px-3 py-2.5 w-full resize-none flex-1 min-h-[160px]" name="description" value={form.description} onChange={handleChange} placeholder="Description" />
+                        <textarea required className="button--glass rounded-[5px] text-sm px-3 py-2.5 w-full resize-none flex-1 min-h-[160px]" name="description" value={form.description} onChange={handleChange} placeholder="Description" />
                       </div>
                     </div>
                   )}
@@ -527,7 +566,9 @@ export default function SpotForm() {
                           )}
                           {images.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              {imageUrls[i] && (
+                                <img src={imageUrls[i]} className="w-full h-full object-cover rounded-[5px]" />
+                              )}
                               <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
                           ))}
@@ -550,7 +591,9 @@ export default function SpotForm() {
                           )}
                           {videos.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              {videoUrls[i] && (
+                                <video src={videoUrls[i]} className="w-full h-full object-cover rounded-[5px]" />
+                              )}
                               <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
                           ))}
@@ -584,7 +627,8 @@ export default function SpotForm() {
                       ) : (
                         <button
                           disabled={loading}
-                          type="submit"
+                          type="button"
+                          onClick={handleSubmit}
                           className="button--glass rounded-[6px] flex-1 py-2.5 text-sm font-semibold bg_activated_light disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           SUBMIT

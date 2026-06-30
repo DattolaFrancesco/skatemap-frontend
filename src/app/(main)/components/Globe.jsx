@@ -240,7 +240,7 @@ export default function Globe() {
                 const p = new URLSearchParams(window.location.search)
                 p.set("selectedSpot", parsed.id)
                 router.push(`?${p.toString()}`, { scroll: false })
-                if (isDesktop) setOpenList(true)
+                setOpenList(true)
             }
 
             // Click sulla mappa intera (non vincolato al layer) cosi'

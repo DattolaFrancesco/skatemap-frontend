@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useEffect, useState, useLayoutEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import SpotCard from "../components/SpotCard";
 import useSpotStore from "../store/SpotStore";
 import gsap from "gsap"
@@ -19,11 +19,6 @@ export default function ListGrid({ position, openList }) {
     const savedY = useRef(0)
     const [windowSize, setWindowSize] = useState({ w: 0, h: 0 })
     const activeSpot = useSpotStore((data) => data.spot)
-
-    useLayoutEffect(() => {
-        if (position !== "absolute" || !listRef.current) return
-        gsap.set(listRef.current, { y: window.innerHeight })
-    }, [])
 
     useGSAP(() => {
         if (position !== "absolute") return

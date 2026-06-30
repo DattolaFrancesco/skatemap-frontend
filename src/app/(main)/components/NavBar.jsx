@@ -214,7 +214,7 @@ export default function NavBar() {
         return () => window.removeEventListener('resize', check)
     }, [])
 
-    useEffect(() => { setOpenList(false) }, [])
+    useEffect(() => { setOpenList(true) }, [])
 
     const filterProps = {
         pathname,

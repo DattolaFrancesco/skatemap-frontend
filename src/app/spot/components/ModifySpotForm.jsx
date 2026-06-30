@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import useSpotForm from "@/app/spot/components/SpotFormStore";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation"
@@ -13,6 +13,7 @@ const MapWithData = dynamic(() => import('@/app/googleMaps/MapWithData'), { ssr:
 
 const TYPE_OPTIONS = ['STREET', 'SKATEPARK', 'BOWL']
 const STRUCTURE_OPTIONS = ['RAIL', 'LEDGE', 'STAIR','RAMP']
+const RISK_OPTIONS = ['LOW', 'MEDIUM', 'HIGH']
 const MAX_VIDEO_SIZE = 40 * 1024 * 1024
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const STEPS = [
@@ -59,6 +60,23 @@ function uploadWithProgress(url, formData, token, onProgress) {
   })
 }
 
+// Hook helper: genera gli object URL per le preview in modo SINCRONO
+// (useMemo, calcolato durante il render) cosi' la preview appare subito
+// dopo aver scelto i file, senza dover "toccare" altro per forzare un
+// secondo render. Il cleanup (revokeObjectURL) avviene in un useEffect
+// separato per evitare memory leak.
+function useObjectUrls(files) {
+  const urls = useMemo(() => files.map(f => URL.createObjectURL(f)), [files])
+
+  useEffect(() => {
+    return () => {
+      urls.forEach(u => URL.revokeObjectURL(u))
+    }
+  }, [urls])
+
+  return urls
+}
+
 export default function ModifySpotForm() {
   const router = useRouter();
   const clearPendingHref = useNavigationStore((state) => state.clearPendingHref);
@@ -99,12 +117,12 @@ export default function ModifySpotForm() {
   const imagesTotalMB = totalSize(images)
   const videosTotalMB = totalSize(videos)
   const imageOverLimit = imagesTotalMB > 5 * MAX_IMAGE_SIZE
-  // FIX: il limite di conteggio video era 1 (vedi handleAddVideos sotto)
-  // ma qui si moltiplicava per 1 invece che per 3, disallineando la soglia
-  // "over limit" mostrata in rosso dal vero tetto massimo di 3 video.
   const videoOverLimit = videosTotalMB > 3 * MAX_VIDEO_SIZE
   const selectedType = form.types.find(t => TYPE_OPTIONS.includes(t))
   const selectedStructures = form.types.filter(t => STRUCTURE_OPTIONS.includes(t))
+
+  const newImageUrls = useObjectUrls(images)
+  const newVideoUrls = useObjectUrls(videos)
 
   useEffect(() => { getSpot(); setPosition(null) }, [])
   useEffect(() => {
@@ -161,11 +179,13 @@ export default function ModifySpotForm() {
     const tooBig = incoming.filter(f => f.size > MAX_IMAGE_SIZE)
     if (tooBig.length > 0) {
       setError(`Images must be under 10MB each (${tooBig.map(f => f.name).join(', ')})`)
+      e.target.value = ''
       return
     }
     const merged = [...images, ...incoming]
     if (activeExistingImages.length + merged.length > 5) {
       setError("Max 5 images")
+      e.target.value = ''
       return
     }
     setError(null)
@@ -178,15 +198,14 @@ export default function ModifySpotForm() {
     const tooBig = incoming.filter(f => f.size > MAX_VIDEO_SIZE)
     if (tooBig.length > 0) {
       setError(`Videos must be under 40MB each (${tooBig.map(f => f.name).join(', ')})`)
+      e.target.value = ''
       return
     }
     const merged = [...videos, ...incoming]
-    // FIX: prima il controllo era "> 1" (quindi in pratica si potava
-    // caricare un video soltanto) mentre il messaggio diceva "Max 3
-    // video" — limite e messaggio non corrispondevano. Ora entrambi
-    // sono coerenti con il vero tetto di 3, allineato a SpotForm.
+
     if (activeExistingVideos.length + merged.length > 3) {
       setError("Max 3 videos")
+      e.target.value = ''
       return
     }
     setError(null)
@@ -343,9 +362,6 @@ export default function ModifySpotForm() {
   })
 
   return (
-    // Stesso fix di scroll verticale mobile applicato a SpotForm:
-    // min-h-0 lungo tutta la catena di flex-col cosi' sono gli
-    // overflow-y-auto interni (per step) a scrollare, non l'intera pagina.
     <div className="w-full h-full flex justify-center items-center p-3 overflow-hidden">
       <div ref={containerRef} className="flex flex-col w-full h-full min-h-0 md:w-[90%] md:h-[90%] lg:w-[70%] justify-center items-center">
 
@@ -476,9 +492,11 @@ export default function ModifySpotForm() {
                       <div className="flex flex-col gap-2">
                         <label className="text-xs font-semibold color_p_gray">Risk</label>
                         <div className="flex gap-2">
-                          {['Low', 'Medium', 'High'].map(r => (
+                          {RISK_OPTIONS.map(r => (
                             <button key={r} type="button" onClick={() => setForm(p => ({ ...p, risk: r }))}
-                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${form.risk === r ? "bg_activated_light" : ""}`}>{r}</button>
+                              className={`button--glass rounded-[5px] flex-1 py-2.5 text-sm transition-colors ${form.risk === r ? "bg_activated_light" : ""}`}>
+                              {r.charAt(0) + r.slice(1).toLowerCase()}
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -548,7 +566,9 @@ export default function ModifySpotForm() {
                           ))}
                           {images.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              <img src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              {newImageUrls[i] && (
+                                <img src={newImageUrls[i]} className="w-full h-full object-cover rounded-[5px]" />
+                              )}
                               <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
                           ))}
@@ -579,7 +599,9 @@ export default function ModifySpotForm() {
                           ))}
                           {videos.map((file, i) => (
                             <div key={i} className="relative w-20 h-20">
-                              <video src={URL.createObjectURL(file)} className="w-full h-full object-cover rounded-[5px]" />
+                              {newVideoUrls[i] && (
+                                <video src={newVideoUrls[i]} className="w-full h-full object-cover rounded-[5px]" />
+                              )}
                               <button type="button" onClick={() => removeVideo(i)} className="absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">×</button>
                             </div>
                           ))}
