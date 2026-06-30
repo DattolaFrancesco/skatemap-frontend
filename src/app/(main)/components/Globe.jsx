@@ -291,16 +291,67 @@ export default function Globe() {
         })
         gsap.to(mapRef.current, { opacity: 1, ease: "power3.inOut" })
     }, { dependencies: [mapReady] })
+       const meridians = Array.from({ length: 13 }, (_, i) => {
+        const angle = (i + 1) * (90 / 14) 
+        const rx = 95 * Math.sin((angle * Math.PI) / 180)
+        return rx
+    })
+
+    const parallels = Array.from({ length: 11 }, (_, i) => {
+        const t = (i + 1) / 12 - 0.5 
+        const y = t * 190
+        const halfWidth = Math.sqrt(Math.max(95 * 95 - y * y, 0))
+        return { y, halfWidth }
+    })
 
     return (
         <>
             <div className="absolute top-[-50%] translate-y-1/2 bg-image justify-center w-full h-full flex flex-col items-center">
                 <div ref={containerRef} className="aspect-square w_custom_globe rounded-full overflow-hidden relative">
-                    {!mapReady && (
-                        <div className={`absolute inset-0 rounded-full bg-[#1a1a1a] flex items-center justify-center z-10 ${delay ? "animate-pulse" : "opacity-0"}`}>
-                            <div className="w-3/4 h-3/4 rounded-full border border-white/5" />
-                            <div className="absolute w-1/2 h-px bg-white/5" />
-                            <div className="absolute w-px h-1/2 bg-white/5" />
+                {!mapReady && (
+                        <div className={`absolute inset-0 rounded-full bg-[#1a1a1a] overflow-hidden z-10 ${delay ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}>
+                            {/* ombra radiale per profondità 3D */}
+                            <div className="absolute inset-0 rounded-full" style={{
+                                background: "radial-gradient(circle at 35% 30%, rgba(255,255,255,0.07), rgba(255,255,255,0.01) 40%, rgba(0,0,0,0.35) 100%)"
+                            }} />
+
+                            {/* reticolato wireframe */}
+                            <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full animate-pulse" style={{ animationDuration: "16s" }}>
+                                {/* contorno sfera */}
+                                <circle cx="100" cy="100" r="95" stroke="rgba(255,255,255,0.12)" strokeWidth="0.6" fill="none" />
+
+                                {/* meridiani (linee verticali = ellissi) */}
+                                {meridians.map((rx, i) => (
+                                    <ellipse
+                                        key={`m-${i}`}
+                                        cx="100" cy="100"
+                                        rx={rx} ry="95"
+                                        stroke="rgba(255,255,255,0.07)"
+                                        strokeWidth="0.4"
+                                        fill="none"
+                                    />
+                                ))}
+                                {/* meridiano centrale */}
+                                <line x1="100" y1="5" x2="100" y2="195" stroke="rgba(255,255,255,0.07)" strokeWidth="0.4" />
+
+                                {/* paralleli (linee orizzontali = corde) */}
+                                {parallels.map(({ y, halfWidth }, i) => (
+                                    <line
+                                        key={`p-${i}`}
+                                        x1={100 - halfWidth} y1={100 + y}
+                                        x2={100 + halfWidth} y2={100 + y}
+                                        stroke="rgba(255,255,255,0.06)"
+                                        strokeWidth="0.4"
+                                    />
+                                ))}
+                                {/* equatore più marcato */}
+                                <line x1="5" y1="100" x2="195" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+                            </svg>
+
+                            {/* punti spot fantasma */}
+                            <div className="absolute top-[28%] left-[42%] w-1 h-1 rounded-full bg-white/25 animate-pulse" />
+                            <div className="absolute top-[52%] left-[62%] w-1 h-1 rounded-full bg-white/15 animate-pulse" style={{ animationDelay: "0.4s" }} />
+                            <div className="absolute top-[68%] left-[38%] w-1 h-1 rounded-full bg-white/20 animate-pulse" style={{ animationDelay: "0.8s" }} />
                         </div>
                     )}
                     <div ref={mapRef} className="w-full h-full opacity-0" />

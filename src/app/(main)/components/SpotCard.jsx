@@ -32,6 +32,8 @@ export default function SpotCard({ spot }) {
     const isDashboard = pathname.includes("/dashboard")
     const isDashboardAll = pathname === "/dashboard/allSpot"
     const isRequests = pathname === "/dashboard/requests"
+    const isFav = pathname === "/dashboard/favourites"
+
 
     function handleCardClick() {
         const p = new URLSearchParams(resolvedParams.toString())
@@ -106,7 +108,7 @@ export default function SpotCard({ spot }) {
                 alt="skate spot image"
                 className="shrink-0 rounded-xl w-[100px] h-[100px] p-2 object-cover"
             />
-            {isDashboard && !isRequests && (
+            {isDashboard && !isRequests && !isFav && (
                 <div className="absolute top-1 right-1 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
                     <button onClick={handleDelete} className="text-xs px-1 rounded">Delete</button>
                     <button onClick={handleModify} className="text-xs px-1 rounded">Modify</button>
