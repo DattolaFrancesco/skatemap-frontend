@@ -57,12 +57,6 @@ function uploadWithProgress(url, formData, token, onProgress) {
     xhr.send(formData)
   })
 }
-
-// Hook helper: genera gli object URL per le preview in modo SINCRONO
-// (useMemo, calcolato durante il render) cosi' la preview appare subito
-// dopo aver scelto i file, senza dover "toccare" altro per forzare un
-// secondo render. Il cleanup (revokeObjectURL) avviene in un useEffect
-// separato per evitare memory leak.
 function useObjectUrls(files) {
   const urls = useMemo(() => files.map(f => URL.createObjectURL(f)), [files])
 
@@ -75,10 +69,6 @@ function useObjectUrls(files) {
   return urls
 }
 
-// Genera una thumbnail "vera" (immagine) per un file video catturando un
-// frame su un <canvas>. Necessario perche' su molti browser mobile il tag
-// <video> non disegna nessun frame finche' non parte davvero la riproduzione,
-// quindi affidarsi al solo <video> lascia la preview trasparente.
 function generateVideoThumbnail(file) {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file)
@@ -117,9 +107,6 @@ function generateVideoThumbnail(file) {
     video.addEventListener('error', () => cleanupAndResolve(null))
   })
 }
-
-// Hook helper: tiene allineate le thumbnail generate con l'array di file
-// video correnti, rigenerando solo quando la lista cambia.
 function useVideoThumbnails(files) {
   const [thumbs, setThumbs] = useState([])
 
