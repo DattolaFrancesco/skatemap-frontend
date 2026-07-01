@@ -122,7 +122,7 @@ export default function ListGrid({ position, openList, onClose }) {
                     <div className="w-[50px] h-[4px] bg-black/20 rounded-2xl" />
                 </div>
                 <div
-                    className="flex flex-col w-full overflow-y-scroll gap-1.5 rounded-[5px] pb-15"
+                    className="flex flex-col w-full overflow-y-scroll gap-1.5 rounded-[5px] pb-3"
                     style={{ touchAction: "pan-y" }}
                 >
                     {filteredSpot?.length > 0 && !activeSpot && filteredSpot.map((s) => (
