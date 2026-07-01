@@ -15,6 +15,8 @@ const FILTERS = {
     status: ["Approved", "Unapproved", "Pending"]
 }
 
+const HIDDEN_PATHS = ["/donate", "/login", "/register"]
+
 function FilterButtons({
     pathname,
     selected,
@@ -28,6 +30,7 @@ function FilterButtons({
     typeRef,
     structureRef,
     statusRef,
+    disabled,
 }) {
     return (
         <>
@@ -35,6 +38,7 @@ function FilterButtons({
                 <div className="button--glass button p-1.5 flex">
                     <div className="flex flex-col gap-2">
                         <button
+                            disabled={disabled}
                             className={`rounded-[5px] h-full flex gap-2 items-center ${selected.type == "" ? "" : "bg_activated_light"}`}
                             onClick={() => setTypeOpen(!typeOpen)}
                         >
@@ -51,7 +55,7 @@ function FilterButtons({
                     <div className="overflow-hidden">
                         <div className={`flex flex-col gap-1.5 w-full p-1.5 ${typeOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                             {FILTERS.type.map((t) => (
-                                <button key={t} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("type", t)}>
+                                <button disabled={disabled} key={t} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("type", t)}>
                                     <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.type.includes(t) ? "bg-black" : ""}`}></span>
                                     <p>{t}</p>
                                 </button>
@@ -65,6 +69,7 @@ function FilterButtons({
                 <div className="button--glass button p-1.5 flex">
                     <div className="flex flex-col gap-2">
                         <button
+                            disabled={disabled}
                             className={`rounded-[5px] h-full flex gap-2 items-center ${selected.structure == "" ? "" : "bg_activated_light"}`}
                             onClick={() => setStructureOpen(!structureOpen)}
                         >
@@ -81,7 +86,7 @@ function FilterButtons({
                     <div className="overflow-hidden">
                         <div className={`flex flex-col gap-1.5 w-full p-1.5 ${structureOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                             {FILTERS.structure.map((s) => (
-                                <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("structure", s)}>
+                                <button disabled={disabled} key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("structure", s)}>
                                     <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.structure.includes(s) ? "bg-black" : ""}`}></span>
                                     <p>{s}</p>
                                 </button>
@@ -96,6 +101,7 @@ function FilterButtons({
                     <div className="button--glass button p-1.5 flex">
                         <div className="flex flex-col gap-2 w-full">
                             <button
+                                disabled={disabled}
                                 className={`rounded-[5px] h-full flex gap-2 items-center justify-between ${selected.status == "" ? "" : "bg_activated_light"}`}
                                 onClick={() => setStatusOpen(!statusOpen)}
                             >
@@ -112,7 +118,7 @@ function FilterButtons({
                         <div className="overflow-hidden">
                             <div className={`flex flex-col gap-1.5 w-full p-1.5 ${statusOpen ? "" : "opacity-0"} transition-opacity duration-500`}>
                                 {FILTERS.status.map((s) => (
-                                    <button key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("status", s)}>
+                                    <button disabled={disabled} key={s} className="rounded-[5px] h-full flex gap-2 items-center" onClick={() => multipleSelection("status", s)}>
                                         <span className={`w-[10px] h-[10px] mt-0.5 border border-black rounded-[2px] ${selected.status.includes(s) ? "bg-black" : ""}`}></span>
                                         <p>{s}</p>
                                     </button>
@@ -151,6 +157,8 @@ export default function NavBar() {
     const resolvedParams = useSearchParams()
     const [isTablet, setIsTablet] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
+
+    const isHiddenRoute = HIDDEN_PATHS.includes(pathname)
 
     const urlParams = (isReturn) => {
         const p = new URLSearchParams()
@@ -238,6 +246,7 @@ export default function NavBar() {
         typeRef,
         structureRef,
         statusRef,
+        disabled: isHiddenRoute,
     }
 
     return (
@@ -251,6 +260,7 @@ export default function NavBar() {
                             <div className="button--glass button p-1.5 flex flex-1">
                                 {!isMobile && activeSpot && (
                                     <button
+                                        disabled={isHiddenRoute}
                                         onClick={() => { setSpot(null); urlParams(true); setSearch("") }}
                                         className="rounded-s-[5px] self-stretch"
                                     >
@@ -262,11 +272,13 @@ export default function NavBar() {
                                     type="text"
                                     placeholder="Search"
                                     value={search}
+                                    disabled={isHiddenRoute}
                                     onClick={() => setOpenList(true)}
                                     onChange={handleSearch}
                                     className={`w-full px-1 text-[12px] ${isMobile || !activeSpot ? "rounded-s-[5px]" : ""}`}
                                 />
                                 <button
+                                    disabled={isHiddenRoute}
                                     className="text-black rounded-e-[5px] self-stretch"
                                     onClick={() => { if (openList) { setOpenList(!openList); setSpot(null) } }}
                                 >
@@ -282,6 +294,7 @@ export default function NavBar() {
                             {isMobile && (
                                 <div className="button--glass button p-1.5 shrink-0">
                                     <button
+                                        disabled={isHiddenRoute}
                                         className={`rounded-[5px] h-full flex items-center ${openList ? "bg_activated_light" : ""}`}
                                         onClick={() => setOpenList(!openList)}
                                     >
