@@ -11,6 +11,8 @@ import { usePathname } from "next/navigation";
 
 gsap.registerPlugin(Draggable, InertiaPlugin)
 
+const HIDDEN_PATHS = ["/donate", "/login", "/register"]
+
 export default function ListGrid({ position, openList, onClose }) {
     const pathname = usePathname()
     const filteredSpot = useSpotStore((data) => data.filteredSpot)
@@ -21,8 +23,11 @@ export default function ListGrid({ position, openList, onClose }) {
     const activeSpot = useSpotStore((data) => data.spot)
     const lastWidth = useRef(typeof window !== "undefined" ? window.innerWidth : 0)
 
+    const isHiddenRoute = HIDDEN_PATHS.includes(pathname)
+
     useGSAP(() => {
         if (position !== "absolute") return
+        if (isHiddenRoute) return
         if (!listRef.current || !dragAreaRef.current) return
 
         const existing = Draggable.get(listRef.current)
@@ -30,7 +35,7 @@ export default function ListGrid({ position, openList, onClose }) {
 
         const minY = -(window.innerHeight - window.innerHeight * 0.4)
         const maxY = 0
-        const CLOSE_THRESHOLD = 80 // px di overdrag oltre maxY prima di chiudere
+        const CLOSE_THRESHOLD = 80
         const dragMaxY = maxY + CLOSE_THRESHOLD
 
         Draggable.create(listRef.current, {
@@ -39,14 +44,9 @@ export default function ListGrid({ position, openList, onClose }) {
             bounds: { minY, maxY: dragMaxY },
             inertia: true,
             onDragEnd: function () {
-                // rilascio oltre la soglia -> chiudi
                 if (this.y >= dragMaxY - 5) {
                     savedY.current = maxY
-
-                    // FONDAMENTALE: disabilita il Draggable così non applica
-                    // più i suoi bounds/inertia in conflitto con la nostra animazione
                     this.disable()
-
                     gsap.to(listRef.current, {
                         y: window.innerHeight,
                         duration: 0.3,
@@ -67,12 +67,11 @@ export default function ListGrid({ position, openList, onClose }) {
                 }
             }
         })
-    }, { scope: listRef, dependencies: [windowSize] })
+    }, { scope: listRef, dependencies: [windowSize, isHiddenRoute] })
 
     useEffect(() => {
-        if (position !== "absolute" || !listRef.current) return
+        if (position !== "absolute" || isHiddenRoute || !listRef.current) return
 
-        // riabilita sempre il drag quando la lista si (ri)apre
         const d = Draggable.get(listRef.current)
         if (openList) {
             if (d) d.enable()
@@ -80,10 +79,10 @@ export default function ListGrid({ position, openList, onClose }) {
         } else {
             gsap.to(listRef.current, { y: window.innerHeight, duration: 0.3, ease: "power3.in" })
         }
-    }, [openList])
+    }, [openList, isHiddenRoute])
 
     useEffect(() => {
-        if (position !== "absolute") return
+        if (position !== "absolute" || isHiddenRoute) return
 
         let resizeTimeout = null
 
@@ -105,7 +104,9 @@ export default function ListGrid({ position, openList, onClose }) {
             window.removeEventListener('resize', handleResize)
             clearTimeout(resizeTimeout)
         }
-    }, [openList])
+    }, [openList, isHiddenRoute])
+
+    if (isHiddenRoute) return null
 
     if (position === "absolute") {
         return (
