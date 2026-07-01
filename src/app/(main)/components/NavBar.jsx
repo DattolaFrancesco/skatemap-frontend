@@ -161,19 +161,24 @@ export default function NavBar() {
         selected.structure.forEach(f => p.append("structure", f.toUpperCase()))
         selected.status.forEach(f => p.append("status", f.toUpperCase()))
         if (search !== null) p.append("search", search)
+
         if (selectedSpot) {
             setOpenList(true)
-            if (!isReturn) p.set("selectedSpot", selectedSpot)   // <-- AGGIUNTO
+            if (!isReturn) p.set("selectedSpot", selectedSpot)
         }
+
         setParams(p)
         p.delete("_t")
+
         if (p.toString() === "" && firstRender == 1) setReset(true)
         if (p.toString() === "" && firstRenderGrid == 1) setReset(true)
+
         if (isReturn) {
             p.delete("selectedSpot")
             router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
-            return  // <-- consiglio: aggiungi return qui, vedi nota sotto
+            return
         }
+
         router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
     }
 
@@ -304,7 +309,13 @@ export default function NavBar() {
                 )}
             </nav>
 
-           {isMobile && <ListGrid position={"absolute"} openList={openList} />}
+            {isMobile && (
+                <ListGrid
+                    position="absolute"
+                    openList={openList}
+                    onClose={() => setOpenList(false)}
+                />
+            )}
         </>
     )
 }
