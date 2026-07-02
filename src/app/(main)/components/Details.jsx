@@ -212,9 +212,6 @@ export default function Details({postion}){
         }
     }
     useEffect(()=>{if(!spot) setSpotClosed(false)},[spot])
-    // FIX: non resettare lo spot al primo mount (su mobile Details rimonta
-    // più volte a causa del cambio isMobile), solo quando pathname cambia
-    // davvero dopo che il componente è già montato.
     useEffect(() => {
         if (isFirstPathnameMount.current) {
             isFirstPathnameMount.current = false
@@ -263,7 +260,7 @@ export default function Details({postion}){
     }
 
      return (
-     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[100%]" : "left-[-1%]"} p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll overflow-x-hidden flex`}>
+     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[101%]" : "left-[-1%]"} p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll overflow-x-hidden flex`}>
            {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
             className="rounded-[5px]"><p>Show</p></button>}
           {!spot || !data 
