@@ -129,13 +129,26 @@ export default function ListGrid({ position, openList, onClose }) {
                     {filteredSpot?.length > 0 && !activeSpot && filteredSpot.map((s) => (
                         <SpotCard key={s.id} spot={s} />
                     ))}
+                    {filteredSpot?.length === 0 && !activeSpot && (
+                        <div className="w-full flex flex-col items-center justify-center gap-1 py-10 text-center color_p_gray">
+                            <p className="text-sm">No spots found</p>
+                            <p className="text-xs opacity-70">Try adjusting your search or filters</p>
+                        </div>
+                    )}
                     <Details postion={"mobile"} />
                 </div>
             </div>
         )
     }
 
-    if (filteredSpot?.length == 0) return null
+    if (filteredSpot?.length == 0) {
+        return (
+            <div className={`z-10 button--glass button p-1.5 mt-1 flex flex-col items-center justify-center gap-1 py-10 text-center color_p_gray ${pathname.includes("/dashboard") ? "max-h-[calc(100vh-100px)]" : "max-h-[calc(100vh-70px)]"} relative`}>
+                <p className="text-sm">No spots found</p>
+                <p className="text-xs opacity-70">Try adjusting your search or filters</p>
+            </div>
+        )
+    }
 
     return (
         <div className={`z-10 button--glass button p-1.5 mt-1 flex flex-col gap-1.5 overflow-y-scroll ${pathname.includes("/dashboard") ? "max-h-[calc(100vh-100px)]" : "max-h-[calc(100vh-70px)]"} relative`}>

@@ -160,7 +160,7 @@ export default function NavBar() {
 
     const isHiddenRoute = HIDDEN_PATHS.includes(pathname)
 
-    const urlParams = (isReturn) => {
+    const urlParams = (isReturn, keepSpot = true) => {
         const p = new URLSearchParams()
         const selectedSpot = resolvedParams.get("selectedSpot")
         selected.location.forEach(f => p.append("continent", f.toUpperCase().replace(/\s/g, "")))
@@ -170,7 +170,7 @@ export default function NavBar() {
         selected.status.forEach(f => p.append("status", f.toUpperCase()))
         if (search !== null) p.append("search", search)
 
-        if (selectedSpot) {
+        if (keepSpot && selectedSpot) {
             setOpenList(true)
             if (!isReturn) p.set("selectedSpot", selectedSpot)
         }
@@ -190,7 +190,17 @@ export default function NavBar() {
         router.push(`?${p.toString()}&_t=${Date.now()}`, { scroll: false })
     }
 
-    useEffect(() => { urlParams(false) }, [selected, router, search])
+    const isFirstFilterMount = useRef(true)
+
+    useEffect(() => {
+        if (isFirstFilterMount.current) {
+            isFirstFilterMount.current = false
+            urlParams(false)
+            return
+        }
+        setSpot(null)
+        urlParams(false, false)
+    }, [selected, router, search])
 
     const handleSearch = (e) => {
         const search = e.currentTarget.value
@@ -232,6 +242,14 @@ export default function NavBar() {
     }, [])
 
     useEffect(() => { setOpenList(true) }, [])
+
+    useEffect(() => {
+        if (activeSpot) {
+            setTypeOpen(false)
+            setStructureOpen(false)
+            setStatusOpen(false)
+        }
+    }, [activeSpot])
 
     const filterProps = {
         pathname,
@@ -280,7 +298,17 @@ export default function NavBar() {
                                 <button
                                     disabled={isHiddenRoute}
                                     className="text-black rounded-e-[5px] self-stretch"
-                                    onClick={() => { if (openList) { setOpenList(!openList); setSpot(null) } }}
+                                    onClick={() => {
+                                        if (openList) {
+                                            setOpenList(!openList)
+                                            setSpot(null)
+                                            setSelected({ location: [], type: [], structure: [], risk: [], status: [] })
+                                            setSearch("")
+                                            setTypeOpen(false)
+                                            setStructureOpen(false)
+                                            setStatusOpen(false)
+                                        }
+                                    }}
                                 >
                                     {openList ? <X size={12} /> : <Search size={12} />}
                                 </button>

@@ -8,6 +8,7 @@ const structuresName = ["ledge", "rail", "ramp", "stair"]
 export default function SpotCard({ spot }) {
     const pathname = usePathname()
     const activeSpot = useSpotStore((data) => data.spot)
+    const setSpot = useSpotStore((s) => s.setSpot)
     const setPendingSpot = useSpotStore((s) => s.setPendingSpot)
     const setEliminationSpot = useSpotStore((s) => s.setEliminationSpot)
     const setAskPermission = useSpotStore((s) => s.setAskPermission)
@@ -37,6 +38,14 @@ export default function SpotCard({ spot }) {
 
     function handleCardClick() {
         const p = new URLSearchParams(resolvedParams.toString())
+
+        if (activeSpot == spot.id) {
+            setSpot(null)
+            p.delete("selectedSpot")
+            router.push(`?${p.toString()}`, { scroll: false })
+            return
+        }
+
         p.set("selectedSpot", spot.id)
         router.push(`?${p.toString()}`, { scroll: false })
     }

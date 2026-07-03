@@ -80,6 +80,8 @@ export default function Globe() {
             const exists = result.some(s => String(s.id) === String(selectedSpot))
             if (exists) setActiveSpot(selectedSpot)
             else setActiveSpot(null)
+        } else {
+            setActiveSpot(null)
         }
 
         setFilteredSpots(result)
