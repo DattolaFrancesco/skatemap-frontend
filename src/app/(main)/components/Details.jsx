@@ -35,9 +35,11 @@ export default function Details({postion}){
     const detailsRef = useRef(null)
     const [spotClosed,setSpotClosed] = useState(false)
     const [downloadingVideos, setDownloadingVideos] = useState(false)
+    const [loadingSpot, setLoadingSpot] = useState(false)
     const isFirstPathnameMount = useRef(true)
     
     async function getSpot(){
+        setLoadingSpot(true)
         const token = localStorage.getItem('token')
         try{
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/spots/single/${spot}`,{
@@ -50,6 +52,8 @@ export default function Details({postion}){
             setData(data)
         }catch(err){
             console.log(err.message)
+        } finally {
+            setLoadingSpot(false)
         }
     }
     async function getFav(){
@@ -260,12 +264,27 @@ export default function Details({postion}){
     }
 
      return (
-     <div ref={containerRef} className={`${!spot || !data ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[101%]" : "left-[-1%]"} p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll overflow-x-hidden flex`}>
+     <div ref={containerRef} className={`${!spot ? "hidden" : "" } ${postion === "mobile" ? "" : "absolute button--glass button"} top-8.5 ${isTablet ? "left-[101%]" : "left-[-1%]"} p-2 pb-2 ${spotClosed ? "w-14.5" : "w-full"} transition-all duration-300 rounded-[5px]  max-h-[calc(100vh-70px)] overflow-y-scroll overflow-x-hidden flex`}>
            {!isMobile && spotClosed && <button onClick={()=>{closeSpot();}} 
             className="rounded-[5px]"><p>Show</p></button>}
-          {!spot || !data 
+          {!spot
             ?  null
-            : ( <div ref={detailsRef} className="w-full overflow-x-hidden"> 
+            : !data
+              ? (
+                <div className="w-full overflow-x-hidden">
+                    <div className="bg_login rounded-t-[5px] h-[180px] bg-black/10 animate-pulse" />
+                    <div className="bg_login rounded-b-[5px] px-3 pb-3 pt-3 flex flex-col gap-2">
+                        <div className="h-5 w-2/3 bg-black/10 animate-pulse rounded-xs" />
+                        <div className="h-3 w-1/2 bg-black/10 animate-pulse rounded-xs" />
+                        <div className="h-3 w-1/3 bg-black/10 animate-pulse rounded-xs" />
+                        <div className="h-16 w-full bg-black/10 animate-pulse rounded-xs mt-2" />
+                    </div>
+                </div>
+              )
+              : ( <div ref={detailsRef} className={`w-full overflow-x-hidden relative ${loadingSpot ? "pointer-events-none" : ""}`}>
+              {loadingSpot && (
+                <div className="absolute inset-0 z-50 bg-black/15 rounded-[5px] animate-pulse" />
+              )}
           {isMobile && <div className="flex gap-1 mb-1 items-center">
                 <button onClick={()=>setSpot(null)} className="flex gap-1 items-center color_p_gray w-full rounded-[5px] py-0.5">
                     <MoveLeft size={12}/> <p>Go back</p>

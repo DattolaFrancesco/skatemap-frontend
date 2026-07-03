@@ -241,7 +241,10 @@ export default function NavBar() {
         return () => window.removeEventListener('resize', check)
     }, [])
 
-    useEffect(() => { setOpenList(true) }, [])
+    useEffect(() => {
+        const mobileNow = window.innerWidth < 768
+        setOpenList(!mobileNow)
+    }, [])
 
     useEffect(() => {
         if (activeSpot) {
