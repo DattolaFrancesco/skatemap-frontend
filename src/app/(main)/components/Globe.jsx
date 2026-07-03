@@ -22,6 +22,10 @@ export default function Globe() {
     const setStatusHref = useNavigationStore((state) => state.setStatusHref)
     const coordsRef = useRef({ lng: 10 })
     const animatedRef = useRef(false)
+    const initialSelectedSpotIdRef = useRef(typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('selectedSpot') : null)
+    const introDoneRef = useRef(false)
+    const pendingInitialFlyRef = useRef(null)
+    const initialCenterHandledRef = useRef(false)
     const [delay, setDelay] = useState(null)
     const reset = useSpotStore((data) => data.reset)
     const setReset = useSpotStore((data) => data.setReset)
@@ -124,6 +128,25 @@ export default function Globe() {
         if (!mapInstance.current || !activeSpot) return
         const spot = filteredSpots.find(s => String(s.id) === String(activeSpot))
         if (!spot) return
+
+        const isInitialSharedSpot = !initialCenterHandledRef.current
+            && initialSelectedSpotIdRef.current
+            && String(activeSpot) === String(initialSelectedSpotIdRef.current)
+
+        if (isInitialSharedSpot) {
+            initialCenterHandledRef.current = true
+            if (introDoneRef.current) {
+                mapInstance.current.flyTo({
+                    center: [spot.longitude, spot.latitude],
+                    duration: 1200,
+                    zoom: getZoom()
+                })
+            } else {
+                pendingInitialFlyRef.current = { lng: spot.longitude, lat: spot.latitude }
+            }
+            return
+        }
+
         mapInstance.current.flyTo({
             center: [spot.longitude, spot.latitude],
             duration: 1200,
@@ -163,7 +186,7 @@ export default function Globe() {
         if (!mapReady || !mapInstance.current.getLayer("spots-layer")) return
         mapInstance.current.setPaintProperty("spots-layer", "circle-color", [
             "case",
-            ["==", ["get", "id"], activeSpot],
+            ["==", ["to-string", ["get", "id"]], activeSpot ? String(activeSpot) : ""],
             "#5eff00",
             "#d7dbd4"
         ])
@@ -200,8 +223,8 @@ export default function Globe() {
                     "circle-radius": 5,
                     "circle-color": [
                         "case",
-                        ["==", ["get", "id"], activeSpot],
-                        "#ff0000",
+                        ["==", ["to-string", ["get", "id"]], activeSpot ? String(activeSpot) : ""],
+                        "#5eff00",
                         "#d7dbd4"
                     ]
                 }
@@ -308,6 +331,16 @@ export default function Globe() {
             onComplete: () => {
                 setStatusHref(false)
                 coordsRef.current = { lng: 10 }
+                introDoneRef.current = true
+                if (pendingInitialFlyRef.current && mapInstance.current) {
+                    const { lng, lat } = pendingInitialFlyRef.current
+                    pendingInitialFlyRef.current = null
+                    mapInstance.current.flyTo({
+                        center: [lng, lat],
+                        duration: 900,
+                        zoom: getZoom()
+                    })
+                }
             }
         })
         gsap.to(mapRef.current, { opacity: 1, ease: "power3.inOut" })
