@@ -242,8 +242,8 @@ export default function NavBar() {
     }, [])
 
     useEffect(() => {
-        const mobileNow = window.innerWidth < 768
-        setOpenList(!mobileNow)
+        const hasSelectedSpot = !!resolvedParams.get("selectedSpot")
+        setOpenList(hasSelectedSpot)
     }, [])
 
     useEffect(() => {

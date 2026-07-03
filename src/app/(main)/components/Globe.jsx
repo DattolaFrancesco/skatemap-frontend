@@ -122,7 +122,7 @@ export default function Globe() {
 
     useEffect(() => {
         if (!mapInstance.current || !activeSpot) return
-        const spot = filteredSpots.find(s => s.id === activeSpot)
+        const spot = filteredSpots.find(s => String(s.id) === String(activeSpot))
         if (!spot) return
         mapInstance.current.flyTo({
             center: [spot.longitude, spot.latitude],
